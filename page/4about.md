@@ -11,7 +11,7 @@ type: page
 
 ## 关于我
 
-<iframe src="https://github.com/Nepire/Nepire.github.io/blob/master/images/nepire.jpg" style="border: 0;height: 142px;width: 200px;overflow: hidden;" frameBorder="0"></iframe>
+<iframe src="https://githubbadge.appspot.com/gaohaoyang?s=1" style="border: 0;height: 142px;width: 200px;overflow: hidden;" frameBorder="0"></iframe>
 
 就读于厦门理工学院商务智能专业 目前为CodeMonster战队中最没地位的Pwn选手
 
@@ -23,12 +23,11 @@ type: page
 
 还有自己的经历所悟出的，学习过程的愉快与否，是由和你一起学习的人及环境决定。
 
-* 2016.6.30 入职阿里巴巴天猫事业部
-* 2016.6 毕业于西安交通大学 软件工程硕士
-* 2015.12 获得2014-2015学年二等奖学金
-* 2015.7-2015.8 联想服务，前端开发工程师（实习生）
-* 2013.6 毕业于西安交通大学 理学院
-* 2001 
+* 2017.9.30 初入信息安全
+* 2017.12.23 和至今为止最深入我的生活的女友分手
+* 2018.4.5-4.8 上海第一届Wonder Festival展参展
+* 2018.4.25 安恒西湖论剑杯学习
+* 2018.6.8 苏州国赛学习 
 
 ## 联系我
 
