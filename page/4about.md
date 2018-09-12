@@ -11,7 +11,7 @@ type: page
 
 ## 关于我
 
-<img src="http://nepire.xmutsec.com/wp-content/uploads/2018/05/未标题-1.png" style="border: 0;height: 142px;width: 200px;overflow: hidden;"></img>
+<img src="http://nepire.xmutsec.com/wp-content/uploads/2018/05/未标题-1.png" style="border: 0;height: 142px;width: 142px;overflow: hidden;">
 
 就读于厦门理工学院商务智能专业 目前为CodeMonster战队中最没地位的Pwn选手
 
