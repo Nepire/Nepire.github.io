@@ -1,9 +1,9 @@
 ---
 layout: post
 title:  "ROP_Rmporium通关指南"
-date:   2018-09-12 19:12:00
+date:   2018-09-19 18:44:00
 categories: WriteUp
-tags: WriteUp PWN 铁三
+tags: WriteUp PWN ROP_Emporium
 ---
 
 * content
@@ -49,6 +49,8 @@ n.interactive()
 
 ### 思路
 
+和上面的方法一样，只有一点差别是在64位下参数是先存寄存器后入栈。
+
 ### exp
 ```python
 from pwn import*
@@ -71,3 +73,5 @@ pwn()
 
 n.interactive()
 ```
+
+## 
