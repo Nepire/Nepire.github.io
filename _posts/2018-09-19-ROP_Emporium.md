@@ -201,3 +201,12 @@ pwn()
 
 n.interactive()
 ```
+
+## write432
+
+### 思路
+
+### exp
+```python
+
+```
