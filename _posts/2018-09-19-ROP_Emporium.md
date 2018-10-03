@@ -10,7 +10,7 @@ tags: WriteUp PWN ROP_Emporium
 {:toc}
 
 
-暑假去了趟Xman认识了一群大佬，也因此受到刺激成长了不少，这里就写一篇在xman时通关的rop—rmporium的wp来记录一下自己的学习历程
+暑假去了趟Xman认识了一群大佬，也因此受到刺激成长了不少，这里就写一篇在xman时通关的ROP—Emporium的wp来记录一下自己的学习历程
 
 
 
@@ -205,6 +205,8 @@ n.interactive()
 ## write432
 
 ### 思路
+
+
 
 ### exp
 ```python
