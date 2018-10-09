@@ -23,3 +23,26 @@ tags: WriteUp PWN nox CSAW
 #### PWN—believeMe(378)
 
 惯例先走一遍file+checksec检查
+```bash
+➜  believeMe file believeMe 
+believeMe: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=03d2b6bcc0a0fdbab80a9852cab1d201437e7e30, not stripped
+➜  believeMe checksec believeMe 
+[*] '/home/Ep3ius/pwn/process/noxCTF2018/believeMe/believeMe'
+    Arch:     i386-32-little
+    RELRO:    Partial RELRO
+    Stack:    Canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x8048000)
+```
+
+再简单的运行下程序看看程序是什么样的结构
+
+```bash
+➜  believeMe ./believeMe 
+Someone told me that pwning makes noxāle...
+But......... how ???? 
+aaaa
+aaaa%  
+➜  believeMe
+```
+
