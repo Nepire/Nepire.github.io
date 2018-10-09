@@ -3,7 +3,7 @@ layout: post
 title:  "nox_CSAW部分pwn题解"
 date:   2018-10-9 18:00:00
 categories: WriteUp
-tags: WriteUp PWN noxCTF CSAWCTF
+tags: WriteUp,WN,noxCTF,CSAWCTF
 ---
 
 * content
