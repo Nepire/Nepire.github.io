@@ -9,8 +9,6 @@ tags: WriteUp PWN nox CSAW
 * content
 {:toc}
 
-## 前言
-
 暑假的时候遇到了一群一起学习安全的小伙伴，在他们的诱劝下，开始接触国外的CTF比赛，作为最菜的pwn选手就试着先打两场比赛试试水，结果发现国外比赛真有意思哎嘿。
 
 本文首发于[安恒网络空间安全讲武堂](https://mp.weixin.qq.com/s?__biz=MzU1MzE3Njg2Mw==&mid=2247485613&idx=1&sn=d523230fb3778620baaddaf987b7d7f3&chksm=fbf792ddcc801bcb81ffd41bc211bdd74c91cb80baecaaec5cb37b682b7afe3bf29dcb2f72d6&mpshare=1&scene=23&srcid=1009d0fGRYWnkyimpbjdG7sm#)
