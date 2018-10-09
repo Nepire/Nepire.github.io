@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "nox&CSAW部分pwn题解"
+title:  "nox_CSAW部分pwn题解"
 date:   2018-10-09 18:00:00
 categories: WriteUp
 tags: WriteUp PWN nox CSAW
