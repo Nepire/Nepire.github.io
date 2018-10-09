@@ -160,9 +160,9 @@ n.interactive()
 ```
 
 FLAG
-
-/**noxCTF{%N3ver_%7rust_%4h3_%F0rmat}**/
-
+```
+noxCTF{N3ver_7rust_4h3_F0rmat}
+```
 
 #### PWN—The Name Calculator
 
