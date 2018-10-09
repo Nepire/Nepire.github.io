@@ -518,7 +518,7 @@ Legend: code, data, rodata, value
 
 execve的汇编可以参考 
 ```
-http://spd.dropsec.xyz/2017/02/20/%E4%BB%8E%E6%B1%87%E7%BC%96%E8%A7%92%E5%BA%A6%E5%88%86%E6%9E%90execve%E5%87%BD%E6%95%B0/&
+http://spd.dropsec.xyz/2017/02/20/%E4%BB%8E%E6%B1%87%E7%BC%96%E8%A7%92%E5%BA%A6%E5%88%86%E6%9E%90execve%E5%87%BD%E6%95%B0/
 ```
 
 EXP
