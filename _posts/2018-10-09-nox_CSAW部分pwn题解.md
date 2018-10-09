@@ -45,7 +45,7 @@ aaaa%
 ```
 然后ida简单分析下，我们可以很直接的看到在main函数里有一个格式化字符串漏洞
 
-```C
+```c
 .text:080487CC ; 10:   printf(s);
 .text:080487CC                 sub     esp, 0Ch
 .text:080487CF                 lea     eax, [ebp+s]
