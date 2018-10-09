@@ -18,4 +18,8 @@ tags: WriteUp PWN nox CSAW
 
 
 
+### NOXCTF
 
+#### PWN—believeMe(378)
+
+惯例先走一遍file+checksec检查
