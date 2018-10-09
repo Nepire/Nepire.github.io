@@ -45,7 +45,7 @@ aaaa%
 ```
 然后ida简单分析下，我们可以很直接的看到在main函数里有一个格式化字符串漏洞
 
-```c
+```
 .text:080487CC ; 10:   printf(s);
 .text:080487CC                 sub     esp, 0Ch
 .text:080487CF                 lea     eax, [ebp+s]
@@ -71,7 +71,7 @@ payload = fmtstr_payload(9,{fflush_got:noxFlag_addr},write_size='short')
 
 然而当我们成功修改fflush_got为noxFlag的地址时会进入到一个死循环中，我们看一下noxFlag函数里面不难发现问题
 
-```c
+```
 void __noreturn noxFlag()
 {
   char i; // [esp+Bh] [ebp-Dh]
