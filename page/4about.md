@@ -13,7 +13,7 @@ type: page
 
 <img src="http://nepire.xmutsec.com/wp-content/uploads/2018/05/未标题-1.png" style="border: 0;height: 142px;width: 142px;overflow: hidden;">
 
-就读于厦门理工学院商务智能专业 目前为CodeMonster战队中最没地位的Pwn选手
+厦门理工学院商务智能大一学生 目前为CodeMonster战队中最没地位的Pwn选手
 
 主要兴趣是做手办。
 
@@ -22,11 +22,6 @@ type: page
 目前喜欢的一句话是"爱与友情以及勇气改变不了一个人，只有受伤才能让人成长"
 
 还有自己的经历所悟出的，学习过程的愉快与否，是由和你一起学习的人及环境决定。
-
-* 2017.9.30 初入信息安全
-* 2018.4.5-4.8 上海第一届Wonder Festival展参展
-* 2018.4.25 安恒西湖论剑杯学习
-* 2018.6.8 苏州国赛学习 
 
 ## 联系我
 
