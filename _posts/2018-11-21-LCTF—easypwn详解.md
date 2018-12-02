@@ -10,6 +10,7 @@ tags: WriteUp Pwn Tcache LCTF2018
 {:toc}
 
 听说一血有pwnhub注册码拿就去试着打了一下周末的这场LCTF，结果作为签到题选手(笑)连签到题的一血都拿不到可能这就是命吧，不过遇到了一题不错的pwn，就详细的记录下解题思路和技巧吧
+
 本文首发于[安全客—LCTF2018-easypwn-详细解析](https://www.anquanke.com/post/id/164591)
 
 
