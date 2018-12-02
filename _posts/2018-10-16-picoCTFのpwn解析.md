@@ -3,7 +3,7 @@ layout: post
 title:  "picoCTFのpwn解析"
 date:   2018-10-16 20:00:00
 categories: WriteUp
-tags: WriteUp PWN pico
+tags: WriteUp Pwn pico
 ---
 
 * content
