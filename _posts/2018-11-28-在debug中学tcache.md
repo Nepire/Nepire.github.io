@@ -14,6 +14,10 @@ tags: WriteUp Pwn Tcache HITCON2018
 本文首发于先知社区[在Debug中学Tcache](https://xz.aliyun.com/t/3419)
 
 
+
+
+
+
 ### tcache简介
 
 tcache（thread local caching）是glibc在2.26版本新出现的一种内存管理机制，它优化了分配效率却也降低了安全性，一些漏洞的利用条件变得容易了许多
