@@ -9,19 +9,15 @@ type: page
 * content
 {:toc}
 
-## 关于我
+## About me
 
 <img src="http://nepire.xmutsec.com/wp-content/uploads/2018/05/未标题-1.png" style="border: 0;height: 142px;width: 142px;overflow: hidden;">
 
-厦门理工学院商务智能大一学生 目前为CodeMonster战队中最没地位的Pwn选手
+Student at Business Intelligence Professional in Xiamen University of Technology , Pwner in XMUTSEC
 
-主要兴趣是做手办。
+Interest is Figure(GK) creation
 
-热爱探险、挑战，想向这世界的未知和神秘发起挑战
-
-目前喜欢的一句话是"爱与友情以及勇气改变不了一个人，只有受伤才能让人成长"
-
-还有自己的经历所悟出的，学习过程的愉快与否，是由和你一起学习的人及环境决定。
+Deepin love for adventure and challenge,want to challenge the unknown and mystery of the world.
 
 ## 联系我
 
@@ -84,10 +80,7 @@ type: page
 ## 友情链接
 
 [羡辙杂俎](http://zhangwenli.com/blog) \| [Anotherhome](https://www.anotherhome.net) \| [Reverland](http://reverland.org/) \| [ZhiLi](http://lizhipower.github.io/) \| [Simmer](http://simmer-jun.github.io/) \| [awthink](http://awthink.net/) \| [Aralic](http://aralic.github.io/) \| [zchen9](http://www.chen9.info/) \| [wuhuaji](http://wuhuaji.me/) \| [lisheng](http://www.lishengcn.cn/) \| [薛彬XueBin](http://axuebin.com/blog/) 
-[Anciety](https://escapingbug.github.io/archive/) \|  
-[1treeS](https://5ing.github.io) \| 
-[Breezy](https://bre3ze.github.io/)\|
-[23R3F](https://23r3f.github.io/) 
+[Anciety](https://escapingbug.github.io/archive/) \|[1treeS](https://segmentfault.com/u/1trees) \| [Breezy](https://bre3ze.github.io/)\|[23R3F](https://23r3f.github.io/) \|[zs0zrc](https://zszcr.github.io/)
 
 ## Comments
 
