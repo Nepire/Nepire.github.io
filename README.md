@@ -1,399 +1,347 @@
-# About this Cool Concise Jekyll Blog Theme 🤘🤘🤘
+hexo-theme-sakura [中文文档](https://github.com/honjun/hexo-theme-sakura/blob/master/README-zh_cn.md)
 
-[![GitHub stars](https://img.shields.io/github/stars/Gaohaoyang/gaohaoyang.github.io.svg)](https://github.com/Gaohaoyang/gaohaoyang.github.io/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/Gaohaoyang/gaohaoyang.github.io.svg)](https://github.com/Gaohaoyang/gaohaoyang.github.io/network)
-[![GitHub issues](https://img.shields.io/github/issues/Gaohaoyang/gaohaoyang.github.io.svg)](https://github.com/Gaohaoyang/gaohaoyang.github.io/issues)
-[![GitHub release](https://img.shields.io/github/release/Gaohaoyang/gaohaoyang.github.io.svg)](https://github.com/Gaohaoyang/gaohaoyang.github.io/releases)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/Gaohaoyang/gaohaoyang.github.io/master/LICENSE)
+Based on the WordPress theme [Sakura](https://github.com/mashirozx/Sakura/) modified into Hexo theme.
 
-**[中文版 Chinese README 请点击这里 🇨🇳](https://github.com/Gaohaoyang/gaohaoyang.github.io/blob/master/README-zh-cn.md)**
+[Demo preview](https://sakura.hojun.cn)
 
-With the escalation of jekyll version, but I also want to reconstruct my older blog theme, so I did reconstruction and added some features recently. My new blog theme will still be stored in this repository. I will also use this theme in the future. Now I have done basically, then I will focus on issues that users opend to make theme better.
+in development......
 
-**My Blog Url: [http://gaohaoyang.github.io/](http://gaohaoyang.github.io/)**. If you like this theme, you can give me a star to encourage me. Welcome everyone to use it.
+![](https://wx3.sinaimg.cn/large/006bYVyvly1g069tuf42oj312w0m8ndq.jpg)
 
-## Content
+## Exchange group
+If you are a user, plus group QQ: 801511924
 
-* [Preview](#preview)
-* [Page Details](#page-details)
-    * [Home](#home)
-    * [Archives](#archives)
-    * [Categories](#categories)
-    * [Tags](#tags)
-    * [Collections](#collections)
-    * [Demo](#demo)
-    * [About](#about)
-    * [Comments](#comments)
-    * [Post Contents](#post-contents)
-    * [Code Highlight](#code-highlight)
-    * [Light Shadow](#light-shadow)
-    * [Mobile Adaptation](#mobile-adaptation)
-    * [Footer](#footer)
-    * [Statistical Analysis](#statistical-analysis)
-* [Usage](#usage)
-    * [1. Install ruby and jekyll environment](#1-install-ruby-and-jekyll-environment)
-    * [2. Copy theme code](#2-copy-theme-code)
-    * [3. Change parameter](#3-change-parameter)
-        * [Basic info](#basic-info)
-        * [Link info](#link-info)
-        * [Comments info](#comments-info)
-        * [Statistical analysis info](#statistical-analysis-info)
-    * [4. Write post](#4-write-post)
-    * [5. Local launch](#5-local-launch)
-    * [6. Push to GitHub](#6-push-to-github)
-* [Donate](#donate)
-* [Update Log](#update-log)
-* [License](#license)
+If you are a creator, plus group QQ: 194472590
 
-## Preview
 
-First of all, let's see previews.
+## Theme feature
 
-Index Page
-![index](http://ww3.sinaimg.cn/large/7011d6cfjw1f3bdli86awj211k0oyqen.jpg)
+ - Home big screen video
+ - Home random cover
+ - Picture lazy loading
+ - Valine review
+ - Fancy-box photo album
+ - Pjax support, music is uninterrupted
+ - Aplayer music player
+ - Multi-level navigation menu (this is a feature as far as most hexo themes are concerned)
 
-Post Page
-![post](http://ww4.sinaimg.cn/large/7011d6cfjw1f3bdmzb9v6j210p0j7gwn.jpg)
 
-## Page Details
+## Appreciate the author
+If you like the hexo-theme-sakura theme, you can consider funding it~ I am very grateful!
 
-### Home
+[paypal](https://www.paypal.me/hojuncn) | [Alipay](https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/custom/donate/AliPayQR.jpg) | [WeChat Pay](https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/custom/donate/WeChanSQ.jpg)
 
-Index page show 5 posts excerpt as a default. Readers can click article title or read more button to see full post. There are recent posts area, categories area and tags area at the right part of the index page. You can also add an area at this part, if you change the file `index.html`.
+## Incomplete use tutorial
 
-### Archives
+well? Honestly, I am not very organized at the moment 233333333~
 
-Archive post according to the year.
+## 1、sakura theme download and install
 
-### Categories
+[hexo-theme-sakura](https://github.com/honjun/hexo-theme-sakura)recommends downloading the compressed package format, because in addition to the theme content, some source configuration is too much trouble for the novice, directly download the decompression to save these troubles.
 
-Show posts according to the category.
+After downloading, extract it to the root directory of the blog (not the theme directory, repeat the selection and replace). Then run the npm iinstallation dependencies on the command line (cmd, bash) .
 
-### Tags
+## configuration
 
-Show posts according to the tags.
-
-### Collections
-
-The user can collect their favorite article links with `markdown` syntax.
-
-### Demo
-
-I use *[Masonry](http://masonry.desandro.com/)* to rewrite the waterfall responsive layout. Better interactive experience.
-
-### About
-
-The user can write some introduction about theirselves and their site with `markdown` syntax.
-
-### Comments
-
-This theme supports both [disqus](https://disqus.com/) and [多说评论 duoshuo comments](http://duoshuo.com/). It's very easy to config your comments module.
-
-The only thing you need do is to change the `short_name` in the file `_config.yml`. As follows.
+### _config configuration in the root directory of the blog
 
 ```yml
-# comments
-# two ways to comment, only choose one, and use your own short name
-duoshuo_shortname: #xxx
-disqus_shortname: xxx
+# Site
+title : Your site name 
+subtitle :
+description : Site Profile 
+Keywords :
+author : Author name 
+language : en zh-cn 
+timezone :
 ```
-
-### Post Contents
-
-The post contents is fixed at the right side while page is scrolling. There will be a scroll bar on contents while it is outside the window height.
-
-### Code Highlight
-
-While the jekyll is update to 3.x.x, you can use github flavored markdown to write code.
-
-More info to see [syntax-highlighter-changed](https://jekyllrb.com/docs/upgrading/2-to-3/#syntax-highlighter-changed).
-
-### Light Shadow
-
-![light](http://ww3.sinaimg.cn/large/7011d6cfjw1f3be6y4vp3j209i02rweg.jpg)
-
-You can see the white shadow on the current item in the navbar. I call this light shadow.
-
-### Mobile Adaptation
-
-Of course, I have done a very good mobile adaptation.
-
-![mobile](http://ww4.sinaimg.cn/large/7011d6cfjw1f3bebnzxkpj20ah0fzgp4.jpg)
-
-### Footer
-
-**Welcome to use this blog theme, but please keep the theme author info at footer.** Theme designed by [HyG](https://github.com/gaohaoyang).
-
-![footer](http://ww3.sinaimg.cn/large/7011d6cfjw1f3bepd8002j20hl02ct95.jpg)
-
-### Statistical Analysis
-
-This theme supports Google Analytics and Baidu Statistics， you can just config the id in the file `_config.yml`, as follows.
 
 ```yml
-# statistic analysis 统计代码
-# 百度统计 id，将统计代码替换为自己的百度统计id，即
-# hm.src = "//hm.baidu.com/hm.js?xxxxxxxxxxxx";
-# xxxxx字符串
-baidu_tongji_id: xxxxxxxxxxxx
-google_analytics_id: UA-xxxxxxxx # google 分析追踪id
+Deploy :
+  type : git 
+  repo : 
+     github : your github repository address 
+    # coding: your coding repository address 
+  branch : master
 ```
 
-## Usage
+### _config configuration under the theme directory
 
-Welcome everyone to use this theme, this part shows introduction to use.
-
-### 1. Install ruby and jekyll environment
-
-This step and Step 5 mainly talk to you how to launch blog at local. If you don't want to launch at local, you can ignore these 2 steps. But I still strongly suggest to do this. Ensure there is nothing wrong before pushing to the github.
-
-The Windows users can directly use [RubyInstaller](http://rubyinstaller.org/) to install ruby environment. Follow the prompts while installing.
-
-Install jekyll commands:
-
-```
-gem install jekyll
-```
-
-For more details, you can view the jekyll official website. [https://jekyllrb.com/](https://jekyllrb.com/)
-
-There may be something wrong at mac OS X El Capitan, you can see the solution at [https://jekyllrb.com/docs/troubleshooting/#jekyll-amp-mac-os-x-1011]( https://jekyllrb.com/docs/troubleshooting/#jekyll-amp-mac-os-x-1011).
-
-If you are interesting in jekyll, you can see the jekyll source code at [https://github.com/jekyll/jekyll](https://github.com/jekyll/jekyll).
-
-![jekyll logo](http://jekyllcn.com/img/logo-2x.png)
-
-### 2. Copy theme code
-
-You can clone, download or fork this repo.
-
-### 3. Change parameter
-
-Mainly change the parameters at file `_config.yml` and use your own `favicon.ico`.
-
-#### Basic info
-
-Shows at site header part.
-
+The part marked with [Change] is the need to modify the department, indicating that [Select] can be changed or not, and the part marked with [Non] is not changed.
 ```yml
-# Site settings
-title: HyG
-brief-intro: Front-end Dev Engineer
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://gaohaoyang.github.io" # the base hostname & protocol for your site
+# site name 
+#
+站名称[改] prefixName :さくら荘その
+siteName : hojun
+
+# favicon and site master avatar 
+#站favicon and avatar input image path (the following configuration is the relative path of cdn, please fill in the full path without cdn, it is recommended to use jsdeliver to build a cdn, first download my cdn replacement The picture is OK, simple and convenient~) [Change] 
+favicon : /images/favicon.ico 
+avatar : /img/custom/avatar.jpg
+
+#站url [Change] 
+url : https://sakura.hojun.cn
+
+#站介绍(或个人
+签名符) [Change] description : Live your life with passion! With some drive!
+
+#站cdn, no is empty [change] If cdn is empty, some image addresses must be filled in the complete address, such as the previous avatar to fill https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/ img / Custom / avatar.jpg 
+CDN : https://cdn.jsdelivr.net/gh/honjun/cdn@1.6
+
+#开启pjax [Select] 
+pjax : 1
+
+#
+站首页's announcement information [Change] notice : hexo-Sakura theme has been open source, currently under development...
+
+#懒Loaded loading image [Select] 
+lazyloadImg : https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/loader/orange.progress-bar-stripe-loader.svg
+
+#站菜单 Configuration [Select] 
+menus :
+   Home : { path: /, fa: fa-fort-awesome faa-shake } 
+  Archive : { path: /archives, fa: fa-archive faa-shake, submenus: { 
+    Technology : { Path: /categories/technology/, fa: fa-code }, 
+    life : {path: /categories/life/, fa: fa-file-text-o }, 
+    resources : {path: /categories/resources/, fa: Fa-cloud-download }, 
+    thoughts : {path: /categories/随想/, fa: fa-commenting-o }, 
+    reproduced : {path: /categories/reproduced/, fa: fa-book } 
+  } } 
+  List : { path : javascript:;, fa: fa-list-ul faa-vertical, submenus: { 
+    Book :{path: /tags/reading/, fa: fa-th-list faa-bounce }, 
+    group : {path: /bangumi/, fa: fa-film faa-vertical }, 
+    song list : {path: /music /, fa: fa-headphones }, 
+    atlas : {path: /tags/atlas/, fa: fa-photo } 
+  } } 
+  Message board : { path: /comment/, fa: fa-pencil-square-o faa -tada } 
+  Friendly account : { path: /links/, fa: fa-link faa-shake } 
+  Appreciation : { path: /donate/, fa: fa-heart faa-pulse } 
+  About : { path: /, fa: fa -leaf faa-wrench , submenus: { 
+    I? : {path: /about/, fa: fa-meetup}, 
+    Subject : {path: /theme-sakura/, fa: iconfont icon-sakura }, 
+    Lab: {path: /lab/, fa: fa-cogs }, 
+  } } 
+  Client : { path: /client/, fa: fa-android faa-vertical } 
+  RSS : { path: /atom.xml, fa: fa- Rss faa-pulse }
+
+# Home page sort type: -1: newer first,1: older first. [ 
+None ] homePageSortType : -1
+
+# Home page article shown number) [非] 
+homeArticleShown : 10
+
+#背景图片[Select] 
+bgn : 8
+
+# startdash面板url, title, desc img [Change] 
+startdash :
+  - {url: /theme-sakura/, title: Sakura, desc: The site hexo theme, img: /img/startdash/sakura.md.png} 
+  - {url: http://space.bilibili.com/271849279, Title: Bilibili, desc: blogger's b-station video, img: /img/startdash/bilibili.jpg} 
+  - {url: /, title: hojun's masterhouse, desc: technical service, img: /img/startdash/wangshiwu .jpg}
+
+
+# Your Site Build Founded Time or DATE 
+# your site creation date [change] 
+siteBuildingTime : 07/17/2018
+
+
+# Social buttons (social) url, img PC side configuration change] [ 
+social :
+   GitHub : {URL: http://github.com/honjun, IMG: /img/social/github.png} 
+  siNA : {URL: HTTP: //weibo.com/mashirozx?is_all=1, img: /img/social/sina.png} 
+  wangyiyun : {url: http://weibo.com/mashirozx?is_all=1, img: /img/social/wangyiyun .png} 
+  zhihu : {url: http://weibo.com/mashirozx?is_all=1, img: /img/social/zhihu.png} 
+  email : {url: http://weibo.com/mashirozx?is_all= 1, img: /img/social/email.svg} 
+  wechat : {url: /#, qrcode: /img/custom/wechat.jpg, img: /img/social/wechat.png}
+
+# Social buttons (msocial) url, img [changes] the mobile terminal configured 
+msocial :
+   GitHub : {URL: http://github.com/honjun, FA: FA-GitHub, Color: 333} 
+  Weibo : {URL: HTTP: / /weibo.com/mashirozx?is_all=1, fa: fa-weibo, color: dd4b39} 
+  qq : {url: https://wpa.qq.com/msgrd?v=3&uin=954655431&site=qq&menu=yes, fa: Fa-qq, color: 25c6fe}
+
+# Appreciate the QR code (where wechatSQ is appreciated for the single page of the appreciation code picture) [Change] 
+donate :
+   alipay : /img/custom/donate/AliPayQR.jpg 
+  wechat : /img/custom/donate/WeChanQR.jpg 
+  wechatSQ : /img /custom/donate/WeChanSQ.jpg
+
+#首页视频地址 is https://cdn.jsdelivr.net/gh/honjun/hojun@1.2/Unbroken.mp4, the configuration is as follows [change] 
+movies :
+  url : https://cdn.jsdelivr.net/gh/honjun/ hojun@1.2 
+  # multiple video separated by commas, random get. The supported formats are currently known as MP4, Flv. Others can be tried, not guaranteed to be useful 
+  name : Unbroken.mp4
+
+#下下角aplayer player configuration mainly change id and server these two, modify the details see [aplayer document] [change] 
+aplayer : 
+  id : 2660651585 
+  server : netease 
+  type : playlist 
+  fixed : true 
+  mini : false 
+  autoplay : false 
+  loop : all 
+  order : random 
+  preload : auto 
+  volume : 0.7 
+  mutex : true
+
+# Valine评论Configuration [Change] 
+valine : true 
+v_appId : GyC3NzMvd0hT9Yyd2hYIC0MN-gzGzoHsz 
+v_appKey : mgOpfzbkHYqU92CV4IDlAUHQ
 ```
 
-#### Link info
+## Category page and tags page configuration
 
-Mainly shows at the footer of the site.
+### Category page
+![](https://ws3.sinaimg.cn/large/006bYVyvly1g07b0gucy9j31060jih76.jpg)
+### tags page
+![](https://wx2.sinaimg.cn/large/006bYVyvly1g07azb2399j31040jgazs.jpg)
 
+Configuration items are in \themes\Sakura\languages\zh-cn.yml. It is best to add a new category or label. Of course, you can use a default picture directly. (You can change the theme or directly replace the 404 picture. Ask for comments. Do you want to add a switch to the configuration file? Issue or group proposed), if you don't set it, you will use the inverted puppy 404.
 ```yml
-# other links
-twitter_username: gaohaoyang126
-facebook_username: gaohaoyang.water
-github_username:  Gaohaoyang
-email: gaohaoyang126@126.com
-weibo_username: 3115521wh
-zhihu_username: gaohaoyang
-linkedIn_username: gaohaoyang
-dribbble_username:
+# Category 
+# Create a name by category 
+Technology :
+     # Chinese title 
+    zh : Wild Technology Association 
+    # English title 
+    EN : Geek - Only for Love 
+    # Cover Image 
+    img : https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/ img / banner / coding.jpg 
+life :
+     zh : life 
+    EN : live 
+    img : https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/banner/writing.jpg
 
-description_footer: 本站记录我前端之旅的沿途风景！
+# Tag 
+# tag name that is the title 
+pleasure reading :
+     # Cover Image 
+    img : https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/banner/reading.jpg
 ```
 
-#### Comments info
+## Single page cover configuration
 
-Get your own `short_name`:
-
-Visit https://disqus.com/ or http://duoshuo.com/. And follow the prompts at the site.
-
-```yml
-# comments
-# two ways to comment, only choose one, and use your own short name
-duoshuo_shortname: #hygblog
-disqus_shortname: xxxx
-```
-
-When you done, you can also see the comments info at disqus or duoshuo admin console.
-
-#### Statistical analysis info
-
-Get Google Analytics id or Baidu Statistics id：
-
-Visit https://www.google.com/analytics/ or http://tongji.baidu.com/. And follow the prompts at the site.
-
-Of course, if you don't want any statistical and analysis info, you can type nothing at id position.
-
-```yml
-# statistic analysis 统计代码
-# 百度统计 id，将统计代码替换为自己的百度统计id，即
-# hm.src = "//hm.baidu.com/hm.js?xxxxxxxxxxxx";
-# xxxxx字符串
-baidu_tongji_id: cf850xxxxxxxxxxxxxxxx
-google_analytics_id: UA-7xxxxxx-4 # google 分析追踪id
-```
-
-When you done, you can see UV, PV, location etc. info at your own Google Analytics or Baidu Statistic console.
-
-### 4. Write post
-
-You can write posts at folder `_posts`. At the beginning of the post, you should declare layout、title、date、categories、tags、author(optional) info、mathjax(optional，click [here](https://www.mathjax.org/) for more detail about `Mathjax`).
-
-```
+![](https://ws3.sinaimg.cn/large/006bYVyvly1g07b1pi619j31080jge4u.jpg)
+For example, on the message board page page, under the comment under source, open index.md as follows:
+```md
 ---
-layout: post
-title:  "对这个 jekyll 博客主题的改版和重构"
-date:   2016-03-12 11:40:18 +0800
-categories: jekyll
-tags: jekyll 端口 markdown Foxit RubyGems HTML CSS
-author: Haoyang Gao
-mathjax: true
+Title: comment
+Date: 2018 - 12 - 20  23 : 13 : 48
+Keywords: message board
+Description: 
+Comments: true
+# Configure a single page header image here, custom replacement oh~
+Photos: https://cdn.jsdelivr.net/gh/honjun/cdn@ 1.4 /img/banner/comment.jpg
 ---
 ```
 
-These follow code is for making contents.
-```
-* content
-{:toc}
-```
 
-You can use 4 wraps as a excerpt separator. The words before separator as excerpt show in the index page. When you enter the post page, you can read full article.
+## Single page configuration
 
-The wraps config is in the file `_config.yml`, as follows:
+### Fan group plan page (please change directly in the downloaded file, the following comments may have some impact)
+![](https://wx2.sinaimg.cn/large/006bYVyvly1g07b2gyx60j31090jjahj.jpg)
 
 ```yml
-# excerpt
-excerpt_separator: "\n\n\n\n"
+---
+ layout : bangumi 
+title : bangumi 
+comments : false 
+date : 2019-02-10 21:32:48 
+keywords :
+ description :
+ bangumis :
+   #番组图片 
+  - img : https://lain.bgm.tv/pic/cover /l/0e/1e/218971_2y351.jpg 
+  # Fan group name 
+    title : North Korea vows to spend the evening - the agreement with effect from the beam toward the parting flower 
+  # chase Fan state (fan chasing ing / chase has been completed) 
+    status : has finished chasing 
+  # Progression 
+    progress : 100 
+  #番剧 Japanese name 
+    jp :Sa yo na ra ni constraint towardsののflower wo ka za ro u 
+  # run time 
+    Time : running time:. 2018-02-24 SUN 
+  # Fan drama presentation 
+    desc :   stay away from the hubbub of the land, while the everyday things of woven fame as Xibi Ou Cloth, the people of Iofu who live quietly. At the age of 15 years old, they stopped growing. They have a life span of hundreds of years, and they are called "parting families" and are regarded as living legends. Iowe girl, who has no parents, is a stable day surrounded by her partners, but she always feels "one person." Their daily routine collapsed in an instant. Pursuing the blood of Iofu's longevity, the Mesati army launched an attack on an ancient beast called Renate. In desperation and chaos, Iofu’s first beauty, Leia, was taken away by Mesati, and the young Kym, who was secretly loved by Macchia, also disappeared. Although Macchia finally escaped, she lost her partner and where she left. 
+  - img : https://lain.bgm.tv/pic/cover/l/0e/1e/218971_2y351.jpg 
+    title : North Korea vows to spend the evening - in parting towards the beam from the flowers of the convention 
+    Status : has finished chasing 
+    Progress : 50 
+    JP : Connecticut published by starting raののflower toward wo ka ni constraint ro u za 
+    time : run time: 2018-02-24 SUN.
+    Desc : Living in a land far away from the dust, while weaving everyday things into a cloth called Hibbio, the Iofan people living quietly. At the age of 15 years old, they stopped growing. They have a life span of hundreds of years, and they are called "parting families" and are regarded as living legends. Iowe girl, who has no parents, is a stable day surrounded by her partners, but she always feels "one person." Their daily routine collapsed in an instant. Pursuing the blood of Iofu's longevity, the Mesati army launched an attack on an ancient beast called Renate. In desperation and chaos, Iofu’s first beauty, Leia, was taken away by Mesati, and the young Kym, who was secretly loved by Macchia, also disappeared. Although Macchia finally escaped, she lost her partner and where she left. 
+---
 ```
 
-You should use markdown syntax to write article, just like write readme in github.
+### Friends chain page (please change directly in the downloaded file, the following comments may have some effect)
+![](https://ws3.sinaimg.cn/large/006bYVyvly1g07b39tleej31080jhjv1.jpg)
 
-You can use 3 \`\`\` to write code block.
-
-### 5. Local launch
-
-use command:
-
+```yml
+---
+layout : links 
+title : links 
+# creation date can be changed at 
+DATE : 2018-12-19 23:11:06 
+# title on the picture, custom modifications 
+keywords : friend account 
+the Description : 
+ # to true / false turn on / off comment 
+comments : to true  
+# page header image, custom modify 
+photos : https://cdn.jsdelivr.net/gh/honjun/cdn@1.4/img/banner/links.jpg 
+# Friends of the chain configuration 
+links : 
+   # type packets 
+  - Group : personal project 
+    # type Profile 
+    desc :Fully explain that this guy is a salted fish < ( ̄) ̄)> 
+    items :
+     #友链链接 
+    - url : https://shino.cc/fgvf 
+    #友链
+      头像img : https://cloud.moezx.cc/Picture /svg/landscape/fields.svg 
+    #友链
+      网站名name : Google 
+    #友链 Introduce the following similar 
+      desc : Google Mirror 
+    - url : https://shino.cc/fgvf 
+      img : https://cloud.moezx.cc/ Picture / SVG / Landscape / fields.svg 
+      name : Google 
+      desc : Google image 
+  # type packets ... 
+  - Group: Small partners 
+    desc : Welcome Friends of the chain exchange ꉂ ('ᗜ') 
+    items :
+    - url : https://shino.cc/fgvf 
+      img : https://cloud.moezx.cc/Picture/svg/landscape/fields.svg 
+      name : Google 
+      desc : Google Mirror 
+    - url : https://shino.cc /fgvf 
+      img : https://cloud.moezx.cc/Picture/svg/landscape/fields.svg 
+      name : Google 
+      desc : Google Mirror 
+---
 ```
-jekyll s
+
+## Write article configuration
+
+The theme integrates the personal plug-ins hexo-tag-bili and hexo-tag-fancybox_img. The hexo-tag-bili is used to insert the B-station external link video in the article or single page. The syntax is as follows:
+```md
+{% bili video_id [page] %}
 ```
+See the [hexo-tag-bili](https://github.com/honjun/hexo-tag-bili/blob/master/README-zh_cn.md) for a detailed tutorial .
 
-Terminal shows:
-
+Hexo-tag-fancybox_img is used to view images in articles or single pages. The syntax is as follows:
+```md
+{% fb_img src [caption] %}
 ```
-Configuration file: E:/GitWorkSpace/blog/_config.yml
-            Source: E:/GitWorkSpace/blog
-       Destination: E:/GitWorkSpace/blog/_site
- Incremental build: disabled. Enable with --incremental
-      Generating...
-                    done in 6.33 seconds.
-  Please add the following to your Gemfile to avoid polling for changes:
-    gem 'wdm', '>= 0.1.0' if Gem.win_platform?
- Auto-regeneration: enabled for 'E:/GitWorkSpace/blog'
-Configuration file: E:/GitWorkSpace/blog/_config.yml
-    Server address: http://127.0.0.1:4000/
-  Server running... press ctrl-c to stop.
-```
+See the [hexo-tag-fancybox_img](https://github.com/honjun/hexo-tag-fancybox_img/blob/master/README-zh_cn.md)
+ for a detailed tutorial.
 
-Visit localhost:4000 to see your blog!!!
+## Also, I can’t remember it for a moment...
 
-### 6. Push to GitHub
-
-If there is nothing wrong, push code to your github!
-
-## Donate
-
-You can also donate me for a coffee, and I'll do better. Thanks.
-
-|                                                                     PayPal                                                                     |                                 Wechat Pay                                  |                                   Alipay                                    |
-|:----------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------:|:---------------------------------------------------------------------------:|
-| [![PayPal](https://www.paypalobjects.com/webstatic/paypalme/images/pp_logo_small.png)<br>Donate via PayPal ](https://www.paypal.me/gaohaoyang) | ![wechat](http://ww2.sinaimg.cn/large/7011d6cfjw1f3bkdw3bslj206z06q3z6.jpg) | ![alipay](http://ww2.sinaimg.cn/large/7011d6cfjw1f3bk8ikzoij20740743z5.jpg) |
-
-
-Thanks these friends!!!
-
-* 2017.07.02 received Wechat user ¥9.99
-* 2017.06.20 received Wechat user ¥2.22
-* 2017.06.19 received Wechat user ¥6.66
-* 2017.05.25 received Wechat user ¥1.00
-* 2017.05.19 received 风之筝 ¥6.66
-* 2017.05.16 received 张驰 ¥6.00
-* 2017.05.03 received 希成 ¥6.66
-* 2017.04.24 received deezer ¥10.00
-* 2017.04.13 received Abraham Xiao ¥30.00
-* 2017.04.11 received Wechat user ¥4.00
-* 2017.04.01 received Elvin Zeng ¥6.66
-* 2017.03.13 received Wechat user ¥6.66
-* 2017.03.04 received 史莱姆 ¥9.90
-* 2017.03.02 received 梦想小熊 ¥6.66
-* 2017.02.27 received 夏友杰 ¥6.66
-* 2017.02.26 received 兰缘小妖 ¥10.00
-* 2017.02.25 received Wechat user ¥6.66
-* 2017.02.22 received Wechat user ¥6.66
-* 2017.02.15 received Wechat user ¥10.00
-* 2017.02.06 received Light ¥10.24
-* 2017.01.15 received Wechat user ¥6.66
-* 2016.12.17 received HitNoah ¥12.00
-* 2016.12.09 received 情融 ¥6.60
-* 2016.11.25 received Wechat user ¥6.66
-* 2016.11.16 received Wechat user ¥1.00
-* 2016.10.24 received 奇峰 ¥6.66
-* 2016.10.21 received 旭廷 ¥10.00
-* 2016.09.25 received 鑫 ¥6.66
-* 2016.08.25 received Erlend Aakre $2.50
-* 2016.08.10 received Wechat user ¥4.40
-* 2016.07.25 received 邓炳初 ¥6.66
-* 2016.07.11 received 彦风 ¥6.66
-* 2016.07.07 received Klci ¥2.50
-* 2016.05.08 received 1057 ¥10.57
-* 2016.05.07 received 吴林 ¥2
-* 2016.04.29 received 北归 ¥10
-* 2016.04.28 received 魏楚阳_Brian ¥2
-* 2016.04.28 received 薛彬 ¥8.8
-
-
-## Update Log
-
-### 2017.2.28
-
-- `[^]` fix smoothScroll bug in Tencent webview like wechat and qq.  [#22](https://github.com/Gaohaoyang/gaohaoyang.github.io/issues/22), [#48](https://github.com/Gaohaoyang/gaohaoyang.github.io/issues/48)
-
-### 2016.6.20
-
-* `[+]` Add next post and previous post link in post page.
-* `[^]` Change the sort of font-family to avoid full-width half-width characters mistake.
-* `[^]` Fix bug in tags cloud when division by zero. [#26](https://github.com/Gaohaoyang/gaohaoyang.github.io/issues/26), [#28](https://github.com/Gaohaoyang/gaohaoyang.github.io/issues/28), [#30](https://github.com/Gaohaoyang/gaohaoyang.github.io/issues/30)
-
-### 2016.5.11 v2.0.1
-
-* `[^]` Optimized code, Extracting common code to `comments.html`
-* `[+]` Add Google Analysis and Baidu Statistics
-* `[+]` Update README, add usage
-* `[+]` Add `favicon.ico`
-* `[^]` Fix bug at contents
-* `[^]` Change the content scroll bar CSS style（Only for `webkit` browser kernel）
-* `[^]` Change tag a color at demo page
-* `[+]` Add busuanzi counter, show the views count at footer
-* `[+]` Add back to top button
-
-### 2016.4.27 v2.0.0
-
-* `[^]` Rewrite all codes based on jekyll 3.1.2
-* `[+]` Add excerpt at index page
-* `[+]` Add recently post, categories and tags cloud at index page
-* `[+]` Add light shadow at navbar
-* `[+]` Add archives, categories, tags page
-* `[+]` Add collections page
-* `[+]` Add comments plugin with disqus or duoshuo
-* `[+]` Mobile Adaptation
-* `[+]` Fix post contents to the right side while scrolling page
-* `[+]` Fix footer at the bottom when page height is smaller than window height
-* `[^]` Use github flavored markdown to write code block(Fenced code blocks)
-* `[^]` Rewrite the demo page with Masonry
-* `[-]` Remove jQuery and BootStrap
-
-About my old blog theme, I won't maintain any more. And I put the code at  [Gaohaoyang/old-blog](https://github.com/Gaohaoyang/old-blog).
-
-## License
-
-[MIT License](https://github.com/Gaohaoyang/gaohaoyang.github.io/blob/master/LICENSE.md)
+To be continued...
