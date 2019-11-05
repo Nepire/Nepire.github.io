@@ -3,7 +3,7 @@ prefixName: 艦隊
 siteName: nepire
 # favicon and site master avatar
 favicon: /images/favicon.ico
-avatar: /images/custom/avatar.jpg
+avatar: /images/custom/title.ico
 url: https://nepire.github.io/
 description: 渴求着能撼动世界的力量
 #cdn: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6
