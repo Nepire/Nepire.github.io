@@ -12,7 +12,7 @@ pjax: 1
 mathjax: 0
 
 notice: いいこと？暁の水平线に、胜利を刻みなさい！
-lazyloadImg: /images/loader/orange.progress-bar-stripe-loader.svg
+#lazyloadImg: /images/loader/orange.progress-bar-stripe-loader.svg
 
 menus:
   首页: { path: /, fa: fa-fort-awesome faa-shake }
