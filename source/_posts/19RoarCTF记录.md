@@ -11,7 +11,7 @@ date: 2019-11-05 12:31:01
 tags:
 keywords:
 description:
-photos:
+photos: /images/cover/8.png
 ---
 比赛时正好遇上作业一大堆，粗略的看了一题就去赶作业了，赛后还是来重新看一遍题目
 
@@ -29,7 +29,7 @@ photos:
 防护全开
 反编译看一下
 
-![图片](https://uploader.shimo.im/f/jj7Vi0RS28Mu5Vdp.png)
+![图片](jj7Vi0RS28Mu5Vdp.png)
 
 标准菜单框架
 
@@ -45,19 +45,19 @@ struct note
   char *content;
 }
 ```
-![图片](https://uploader.shimo.im/f/3lJTRVXx9hkjDAhf.png)
+![图片](3lJTRVXx9hkjDAhf.png)
 
-![图片](https://uploader.shimo.im/f/ohsQTbMsvZEwjrbO.png)
+![图片](ohsQTbMsvZEwjrbO.png)
 
 我们可以看到create的功能只初始化了新chunk，并未往content写东西
 
 然后简单审计过后就能发现有个很僵硬的漏洞
 
-![图片](https://uploader.shimo.im/f/mnrLbOp5t5EMBjwY.png)
+![图片](mnrLbOp5t5EMBjwY.png)
 
 在往chunk_content内写东西时的size是cmp_min的返回值，而问题就出在cmp_min里
 
-![图片](https://uploader.shimo.im/f/BDqW1RPx5HIeSvgl.png)这里僵硬在于这个额外多出的if，本来猜测可能是想输入的size是带'\n'的但发现这也不对就hen尬
+![图片](BDqW1RPx5HIeSvgl.png)这里僵硬在于这个额外多出的if，本来猜测可能是想输入的size是带'\n'的但发现这也不对就hen尬
 
 总结下现在得到的可利用点
 
@@ -69,12 +69,12 @@ struct note
 
 那么先尝试利用off by one泄露出libc
 
-![图片](https://uploader.shimo.im/f/3oLNBqRr7Scnt8ZZ.png)
+![图片](3oLNBqRr7Scnt8ZZ.png)
 
 
 这里有个细节是它没有用malloc创建堆而是calloc，但没必要去纠结，因为触发malloc_hook的不是这里的malloc
 
-![图片](https://uploader.shimo.im/f/gzXbIS07Uy4a3463.png)
+![图片](gzXbIS07Uy4a3463.png)
 
 
 接着就是很直接的，uaf改fd到malloc_hook后把malloc_hook改成one_gadget再用doublefree报错里的malloc触发getshell
