@@ -1,13 +1,18 @@
 ---
-layout: post
-title: "19RoarCTF"
-date:   2019-10-12 19:00:00
-categories: WriteUp
-tags: WriteUp RoarCTF
+title: 19RoarCTF记录
+author: nepire
+avatar: 'https://wx1.sinaimg.cn/large/006bYVyvgy1ftand2qurdj303c03cdfv.jpg'
+authorLink: 'https://nepire.github.io/'
+authorAbout: 逐梦者
+authorDesc: 逐梦者
+categories: 技术
+comments: true
+date: 2019-11-05 12:31:01
+tags:
+keywords:
+description:
+photos:
 ---
-
-* content
-{:toc}
 比赛时正好遇上作业一大堆，粗略的看了一题就去赶作业了，赛后还是来重新看一遍题目
 
 

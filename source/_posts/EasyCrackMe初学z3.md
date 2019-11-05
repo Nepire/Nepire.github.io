@@ -1,14 +1,18 @@
 ---
-layout: post
-title: "EasyCrackMe初学z3"
-date:   2019-09-10 19:00:00
-categories: WriteUp
-tags: WriteUp z3 re TokyoWesterns
+title: EasyCrackMe初学z3
+author: nepire
+avatar: 'https://wx1.sinaimg.cn/large/006bYVyvgy1ftand2qurdj303c03cdfv.jpg'
+authorLink: 'https://nepire.github.io/'
+authorAbout: 逐梦者
+authorDesc: 逐梦者
+categories: 技术
+comments: true
+date: 2019-11-05 12:29:45
+tags:
+keywords:
+description:
+photos:
 ---
-
-* content
-{:toc}
-
 TokyoWesterns的题目实在有意思，只能水水热身题混混日子
 
 
