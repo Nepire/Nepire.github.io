@@ -42,7 +42,7 @@ menus:
 # Home page sort type: -1: newer first，1: older first.
 homePageSortType: -1
 # Home page article shown number)
-homeArticleShown: 4
+homeArticleShown: 5
 # 背景图片 更好的修改
 bg:
   - /images/cover/(0).jpg
