@@ -1,14 +1,18 @@
 ---
-layout: post
-title: "FireShellCTF2019反思"
-date:   2019-1-28 18:00:00
-categories: 比赛反思
-tags: WriteUp FireShellCTF2019
+title: FireShellCTF2019反思
+author: nepire
+avatar: 'https://wx1.sinaimg.cn/large/006bYVyvgy1ftand2qurdj303c03cdfv.jpg'
+authorLink: 'https://nepire.github.io/'
+authorAbout: 逐梦者
+authorDesc: 逐梦者
+categories: 技术
+comments: true
+date: 2019-11-05 12:26:45
+tags:
+keywords:
+description:
+photos:
 ---
-
-* content
-{:toc}
-
 实在是不应该，赛后看了下Pwn最后一题的EXP反省了下，要是能专注去分析还是能搓出来的，结果到后面也只做出来了常规的三题，不是一个很好的阶段结束，写完这篇总结就去肝19WF的参展品了，比赛估计也要停一段时间打不了。
 
 

@@ -1,15 +1,18 @@
 ---
-layout: post
-title: "Ghidra_9.0工具学习"
-date:   2019-03-06 19:00:00
-categories: note
-tags: note
+title: Ghidra_9.0工具学习
+author: nepire
+avatar: 'https://wx1.sinaimg.cn/large/006bYVyvgy1ftand2qurdj303c03cdfv.jpg'
+authorLink: 'https://nepire.github.io/'
+authorAbout: 逐梦者
+authorDesc: 逐梦者
+categories: 技术
+comments: true
+date: 2019-11-05 12:28:07
+tags:
+keywords:
+description:
+photos:
 ---
-
-* content
-{:toc}
-
-
 新出了一个堪比ida的反编译工具，虽然到现在都还没开源的样子，先把一些简单的操作记录一下
 
 
