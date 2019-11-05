@@ -1,15 +1,18 @@
 ---
-layout: post
-title:  "ROP_Emporium通关指南"
-date:   2018-09-19 18:44:00
-categories: WriteUp
-tags: WriteUp PWN ROP_Emporium
+title: ROP_Emporium
+author: nepire
+avatar: 'https://wx1.sinaimg.cn/large/006bYVyvgy1ftand2qurdj303c03cdfv.jpg'
+authorLink: 'https://nepire.github.io/'
+authorAbout: 逐梦者
+authorDesc: 逐梦者
+categories: 技术
+comments: true
+date: 2019-11-05 11:45:15
+tags:
+keywords:
+description:
+photos:
 ---
-
-* content
-{:toc}
-
-
 暑假去了趟Xman认识了一群大佬，也因此受到刺激成长了不少，这里就写一篇在xman时通关的ROP—Emporium的wp来记录一下自己的学习历程
 
 

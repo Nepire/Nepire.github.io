@@ -1,14 +1,17 @@
 ---
-layout: post
-title:  "铁三福建赛区pwn回顾"
-date:   2018-09-12 19:12:00
-categories: WriteUp
-tags: WriteUp PWN 铁三
+title: 铁三福建赛区pwn回顾
+author: nepire
+avatar: https://wx1.sinaimg.cn/large/006bYVyvgy1ftand2qurdj303c03cdfv.jpg
+authorLink: https://nepire.github.io/
+authorAbout: 逐梦者
+authorDesc: 逐梦者
+categories: 技术
+comments: true
+tags:
+keywords:
+description:
+photos:
 ---
-
-* content
-{:toc}
-
 
 建了新博客开始还是写点东西存着，不然空空的感觉也不是很好，刚好看到文涛学长给我的铁三PWN题，当时我连涛神写的exp都看不懂，现在看看自己当初真的太菜了，所以现在重新看一遍题目来检验现在的实力
 

