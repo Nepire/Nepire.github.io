@@ -80,9 +80,9 @@ theme: Sakura
 deploy:
   type: git
   repo:
-    github: git@github.com:Nepire/Nepire.github.io.git
-    coding: git@git.coding.net:Nepire/nepire.git
-  branch: master
+    github: git@github.com:Nepire/Nepire.github.io.git:page-hexo
+    # coding: git@git.coding.net:Nepire/nepire.git
+  branch: page-hexo
 
 # backup
 # backup:
