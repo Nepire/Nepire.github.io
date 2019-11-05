@@ -3,7 +3,7 @@ prefixName: 艦隊
 siteName: nepire
 # favicon and site master avatar
 favicon: /images/favicon.ico
-avatar: /img/custom/avatar.jpg
+avatar: /images/custom/avatar.jpg
 url: https://nepire.github.io/
 description: 渴求着能撼动世界的力量
 #cdn: https://cdn.jsdelivr.net/gh/honjun/cdn@1.6
@@ -66,12 +66,12 @@ siteBuildingTime: 07/17/2018
 
 #social  url, img PC端配置
 social:
-  github: {url: https://github.com/Nepire, img: /img/social/github.png}
-  sina: {url: https://github.com/Nepire, img: /img/social/sina.png}
-  wangyiyun: {url: https://github.com/Nepire, img: /img/social/wangyiyun.png}
-  zhihu: {url: https://github.com/Nepire, img: /img/social/zhihu.png}
-  email: {url: https://github.com/Nepire, img: /img/social/email.svg}
-  wechat: {url: /#, qrcode: /img/custom/wechat.jpg, img: /img/social/wechat.png}
+  github: {url: https://github.com/Nepire, img: /images/social/github.png}
+  sina: {url: https://github.com/Nepire, img: /images/social/sina.png}
+  wangyiyun: {url: https://github.com/Nepire, img: /images/social/wangyiyun.png}
+  zhihu: {url: https://github.com/Nepire, img: /images/social/zhihu.png}
+  email: {url: https://github.com/Nepire, img: /images/social/email.svg}
+  wechat: {url: /#, qrcode: /img/custom/wechat.jpg, img: /images/social/wechat.png}
 
 #social  url, img 移动端配置
 msocial:
