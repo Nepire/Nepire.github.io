@@ -11,7 +11,7 @@ date: 2019-11-05 11:50:36
 tags:
 keywords:
 description:
-photos:
+photos: https://p2.ssl.qhimg.com/t01f20b1ea3950aa6f6.jpg
 ---
 国庆期间得知了美国CMU主办的picoCTF比赛，出于最近做题的手感有所下降，借此比赛来复习下PWN相关的题型（题目的质量不错，而且题型很广，自我感觉相当棒的比赛）
 
