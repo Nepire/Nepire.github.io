@@ -1,9 +1,8 @@
 #!/bin/bash
+hexo clean
 git add -A
 git commit -m "source"
-git push origin backup
+git push
 git checkout master
-hexo g
-hexo d
-hexo clean
+hexo g -d
 git checkout backup

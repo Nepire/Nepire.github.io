@@ -1,7 +1,7 @@
 ---
 title: picoCTFのpwn解析
 author: nepire
-avatar: 'https://wx1.sinaimg.cn/large/006bYVyvgy1ftand2qurdj303c03cdfv.jpg'
+avatar: /images/title.ico
 authorLink: 'https://nepire.github.io/'
 authorAbout: 逐梦者
 authorDesc: 逐梦者
@@ -13,17 +13,6 @@ keywords:
 description:
 photos:
 ---
----
-layout: post
-title:  "picoCTFのpwn解析"
-date:   2018-10-16 20:00:00
-categories: WriteUp
-tags: WriteUp Pwn pico
----
-
-* content
-{:toc}
-
 国庆期间得知了美国CMU主办的picoCTF比赛，出于最近做题的手感有所下降，借此比赛来复习下PWN相关的题型（题目的质量不错，而且题型很广，自我感觉相当棒的比赛）
 
 本文首发于[安全客—picoCTFのpwn解析](https://www.anquanke.com/post/id/161843)

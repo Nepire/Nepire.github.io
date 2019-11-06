@@ -1,7 +1,7 @@
 ---
 title: T-Spin_from_TetrisOnlinePoland
 author: nepire
-avatar: 'https://wx1.sinaimg.cn/large/006bYVyvgy1ftand2qurdj303c03cdfv.jpg'
+avatar: /images/title.ico
 authorLink: 'https://nepire.github.io/'
 authorAbout: 逐梦者
 authorDesc: 逐梦者
