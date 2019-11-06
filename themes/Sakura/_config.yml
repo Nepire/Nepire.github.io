@@ -80,7 +80,7 @@ msocial:
   qq: {url: https://github.com/Nepire, fa: fa-qq, color: 25c6fe}
 
 donate:
-  paypal: 
+  paypal:
   alipay:
   wechat:
   wechatSQ:
@@ -105,5 +105,5 @@ aplayer:
 
 # Valine
 valine: true
-v_appId: GyC3NzMvd0hT9Yyd2hYIC0MN-gzGzoHsz
-v_appKey: mgOpfzbkHYqU92CV4IDlAUHQ
+v_appId: aAE6NeF5HCQ0WM9kYD4ywdDw-gzGzoHsz
+v_appKey: EEpyRysaKmv7aOJjR1o9E4Eq
