@@ -3,5 +3,6 @@ git add -A
 git commit -m "source"
 git push origin backup
 git checkout master
-hexo g -d
+hexo g
+hexo d
 git checkout backup
