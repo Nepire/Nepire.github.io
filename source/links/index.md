@@ -14,10 +14,21 @@ links:
       img: http://www.anciety.de/img/avatar.jpg
       name: Anciety
       desc: Escapingbug
+    - url: https://blog.csdn.net/whklhhhh
+      img: https://profile.csdnimg.cn/0/3/8/2_whklhhhh
+      name: 奈沙夜影
     - url: https://binarysec.top/
       img: https://avatars3.githubusercontent.com/u/38719975
       name: KaKa
       desc: master of pwn逆向学习交流
+    - url: https://iosmosis.github.io/
+      img: https://iosmosis.github.io/images/logo.jpeg
+      name: ios
+      desc: iosmosis
+    - url: https://darkeyer.github.io/
+      img: https://darkeyer.github.io/img/avatar_m.jpg
+      name: Mr.R
+      desc: Goals determine what you going to be!
     - url: https://23r3f.github.io/
       img: https://avatars2.githubusercontent.com/u/40877095
       name: 23R3F
@@ -58,4 +69,13 @@ links:
       img: https://wywwzjj.top/avatar/A.png
       name: wywwzjj
       desc: Shell is only the beginning.
+    - url: http://blog.thecosmos.cn/
+      img: http://thecosmos.cn/img/head.jpg
+      name: Cosmos
+      desc: 可能是个CTFer
+    - url: https://southseast.cc/
+      img: https://southseast.cc/images/avatar.gif
+      name: 南溟
+      desc: 荆棘刺穿我的脚掌路坎坷而漫长
+
 ---
