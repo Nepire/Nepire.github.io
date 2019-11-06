@@ -1,8 +1,5 @@
 #!/bin/bash
-hexo g
+git checkout backup
 git add -A
 git commit -m "source"
 git push origin backup
-git checkout master
-hexo d
-git checkout backup
