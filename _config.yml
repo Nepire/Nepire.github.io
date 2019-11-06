@@ -82,14 +82,15 @@ deploy:
   repo:
     github: git@github.com:Nepire/Nepire.github.io.git
     # coding: git@git.coding.net:Nepire/nepire.git
-  # branch: master
+  branch: master
 
 # backup
 backup:
   type: git
   message: backup my blog of https://Nepire.github.io/
   repository:
-    github: git@github.com:Nepire/Nepire.github.io.git,backup
+    github: git@github.com:Nepire/Nepire.github.io.git
+  branch: backup
     # coding: https://git.coding.net/hojun/hojun.git,backup
 
 #RSS
