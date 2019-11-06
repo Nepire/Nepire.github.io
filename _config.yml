@@ -90,7 +90,7 @@ backup:
   message: backup my blog of https://Nepire.github.io/
   repository:
     github: git@github.com:Nepire/Nepire.github.io.git
-  branch: backup
+  # branch: backup
     # coding: https://git.coding.net/hojun/hojun.git,backup
 
 #RSS
