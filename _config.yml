@@ -81,7 +81,7 @@ deploy:
   type: git
   repo:
     github: git@github.com:Nepire/Nepire.github.io.git
-    # coding: git@git.coding.net:Nepire/nepire.git
+    coding: git@git.coding.net:Nepire/nepire.git
   branch: master
 
 # backup
