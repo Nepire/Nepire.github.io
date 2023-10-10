@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="downloadbuildroot 12wget https:&#x2F;&#x2F;buildroot.org&#x2F;downloads&#x2F;buildroot-2023.02.tar.xztar xf buildroot-2023.02.tar.xz &amp;&amp; cd buildroot-2023.02 qemu 123wget https:&#x2F;&#x2F;download.qemu.org&#x2F;qemu-8.1.1.tar.x">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kernel调试环境搭建">
+<meta property="og:url" content="http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/index.html">
+<meta property="og:site_name" content="Nepire Blog">
+<meta property="og:description" content="downloadbuildroot 12wget https:&#x2F;&#x2F;buildroot.org&#x2F;downloads&#x2F;buildroot-2023.02.tar.xztar xf buildroot-2023.02.tar.xz &amp;&amp; cd buildroot-2023.02 qemu 123wget https:&#x2F;&#x2F;download.qemu.org&#x2F;qemu-8.1.1.tar.x">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-10-07T03:18:08.000Z">
+<meta property="article:modified_time" content="2023-10-07T03:32:53.595Z">
+<meta property="article:author" content="nepire">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>kernel调试环境搭建</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2023/10/07/cve-2021-3156%E6%9C%AC%E5%9C%B0%E6%8F%90%E6%9D%83%E8%B0%83%E8%AF%95/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2023/10/06/%E8%88%B9%E6%96%B0%E7%89%88%E6%9C%AC%E5%8D%9A%E5%AE%A2/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&text=kernel调试环境搭建"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&title=kernel调试环境搭建"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&is_video=false&description=kernel调试环境搭建"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=kernel调试环境搭建&body=Check out this article: http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&title=kernel调试环境搭建"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&title=kernel调试环境搭建"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&title=kernel调试环境搭建"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&title=kernel调试环境搭建"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&name=kernel调试环境搭建&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&t=kernel调试环境搭建"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#download"><span class="toc-number">1.</span> <span class="toc-text">download</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">架构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E8%AF%91%E5%89%8D%E5%87%86%E5%A4%87"><span class="toc-number">2.1.</span> <span class="toc-text">编译前准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%87%8D%E6%89%93%E5%8C%85"><span class="toc-number">2.2.</span> <span class="toc-text">重打包</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        kernel调试环境搭建
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">nepire</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-10-07T03:18:08.000Z" class="dt-published" itemprop="datePublished">2023-10-07</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h1 id="download"><a href="#download" class="headerlink" title="download"></a>download</h1><p>buildroot</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget https://buildroot.org/downloads/buildroot-2023.02.tar.xz</span><br><span class="line">tar xf buildroot-2023.02.tar.xz &amp;&amp; <span class="built_in">cd</span> buildroot-2023.02</span><br></pre></td></tr></table></figure>
+<p>qemu</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https://download.qemu.org/qemu-8.1.1.tar.xz</span><br><span class="line">tar xvJf qemu-8.1.1.tar.xz</span><br><span class="line"><span class="built_in">cd</span> qemu-8.1.1</span><br></pre></td></tr></table></figure>
+<p>qemu的一些小tips</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install ninja-build libpixman-1-dev libglib2.0-dev</span><br><span class="line">“qemu-system” ./configure --target-list=$&#123;QEMU_TARGET_LIST&#125;-softmmu</span><br><span class="line">“qemu-user” ./configure --target-list=$&#123;QEMU_TARGET_LIST&#125;-linux-user</span><br></pre></td></tr></table></figure>
+
+<h1 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h1><p>因为用的是qemu，buildroot有预先准备了这些配置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">make list-defconfigs</span><br><span class="line">  qemu_aarch64_ebbr_defconfig         - Build for qemu_aarch64_ebbr</span><br><span class="line">  qemu_aarch64_sbsa_defconfig         - Build for qemu_aarch64_sbsa</span><br><span class="line">  qemu_aarch64_virt_defconfig         - Build for qemu_aarch64_virt</span><br><span class="line">  qemu_arm_ebbr_defconfig             - Build for qemu_arm_ebbr</span><br><span class="line">  qemu_arm_versatile_defconfig        - Build for qemu_arm_versatile</span><br><span class="line">  qemu_arm_vexpress_defconfig         - Build for qemu_arm_vexpress</span><br><span class="line">  qemu_arm_vexpress_tz_defconfig      - Build for qemu_arm_vexpress_tz</span><br><span class="line">  qemu_m68k_mcf5208_defconfig         - Build for qemu_m68k_mcf5208</span><br><span class="line">  qemu_m68k_q800_defconfig            - Build for qemu_m68k_q800</span><br><span class="line">  qemu_microblazebe_mmu_defconfig     - Build for qemu_microblazebe_mmu</span><br><span class="line">  qemu_microblazeel_mmu_defconfig     - Build for qemu_microblazeel_mmu</span><br><span class="line">  qemu_mips32r2el_malta_defconfig     - Build for qemu_mips32r2el_malta</span><br><span class="line">  qemu_mips32r2_malta_defconfig       - Build for qemu_mips32r2_malta</span><br><span class="line">  qemu_mips32r6el_malta_defconfig     - Build for qemu_mips32r6el_malta</span><br><span class="line">  qemu_mips32r6_malta_defconfig       - Build for qemu_mips32r6_malta</span><br><span class="line">  qemu_mips64el_malta_defconfig       - Build for qemu_mips64el_malta</span><br><span class="line">  qemu_mips64_malta_defconfig         - Build for qemu_mips64_malta</span><br><span class="line">  qemu_mips64r6el_malta_defconfig     - Build for qemu_mips64r6el_malta</span><br><span class="line">  qemu_mips64r6_malta_defconfig       - Build for qemu_mips64r6_malta</span><br><span class="line">  qemu_nios2_10m50_defconfig          - Build for qemu_nios2_10m50</span><br><span class="line">  qemu_or1k_defconfig                 - Build for qemu_or1k</span><br><span class="line">  qemu_ppc64_e5500_defconfig          - Build for qemu_ppc64_e5500</span><br><span class="line">  qemu_ppc64le_powernv8_defconfig     - Build for qemu_ppc64le_powernv8</span><br><span class="line">  qemu_ppc64le_pseries_defconfig      - Build for qemu_ppc64le_pseries</span><br><span class="line">  qemu_ppc64_pseries_defconfig        - Build for qemu_ppc64_pseries</span><br><span class="line">  qemu_ppc_bamboo_defconfig           - Build for qemu_ppc_bamboo</span><br><span class="line">  qemu_ppc_e500mc_defconfig           - Build for qemu_ppc_e500mc</span><br><span class="line">  qemu_ppc_g3beige_defconfig          - Build for qemu_ppc_g3beige</span><br><span class="line">  qemu_ppc_mac99_defconfig            - Build for qemu_ppc_mac99</span><br><span class="line">  qemu_ppc_mpc8544ds_defconfig        - Build for qemu_ppc_mpc8544ds</span><br><span class="line">  qemu_riscv32_virt_defconfig         - Build for qemu_riscv32_virt</span><br><span class="line">  qemu_riscv64_nommu_virt_defconfig   - Build for qemu_riscv64_nommu_virt</span><br><span class="line">  qemu_riscv64_virt_defconfig         - Build for qemu_riscv64_virt</span><br><span class="line">  qemu_s390x_defconfig                - Build for qemu_s390x</span><br><span class="line">  qemu_sh4eb_r2d_defconfig            - Build for qemu_sh4eb_r2d</span><br><span class="line">  qemu_sh4_r2d_defconfig              - Build for qemu_sh4_r2d</span><br><span class="line">  qemu_sparc64_sun4u_defconfig        - Build for qemu_sparc64_sun4u</span><br><span class="line">  qemu_sparc_ss10_defconfig           - Build for qemu_sparc_ss10</span><br><span class="line">  qemu_x86_64_defconfig               - Build for qemu_x86_64</span><br><span class="line">  qemu_x86_defconfig                  - Build for qemu_x86</span><br><span class="line">  qemu_xtensa_lx60_defconfig          - Build for qemu_xtensa_lx60</span><br><span class="line">  qemu_xtensa_lx60_nommu_defconfig    - Build for qemu_xtensa_lx60_nommu</span><br></pre></td></tr></table></figure>
+
+<h2 id="编译前准备"><a href="#编译前准备" class="headerlink" title="编译前准备"></a>编译前准备</h2><p>开debug</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ make menuconfig</span><br><span class="line">Build options ---&gt;</span><br><span class="line">[*] build packages with debugging symbols</span><br><span class="line">      gcc debug level (debug level 3)  ---&gt;</span><br><span class="line">[ ] strip target binaries</span><br></pre></td></tr></table></figure>
+<p>关KALSR（make的时间可能较长慢慢等就是了）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ make linux-menuconfig</span><br><span class="line">Processor type and features   ---&gt;</span><br><span class="line">[*] Build a relocatable kernel</span><br><span class="line">[ ]   Randomize the address of the kernel image (KASLR)</span><br></pre></td></tr></table></figure>
+
+<h2 id="重打包"><a href="#重打包" class="headerlink" title="重打包"></a>重打包</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># thk n132</span></span><br><span class="line"><span class="comment"># ./repk.sh ./rootfs</span></span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$1</span> &amp;&amp;\</span><br><span class="line">find . | cpio -o --format=newc &gt; ../rootfs.cpio &amp;&amp;\</span><br><span class="line"><span class="built_in">cd</span> .. &amp;&amp;\</span><br><span class="line"><span class="built_in">mv</span> ./rootfs.cpio ./initramfs.cpio &amp;&amp;\</span><br><span class="line"><span class="built_in">rm</span> -rf ./initramfs.cpio.gz &amp;&amp;\</span><br><span class="line">gzip  ./initramfs.cpio &amp;&amp;\</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;[+] Filesystem - Done&quot;</span></span><br></pre></td></tr></table></figure>
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#download"><span class="toc-number">1.</span> <span class="toc-text">download</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84"><span class="toc-number">2.</span> <span class="toc-text">架构</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E8%AF%91%E5%89%8D%E5%87%86%E5%A4%87"><span class="toc-number">2.1.</span> <span class="toc-text">编译前准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%87%8D%E6%89%93%E5%8C%85"><span class="toc-number">2.2.</span> <span class="toc-text">重打包</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&text=kernel调试环境搭建"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&title=kernel调试环境搭建"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&is_video=false&description=kernel调试环境搭建"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=kernel调试环境搭建&body=Check out this article: http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&title=kernel调试环境搭建"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&title=kernel调试环境搭建"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&title=kernel调试环境搭建"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&title=kernel调试环境搭建"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&name=kernel调试环境搭建&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2023/10/07/kernel%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/&t=kernel调试环境搭建"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2023
+    nepire
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

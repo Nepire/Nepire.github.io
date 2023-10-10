@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="起因和丁佬他们一起整了个小队去打了强网杯，然后就玩到了线下，有实物的rw赛制还是好玩 题目赛题都放一个u盘里，然后还有个路由器的实体，有个说明文档，大致就是介绍题目的内容和上台演示的成功条件，由于比较菜，搞不来v8和VMware，就来搞这台路由器了 演示环境是不给后台密码的，所以我们需要挖的是一个远程利用的未授权RCE，这里拿到的路由器开了ssh，连上去可以知道这是小米路由器pro，然后把实机的固">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MiRouter漏洞挖掘">
+<meta property="og:url" content="http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/index.html">
+<meta property="og:site_name" content="Nepire Blog">
+<meta property="og:description" content="起因和丁佬他们一起整了个小队去打了强网杯，然后就玩到了线下，有实物的rw赛制还是好玩 题目赛题都放一个u盘里，然后还有个路由器的实体，有个说明文档，大致就是介绍题目的内容和上台演示的成功条件，由于比较菜，搞不来v8和VMware，就来搞这台路由器了 演示环境是不给后台密码的，所以我们需要挖的是一个远程利用的未授权RCE，这里拿到的路由器开了ssh，连上去可以知道这是小米路由器pro，然后把实机的固">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/d5f3cd4ed31395abe2668afc1f491a316b0e76b258167cbb47ba642ecb212b47.png">
+<meta property="og:image" content="http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/da4866d968976c0bff1c57482d56fb32a88d5de228ff10970048ca82440df917.png">
+<meta property="og:image" content="http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/dd3f465350f1d94b635299e7066e9f1e059fdec6ecba7192401b0bdd72c2108b.png">
+<meta property="og:image" content="http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/13b20a54ed177adfced498287f7cd6b3956f33ee32f447f6c10538f64e1fa6fa.png">
+<meta property="article:published_time" content="2023-10-08T03:27:08.000Z">
+<meta property="article:modified_time" content="2023-10-10T11:05:29.038Z">
+<meta property="article:author" content="nepire">
+<meta property="article:tag" content="路由器,漏洞挖掘,CTF">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/d5f3cd4ed31395abe2668afc1f491a316b0e76b258167cbb47ba642ecb212b47.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>MiRouter漏洞挖掘</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2023/10/08/GoAhead%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2023/10/07/cve-2021-3156%E6%9C%AC%E5%9C%B0%E6%8F%90%E6%9D%83%E8%B0%83%E8%AF%95/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&text=MiRouter漏洞挖掘"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&title=MiRouter漏洞挖掘"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&is_video=false&description=MiRouter漏洞挖掘"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=MiRouter漏洞挖掘&body=Check out this article: http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&title=MiRouter漏洞挖掘"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&title=MiRouter漏洞挖掘"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&title=MiRouter漏洞挖掘"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&title=MiRouter漏洞挖掘"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&name=MiRouter漏洞挖掘&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&t=MiRouter漏洞挖掘"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B5%B7%E5%9B%A0"><span class="toc-number">1.</span> <span class="toc-text">起因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE"><span class="toc-number">2.</span> <span class="toc-text">题目</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        MiRouter漏洞挖掘
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">nepire</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-10-08T03:27:08.000Z" class="dt-published" itemprop="datePublished">2023-10-08</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/%E8%B7%AF%E7%94%B1%E5%99%A8-%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98-CTF/" rel="tag">路由器,漏洞挖掘,CTF</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>和丁佬他们一起整了个小队去打了强网杯，然后就玩到了线下，有实物的rw赛制还是好玩</p>
+<h2 id="题目"><a href="#题目" class="headerlink" title="题目"></a>题目</h2><p>赛题都放一个u盘里，然后还有个路由器的实体，有个说明文档，大致就是介绍题目的内容和上台演示的成功条件，由于比较菜，搞不来v8和VMware，就来搞这台路由器了</p>
+<p>演示环境是不给后台密码的，所以我们需要挖的是一个远程利用的未授权RCE，这里拿到的路由器开了ssh，连上去可以知道这是小米路由器pro，然后把实机的固件dump下来确定版本后，去官网下原始固件来diff下看看是不是出题人塞东西或改的洞。<br>GoAhead漏洞分析</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line">diff --git a/etc/mihttpd/mihttpd.conf b/etc/mihttpd/mihttpd.conf</span><br><span class="line">index 9fbe742..89d058f 100644</span><br><span class="line">--- a/etc/mihttpd/mihttpd.conf</span><br><span class="line">+++ b/etc/mihttpd/mihttpd.conf</span><br><span class="line">@@ -153,13 +153,13 @@ http &#123;</span><br><span class="line">       upload_pass_form_field <span class="string">&quot;^(?!nginx_file)&quot;</span>;</span><br><span class="line">       upload_pass_args on;</span><br><span class="line">     &#125;</span><br><span class="line">-    location /api-third-party/download/public &#123;</span><br><span class="line">+    location /api-third-party/download/public/ &#123;</span><br><span class="line">       <span class="built_in">alias</span> /userdisk/data/;</span><br><span class="line">     &#125;     </span><br><span class="line">-    location /api-third-party/download/private &#123;</span><br><span class="line">+    location /api-third-party/download/private/ &#123;</span><br><span class="line">       <span class="built_in">alias</span> /userdisk/appdata/;</span><br><span class="line">     &#125;          </span><br><span class="line">-    location /api-third-party/download/extdisks &#123;</span><br><span class="line">+    location /api-third-party/download/extdisks/ &#123;</span><br><span class="line">       <span class="built_in">alias</span> /extdisks/;</span><br><span class="line">     &#125;          </span><br><span class="line"> </span><br><span class="line">diff --git a/etc/sysapihttpd/sysapihttpd.conf b/etc/sysapihttpd/sysapihttpd.conf</span><br><span class="line">index ab90d6c..16bf88c 100644</span><br><span class="line">--- a/etc/sysapihttpd/sysapihttpd.conf</span><br><span class="line">+++ b/etc/sysapihttpd/sysapihttpd.conf</span><br><span class="line">@@ -129,19 +129,19 @@ http &#123;</span><br><span class="line">       proxy_pass http://127.0.0.1:5081;</span><br><span class="line">       <span class="comment">#</span></span><br><span class="line">     &#125;</span><br><span class="line">-    location /backup/log &#123;</span><br><span class="line">+    location /backup/log/ &#123;</span><br><span class="line">       <span class="built_in">alias</span> /tmp/syslogbackup/;</span><br><span class="line">     &#125;</span><br><span class="line">     location /api/service/plugin &#123;</span><br><span class="line">       rewrite ^/api/service/plugin/control /api-third-party/download/private/<span class="variable">$arg_appid</span>/control.html? permanent;</span><br><span class="line">     &#125;</span><br><span class="line">-    location /api-third-party/download/public &#123;</span><br><span class="line">+    location /api-third-party/download/public/ &#123;</span><br><span class="line">       <span class="built_in">alias</span> /userdisk/data/;</span><br><span class="line">     &#125;     </span><br><span class="line">-    location /api-third-party/download/private &#123;</span><br><span class="line">+    location /api-third-party/download/private/ &#123;</span><br><span class="line">       <span class="built_in">alias</span> /userdisk/appdata/;</span><br><span class="line">     &#125;          </span><br><span class="line">-    location /api-third-party/download/extdisks &#123;</span><br><span class="line">+    location /api-third-party/download/extdisks/ &#123;</span><br><span class="line">       <span class="built_in">alias</span> /extdisks/;</span><br><span class="line">     &#125;          </span><br><span class="line">     location /api-third-party/service &#123;</span><br><span class="line">diff --git a/usr/lib/lua/traffic.lua b/usr/lib/lua/traffic.lua</span><br><span class="line">index 8bf1ad7..5c2569a 100644</span><br><span class="line">--- a/usr/lib/lua/traffic.lua</span><br><span class="line">+++ b/usr/lib/lua/traffic.lua</span><br><span class="line">@@ -8,7 +8,7 @@ <span class="built_in">local</span> dbDict</span><br><span class="line"> <span class="built_in">local</span> dhcpDict</span><br><span class="line"> </span><br><span class="line"> <span class="keyword">function</span> cmdfmt(str)</span><br><span class="line">-  <span class="built_in">return</span> str:gsub(<span class="string">&quot;\\&quot;</span>, <span class="string">&quot;\\\\&quot;</span>):gsub(<span class="string">&quot;`&quot;</span>, <span class="string">&quot;\\`&quot;</span>):gsub(<span class="string">&quot;\&quot;&quot;</span>, <span class="string">&quot;\\\&quot;&quot;</span>):gsub(<span class="string">&quot;%$&quot;</span>, <span class="string">&quot;\\$&quot;</span>)</span><br><span class="line">+  <span class="built_in">return</span> str:gsub(<span class="string">&quot;\\&quot;</span>, <span class="string">&quot;\\\\&quot;</span>):gsub(<span class="string">&quot;`&quot;</span>, <span class="string">&quot;\\`&quot;</span>):gsub(<span class="string">&quot;\&quot;&quot;</span>, <span class="string">&quot;\\\&quot;&quot;</span>)</span><br><span class="line"> end</span><br><span class="line"> </span><br><span class="line"> <span class="keyword">function</span> get_hostname_init()</span><br><span class="line">diff --git a/usr/lib/lua/xiaoqiang/module/XQBackup.lua b/usr/lib/lua/xiaoqiang/module/XQBackup.lua</span><br><span class="line">index 9330fb2..e8e3b2c 100644</span><br><span class="line">--- a/usr/lib/lua/xiaoqiang/module/XQBackup.lua</span><br><span class="line">+++ b/usr/lib/lua/xiaoqiang/module/XQBackup.lua</span><br><span class="line">@@ -1,7 +1,7 @@</span><br><span class="line"> module (<span class="string">&quot;xiaoqiang.module.XQBackup&quot;</span>, package.seeall)</span><br><span class="line"> </span><br><span class="line">-<span class="built_in">local</span> DESFILE    = <span class="string">&quot;/tmp/cfg_backup.des&quot;</span></span><br><span class="line">-<span class="built_in">local</span> MBUFILE    = <span class="string">&quot;/tmp/cfg_backup.mbu&quot;</span></span><br><span class="line">+<span class="built_in">local</span> DESFILE    = <span class="string">&quot;/tmp/extmp/cfg_backup.des&quot;</span></span><br><span class="line">+<span class="built_in">local</span> MBUFILE    = <span class="string">&quot;/tmp/extmp/cfg_backup.mbu&quot;</span></span><br><span class="line"> <span class="built_in">local</span> TARMBUFILE = <span class="string">&quot;/tmp/cfgbackup.tar.gz&quot;</span></span><br><span class="line"> </span><br><span class="line"> -- backup <span class="built_in">functions</span></span><br><span class="line">@@ -210,9 +210,10 @@ <span class="keyword">function</span> save_info(keys, info)</span><br><span class="line">     <span class="built_in">local</span> dstr = json.encode(keys)</span><br><span class="line">     <span class="built_in">local</span> data = aes.encrypt(key, jstr)</span><br><span class="line">     <span class="built_in">local</span> filename = os.date(<span class="string">&quot;%Y-%m-%d--%X&quot;</span>,os.time())..<span class="string">&quot;.tar.gz&quot;</span></span><br><span class="line">+    os.execute(<span class="string">&quot;mkdir -p /tmp/extmp &gt;/dev/null 2&gt;/dev/null&quot;</span>)</span><br><span class="line">     fs.writefile(MBUFILE, data)</span><br><span class="line">     fs.writefile(DESFILE, dstr)</span><br><span class="line">-    os.execute(<span class="string">&quot;cd /tmp; tar -czf &quot;</span>..backuppath..filename..<span class="string">&quot; cfg_backup.des cfg_backup.mbu &gt;/dev/null 2&gt;/dev/null&quot;</span>)</span><br><span class="line">+    os.execute(<span class="string">&quot;cd /tmp/extmp; tar -czf &quot;</span>..backuppath..filename..<span class="string">&quot; cfg_backup.des cfg_backup.mbu &gt;/dev/null 2&gt;/dev/null&quot;</span>)</span><br><span class="line">     os.execute(<span class="string">&quot;rm &quot;</span>..MBUFILE..<span class="string">&quot; &gt;/dev/null 2&gt;/dev/null&quot;</span>)</span><br><span class="line">     os.execute(<span class="string">&quot;rm &quot;</span>..DESFILE..<span class="string">&quot; &gt;/dev/null 2&gt;/dev/null&quot;</span>)</span><br><span class="line">     <span class="built_in">local</span> url = lanip..<span class="string">&quot;/backup/log/&quot;</span>..filename</span><br><span class="line">@@ -267,7 +268,8 @@ <span class="keyword">function</span> extract(filepath)</span><br><span class="line">     <span class="keyword">if</span> not fs.access(tarpath) <span class="keyword">then</span></span><br><span class="line">         <span class="built_in">return</span> 1</span><br><span class="line">     end</span><br><span class="line">-    os.execute(<span class="string">&quot;cd /tmp; tar -xzf &quot;</span>..tarpath..<span class="string">&quot; &gt;/dev/null 2&gt;/dev/null&quot;</span>)</span><br><span class="line">+    os.execute(<span class="string">&quot;mkdir -p /tmp/extmp &gt;/dev/null 2&gt;/dev/null&quot;</span>)</span><br><span class="line">+    os.execute(<span class="string">&quot;cd /tmp/extmp; tar -xzf &quot;</span>..tarpath..<span class="string">&quot; &gt;/dev/null 2&gt;/dev/null&quot;</span>)</span><br><span class="line">     os.execute(<span class="string">&quot;rm &quot;</span>..tarpath..<span class="string">&quot; &gt;/dev/null 2&gt;/dev/null&quot;</span>)</span><br><span class="line">     <span class="keyword">if</span> not fs.access(DESFILE) <span class="keyword">then</span></span><br><span class="line">         <span class="built_in">return</span> 2</span><br></pre></td></tr></table></figure>
+
+<p>发现把路径穿越还有一些其他的洞修了，然后删去了cmdfmt函数里防止$命令执行的过滤，那么重点就应该是在这个地方了，看一下traffic里的相关逻辑，能发现在<code>trafficd_lua_ecos_pair_verify</code>调用了<code>cmdfmt</code><br><img src="/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/d5f3cd4ed31395abe2668afc1f491a316b0e76b258167cbb47ba642ecb212b47.png"><br>接着找一下哪有调用这个文件的这个函数的文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">iot@toi ~/C/r/d/rootfs&gt; grep -r <span class="string">&quot;trafficd_lua_ecos_pair_verify&quot;</span></span><br><span class="line">usr/lib/lua/traffic.lua:<span class="keyword">function</span> trafficd_lua_ecos_pair_verify(repeater_token)</span><br><span class="line">匹配到二进制文件 usr/sbin/netapi</span><br></pre></td></tr></table></figure>
+<p>那么该去逆一波netapi里trafficd_lua_ecos_pair_verify的逻辑了<br>简单的逆完再结合到路由器里其他使用netapi的脚本后可以知道这是小米魔改dbus的tbus的一个服务<br>然后根据路由器里的脚本我们可以得到命令行版命令注入的poc</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tbus call netapi init &#123;&quot;data&quot;:&quot;$(touch /tmp/nepire)&quot;&#125;</span><br></pre></td></tr></table></figure>
+<p>但我们需要的是远程的命令执行，我感觉这个好像用不了，同步了下进度就去看其他有监听端口的进程了<br>后来有人提醒我，这个进程有网络通信，直接重放命令可以执行，于是我又回来审这流量了<br><img src="/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/da4866d968976c0bff1c57482d56fb32a88d5de228ff10970048ca82440df917.png"></p>
+<p>直接重放流量，发现可以成功执行，但重启设备后发现不行<br>重新抓流量对比发现有8个字节的不同，并且两个疑似相同的key不过一个是大端一个小端，在查看前面的流量中发现在返回包里存在该key，并且请求包的内容是固定的，那么就直接两步获取了，先获取key然后构造命令执行的请求包，写入authorized_keys，这样就能getshell了<br><img src="/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/dd3f465350f1d94b635299e7066e9f1e059fdec6ecba7192401b0bdd72c2108b.png"></p>
+<p>由于路由器的www目录不能直接改，所以用mount把利用成功页面挂上去，至此完成整个利用<br><img src="/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/13b20a54ed177adfced498287f7cd6b3956f33ee32f447f6c10538f64e1fa6fa.png"></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B5%B7%E5%9B%A0"><span class="toc-number">1.</span> <span class="toc-text">起因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A2%98%E7%9B%AE"><span class="toc-number">2.</span> <span class="toc-text">题目</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&text=MiRouter漏洞挖掘"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&title=MiRouter漏洞挖掘"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&is_video=false&description=MiRouter漏洞挖掘"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=MiRouter漏洞挖掘&body=Check out this article: http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&title=MiRouter漏洞挖掘"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&title=MiRouter漏洞挖掘"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&title=MiRouter漏洞挖掘"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&title=MiRouter漏洞挖掘"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&name=MiRouter漏洞挖掘&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=http://example.com/2023/10/08/MiRouter%E6%BC%8F%E6%B4%9E%E6%8C%96%E6%8E%98/&t=MiRouter漏洞挖掘"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2023
+    nepire
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
